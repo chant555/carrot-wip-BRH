@@ -577,11 +577,10 @@ class LongitudinalMpc:
       desired_distances = desired_follow_distance(gap_v, lead_xv[:,1], comfort_brake, stop_distance, t_follow)
       state.update(level=carrot.leadAccelResponse, track_id=lead.radarTrackId, enabled=eligible, dt=self.dt,
                    ego_speed=v_ego, lead_speed=lead.vLead if eligible else 0.0, relative_speed=lead.vRel if eligible else 0.0,
-                   distance=lead.dRel if eligible else 0.0, desired_distance=self.base_desired_distances[lead_index],
-                   base_tf=t_follow, stop_distance=stop_distance)
+                   distance=lead.dRel if eligible else 0.0, desired_distance=self.base_desired_distances[lead_index], base_tf=t_follow)
       self.lead_gap_margins[:,lead_index] = state.margins(
         level=carrot.leadAccelResponse, times=T_IDXS, ego_speeds=gap_v, lead_speeds=lead_xv[:,1], base_tf=t_follow,
-        lead_distances=physical_gaps, desired_distances=desired_distances, stop_distance=stop_distance)
+        lead_distances=physical_gaps, desired_distances=desired_distances)
       comfort = self.lead_comfort_states[lead_index]
       comfort.update(enabled=eligible, track_id=lead.radarTrackId, dt=self.dt,
                      distance=lead.dRel if eligible else 0.0,
