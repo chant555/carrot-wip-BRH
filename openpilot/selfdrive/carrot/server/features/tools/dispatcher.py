@@ -43,6 +43,21 @@ GIT_UPDATE_COMMIT_LIMIT = 20
 GIT_UPDATE_DISPLAY_LIMIT = 3
 
 
+def _follow_checked_out_branch_sync(repo_dir: str) -> str:
+  """Make updated target the branch just checked out instead of restoring the previous one."""
+  proc = subprocess.run(["git", "branch", "--show-current"], cwd=repo_dir, capture_output=True, text=True)
+  branch = proc.stdout.strip() if proc.returncode == 0 else ""
+  if not branch or not HAS_PARAMS:
+    return ""
+  Params().put("UpdaterTargetBranch", branch)
+  # A finalized update for the previous target would replace this checkout on the next boot.
+  try:
+    os.remove(os.path.join(os.environ.get("STAGING_ROOT", "/data/safe_staging"), "finalized", ".overlay_consistent"))
+  except FileNotFoundError:
+    pass
+  return branch
+
+
 def capture_tmux_log_sync() -> Tuple[int, str]:
   try:
     os.remove(TMUX_LOG_PATH)
@@ -431,6 +446,10 @@ async def _run_tool_job(job: Dict[str, Any]) -> None:
             f"git switch -c {shlex.quote(branch)} --track {shlex.quote(f'origin/{branch}')}"
           )
       rc = await jobs.stream_exec(job, ["bash", "-lc", script], cwd=repo_dir, timeout=180)
+      if rc == 0:
+        target = _follow_checked_out_branch_sync(repo_dir)
+        if target:
+          jobs.append(job, f"\nUpdaterTargetBranch={target}\n")
       jobs.finish(job, ok=rc == 0, result=jobs.result_from_log(job, rc, summary_key="git_result_checkout_done", summary_vars={"branch": summary_branch}))
       return
 
@@ -1000,6 +1019,8 @@ async def _dispatch_sync(request: web.Request, body: Dict[str, Any]) -> web.Resp
               cwd=REPO_DIR
             )
             rc, out = rc2, out2
+        if rc == 0:
+          _follow_checked_out_branch_sync(REPO_DIR)
         return web.json_response({"ok": rc == 0, "rc": rc, "out": out, "summary_key": "git_result_checkout_done", "summary_vars": {"branch": summary_branch}, "empty_output": not out})
       except Exception as e:
         return web.json_response({"ok": False, "error": str(e)}, status=500)
