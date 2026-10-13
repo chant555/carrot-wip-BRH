@@ -1,0 +1,48 @@
+검증 범위: 임시 폴더에서 수행한 로컬 검증입니다. 기기 전체 빌드는 수행하지 않았습니다.
+패치 SHA-256(보안 해시 알고리즘 256비트): cee8522ae71e5450c5d1db96f227ec3ef292ab49c61c996b3786e4bce6e8f969
+기준 커밋: 910bd82fb744999020c769f6e7e6379826c490af
+명령: git apply --check /home/jooheon/C4_500/docs/rebuild_all-910bd82f.patch
+
+종료코드: 0
+명령: git apply --whitespace=error /home/jooheon/C4_500/docs/rebuild_all-910bd82f.patch
+
+종료코드: 0
+명령: bash -n launch_chffrplus.sh
+
+종료코드: 0
+파이썬 문법 검사: 9개 파일이 통과했습니다.
+명령: python3 openpilot/system/tests/test_rebuild_cleanup.py -v
+test_dangling_cache_symlink (__main__.ManagerCacheCleanupTests) ... ok
+test_failed_cleanup_stops_retries_and_preserves_error (__main__.ManagerCacheCleanupTests) ... ok
+test_missing_sudo (__main__.ManagerCacheCleanupTests) ... ok
+test_successful_fallback (__main__.ManagerCacheCleanupTests) ... ok
+test_sudo_failure (__main__.ManagerCacheCleanupTests) ... ok
+test_sudo_zero_exit_but_cache_remains (__main__.ManagerCacheCleanupTests) ... ok
+test_absent_request_does_not_clean (__main__.RebuildCleanupTests) ... ok
+test_autoreset_failure_does_not_write_stamp (__main__.RebuildCleanupTests) ... ok
+test_autoreset_success_writes_stamp (__main__.RebuildCleanupTests) ... ok
+test_cleanup_success_despite_scons_failure (__main__.RebuildCleanupTests) ... ok
+test_dangling_symlink_is_not_treated_as_removed (__main__.RebuildCleanupTests) ... ok
+test_delete_error_retains_request_and_has_no_success (__main__.RebuildCleanupTests) ... ok
+test_failure_does_not_set_success_flags (__main__.RebuildCleanupTests) ... ok
+test_heal_delete_failure (__main__.RebuildCleanupTests) ... ok
+test_heal_zero_exit_with_remaining_cache (__main__.RebuildCleanupTests) ... ok
+test_launch_stops_before_params_on_cleanup_failure (__main__.RebuildCleanupTests) ... ok
+test_log_open_failure_preserves_request (__main__.RebuildCleanupTests) ... ok
+test_real_permission_error_retains_request (__main__.RebuildCleanupTests) ... ok
+test_request_delete_failure_is_reported (__main__.RebuildCleanupTests) ... ok
+test_retry_after_delete_failure (__main__.RebuildCleanupTests) ... ok
+test_zero_exit_with_remaining_files_is_failure (__main__.RebuildCleanupTests) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.238s
+
+OK
+SCons cache lock failed; attempting cleanup of /tmp/tmptz7_76d5/cache
+SCons cache cleanup failed: /tmp/tmptz7_76d5/cache; no retry performed
+Cannot remove SCons cache: sudo
+
+종료코드: 0
+기존 pytest 시험 묶음은 기본 환경에 pytest가 없어 이번에 재실행하지 않았습니다.
+기존 문서의 331개 통과 기록은 이전 검증 결과이며 이번 실행 결과가 아닙니다.
+모든 이번 로컬 검증이 완료되었습니다. 기기 변경, 이슈 등록 및 외부 제출은 하지 않았습니다.

@@ -1,0 +1,381 @@
+{
+  "status": "completed_and_restored",
+  "test_date": "2026-10-13",
+  "timezone": "Asia/Seoul",
+  "base_commit": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "patch_order": [
+    "A",
+    "B",
+    "C"
+  ],
+  "patches": {
+    "rebuild_all-A-626b887d.patch": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+    "scons_cache_guard-B-626b887d.patch": "2d4876cb880890beaf14ba1f9ee897df0db511165ff8e37273adb1ec835c5fdb",
+    "solver_autoreset-C-626b887d.patch": "2f95ab0e21fc500df7881678aa2f3a6ef27bb8a434bb93211b1bcc7ac8e5d6f4"
+  },
+  "source_match": true,
+  "focused_tests": {
+    "local_passed": 43,
+    "device_passed": 43
+  },
+  "isolated_scons": {
+    "passed_checks": 10,
+    "core_scenarios": 5,
+    "result": "isolated-cache-kmvlrebr/results.json"
+  },
+  "request": {
+    "started_at": "2026-10-13T02:49:04.782374+00:00",
+    "old_boot_id": "b0bdbd99-0613-448b-87f3-bd1b5a4f8d56",
+    "endpoint": "POST /api/tools/start",
+    "payload": {
+      "action": "rebuild_all"
+    },
+    "response": {
+      "ok": true,
+      "job_id": "407f7d8d0027",
+      "status": "running"
+    },
+    "job": {
+      "ok": true,
+      "id": "407f7d8d0027",
+      "action": "rebuild_all",
+      "payload": {
+        "action": "rebuild_all"
+      },
+      "status": "done",
+      "done": true,
+      "log": "",
+      "progress": 100,
+      "message": "rebuild all",
+      "step_current": 1,
+      "step_total": 1,
+      "error": null,
+      "error_code": null,
+      "error_detail": null,
+      "created_at": 1791859744.936322,
+      "updated_at": 1791859744.97226,
+      "result": {
+        "ok": true,
+        "out": "rebuild scheduled: rebooting, full clean build runs at boot"
+      }
+    },
+    "request_file_observed": true,
+    "request_observed_at": "2026-10-13T02:49:05.065412+00:00"
+  },
+  "rebuild_ready_observed_at": "2026-10-13T11:56:09+09:00",
+  "request_to_ready_observed_seconds": 424.2,
+  "poll_interval_seconds": 10,
+  "cleanup": {
+    "removed_files": 2738,
+    "removed_directories": 265,
+    "cache_files": 2394,
+    "done": true
+  },
+  "boot_checks": {
+    "baseline": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "bootcheck.py": {
+        "exit_code": 1,
+        "findings": [
+          "부팅 후보 로그의 ERROR/crash 원인 확인 필요"
+        ],
+        "incomplete": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      }
+    },
+    "rebuilt": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      }
+    },
+    "restored": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": [],
+        "incomplete": []
+      }
+    }
+  },
+  "rebuilt_state": {
+    "phase": "rebuilt",
+    "observed_at": "2026-10-13T11:57:06+0900",
+    "boot_id": "f98a106f-16b7-4119-99f1-250c5f6e5063",
+    "branch": "codex/rebuild-device-626b887d",
+    "head": "626b887d527ff3c619e885ff65c303255e2933c6",
+    "dirty_sha256": "f32ec27d81b9887a8632ff5c57b382010a11d314f852fdacef8ed63a075b3feb",
+    "status": [
+      " M SConstruct",
+      " M launch_chffrplus.sh",
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_180_generated.dbc",
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_235_generated.dbc",
+      " M openpilot/common/startup_recovery.py",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.png",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.png",
+      " M openpilot/selfdrive/carrot/recovery/server.py",
+      " M openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+      " M openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+      " M openpilot/system/manager/build.py",
+      " M openpilot/system/tests/test_startup_recovery.py",
+      " M scripts/ensure_params_build.sh",
+      "?? opendbc_repo/opendbc/can/_can_native.cpp",
+      "?? opendbc_repo/opendbc/dbc/generator/hyundai/hyundai_canfd_radar.dbc",
+      "?? openpilot/cereal/gen/",
+      "?? openpilot/cereal/messaging/bridge",
+      "?? openpilot/cereal/services.h",
+      "?? openpilot/common/rebuild_request.py",
+      "?? openpilot/common/scons_cache_lock.py",
+      "?? openpilot/pydeps/",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.png",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/unifont.fnt",
+      "?? openpilot/selfdrive/assets/fonts/unifont.png",
+      "?? openpilot/selfdrive/carrot/radar_motion/_motion_native.cpp",
+      "?? openpilot/selfdrive/modeld/models/.build_stamp",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_metadata.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunk01of01",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk04of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk05of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/tg_input_devices.json",
+      "?? openpilot/system/camerad/camerad",
+      "?? openpilot/system/tests/test_build_cache.py",
+      "?? openpilot/system/tests/test_rebuild_cleanup.py",
+      "?? openpilot/system/tests/test_solver_autoreset.py",
+      "?? openpilot/system/ui/lib/_draw_native.cpp",
+      "?? pydeps/"
+    ],
+    "user_settings": {
+      "DriverMonitoringEnabled": "0",
+      "OpenpilotEnabledToggle": "1",
+      "DrivingModelName": null,
+      "DisableDM": "2",
+      "MaxTimeOffroadMin": "120",
+      "ExperimentalMode": null,
+      "LongitudinalPersonality": "0"
+    },
+    "user_settings_match": true,
+    "control_params": {
+      "SoftwareMenu": "0",
+      "DisableUpdates": "1",
+      "UpdaterTargetBranch": null,
+      "GitBranch": "codex/rebuild-device-626b887d",
+      "GitRemote": "https://github.com/chant555/carrot-wip-BRH",
+      "UpdateAvailable": null
+    },
+    "is_onroad": "0",
+    "is_offroad": "1",
+    "source_model_sha256": "f73a9e535523d5e9acb9e642c64e33d631825dc8ba74123757d107cedd047bb5",
+    "model_manifest": "3",
+    "request_exists": false,
+    "rebuild_log_exists": true,
+    "autoreset_stamp_exists": false,
+    "cache_config_lock_exists": false,
+    "build_failure_alert_exists": false,
+    "panda_mismatch_alert_exists": false
+  },
+  "restored_state": {
+    "phase": "restored",
+    "observed_at": "2026-10-13T12:00:16+0900",
+    "boot_id": "4155352b-71a9-4d48-afb2-2e0319e69ee3",
+    "branch": "carrot-wip-brh",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "dirty_sha256": "95b6c5e1f914f248a5ef5a29025875118466dd0792baafbc7c4c2c26c5800bb6",
+    "status": [
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_180_generated.dbc",
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_235_generated.dbc",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.png",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.png",
+      "?? opendbc_repo/opendbc/can/_can_native.cpp",
+      "?? opendbc_repo/opendbc/dbc/generator/hyundai/hyundai_canfd_radar.dbc",
+      "?? openpilot/cereal/gen/",
+      "?? openpilot/cereal/messaging/bridge",
+      "?? openpilot/cereal/services.h",
+      "?? openpilot/pydeps/",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.png",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/unifont.fnt",
+      "?? openpilot/selfdrive/assets/fonts/unifont.png",
+      "?? openpilot/selfdrive/carrot/radar_motion/_motion_native.cpp",
+      "?? openpilot/selfdrive/modeld/models/.build_stamp",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_metadata.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunk01of01",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk04of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk05of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/tg_input_devices.json",
+      "?? openpilot/system/camerad/camerad",
+      "?? openpilot/system/ui/lib/_draw_native.cpp",
+      "?? pydeps/"
+    ],
+    "user_settings": {
+      "DriverMonitoringEnabled": "0",
+      "OpenpilotEnabledToggle": "1",
+      "DrivingModelName": null,
+      "DisableDM": "2",
+      "MaxTimeOffroadMin": "120",
+      "ExperimentalMode": null,
+      "LongitudinalPersonality": "0"
+    },
+    "user_settings_match": true,
+    "control_params": {
+      "SoftwareMenu": "1",
+      "DisableUpdates": null,
+      "UpdaterTargetBranch": "carrot-wip-brh",
+      "GitBranch": "carrot-wip-brh",
+      "GitRemote": "https://github.com/chant555/carrot-wip-BRH",
+      "UpdateAvailable": "0"
+    },
+    "is_onroad": "0",
+    "is_offroad": "1",
+    "source_model_sha256": "433f85f956837606ad1f1cbee4aa7e2158ad23c768dea914b20436c97232741b",
+    "model_manifest": "5",
+    "request_exists": false,
+    "rebuild_log_exists": false,
+    "autoreset_stamp_exists": false,
+    "cache_config_lock_exists": false,
+    "build_failure_alert_exists": false,
+    "panda_mismatch_alert_exists": false,
+    "original_head_restored": true,
+    "original_dirty_patch_identical": true,
+    "original_status_identical": true,
+    "original_git_config_identical": true,
+    "original_web_settings_identical": true,
+    "control_params_restored": true
+  },
+  "device_backup_directory": "/data/maintenance-backups/rebuild-device-20261013-626b887d",
+  "limits": [
+    "A alone not tested end-to-end",
+    "Recovery buttons not exercised directly",
+    "No driving or model inference validation",
+    "No forced power loss test",
+    "No live solver corruption test",
+    "No simultaneous full project builds",
+    "No unpatched fork concurrency test",
+    "No full project pytest rerun on latest base"
+  ],
+  "issues_or_pull_requests_published": false,
+  "device_backup_deleted_at": "2026-10-13T12:33:36+0900",
+  "followup_results": "../2026-10-13-rebuild-heal-boot/results.json"
+}

@@ -1,0 +1,41 @@
+{
+  "base_commit": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "additional_tests_run": false,
+  "patches": [
+    {
+      "patch": "rebuild_all-A-626b887d.patch",
+      "source": "analysis/2026-10-13-rebuild-device/prepared/rebuild_all-A-626b887d.patch",
+      "source_sha256": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+      "submission_sha256": "1d3a86180e7a53bb2f9676101edf9963d880469ad5f4bb17cd211d047ec45150",
+      "change_scope": "comments and module documentation only; no executable diff lines changed"
+    },
+    {
+      "patch": "scons_cache_guard-B-626b887d.patch",
+      "source": "analysis/2026-10-13-rebuild-device/prepared/scons_cache_guard-B-626b887d.patch",
+      "source_sha256": "2d4876cb880890beaf14ba1f9ee897df0db511165ff8e37273adb1ec835c5fdb",
+      "submission_sha256": "5fb12e782bce67b74bc887f105de1a757fb9fa44bd57d1d547a60425786e2bc7",
+      "change_scope": "comments and module documentation only; no executable diff lines changed"
+    },
+    {
+      "patch": "solver_autoreset-C-626b887d.patch",
+      "source": "analysis/2026-10-13-rebuild-device/prepared/solver_autoreset-C-626b887d.patch",
+      "source_sha256": "2f95ab0e21fc500df7881678aa2f3a6ef27bb8a434bb93211b1bcc7ac8e5d6f4",
+      "submission_sha256": "753d2a997932bd39f93a0819ca2cc255856ddda3e99bd9d236f416fbd4934d3c",
+      "change_scope": "comments and module documentation only; no executable diff lines changed"
+    },
+    {
+      "patch": "startup-touch-D-626b887d-v2.patch",
+      "source": "docs/startup-touch-D-626b887d-v2.patch",
+      "source_sha256": "e432449c40b347dc7a20ac3f45e965ac8db08c850c144fcdf1f26dc26c076c55",
+      "submission_sha256": "443b2d067e8a14bd25c99b676eb355ab8542ca7aa07402d70d42d5d90a30f366",
+      "change_scope": "comments and module documentation only; no executable diff lines changed"
+    },
+    {
+      "patch": "startup-touch-usability-E-626b887d.patch",
+      "source": "docs/startup-touch-usability-E-626b887d.patch",
+      "source_sha256": "0b56495bd0b70d33c73bcd05009414945e1af82f03c330d452a3df7f0d29e4e0",
+      "submission_sha256": "3320acef71523b0a1ce1a80a41ed6c2dcfeb5a0bd5aa6fcca792b642ad2a7673",
+      "change_scope": "comments and module documentation only; no executable diff lines changed"
+    }
+  ]
+}

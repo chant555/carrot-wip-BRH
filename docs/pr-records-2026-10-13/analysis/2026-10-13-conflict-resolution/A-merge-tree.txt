@@ -1,0 +1,158 @@
+changed in both
+  base   100644 7c2e383682d2cb795324c294d33c53f464e07465 SConstruct
+  our    100644 07ad4466a5d28aeba6eaa208ab62e85be0b3915c SConstruct
+  their  100644 b6c64377fb270ede1a4e992cb1aca121baf4b650 SConstruct
+changed in both
+  base   100755 9ecc768f3d75ae064125949591d096360614555f launch_chffrplus.sh
+  our    100755 052125f4c2535692f2c087e9b12a12cb97991285 launch_chffrplus.sh
+  their  100755 83ca458091b3095a9e58568bb5000eada07b8371 launch_chffrplus.sh
+@@ -398,6 +398,7 @@
+ # Concurrency protection is provided separately by the common cache guard.
+ BUILD_STATE_RESET=0
+ 
++<<<<<<< .our
+ SCONS_CACHE="${SCONS_CACHE_DIR:-/tmp/scons_cache}"
+ if [ -z "${SCONS_CACHE_DIR:-}" ] && [ -f /TICI ]; then
+   SCONS_CACHE="/data/scons_cache"
+@@ -436,19 +437,33 @@
+     sudo -n rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" "$SCONS_CACHE"
+   fi
+   for target in "$DIR/.sconsign.dblite" "$SCONS_CACHE" "$DIR/prebuilt"; do
++=======
++function reset_build_state {
++  local target
++  # The cache is disposable. One created by another user (e.g. `sudo scons`)
++  # cannot be removed as this user, so fall back to sudo before giving up.
++  if ! rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache; then
++    sudo -n rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache
++  fi
++  for target in "$DIR/.sconsign.dblite" /data/scons_cache "$DIR/prebuilt"; do
++>>>>>>> .their
+     if [ -e "$target" ] || [ -L "$target" ]; then
+       echo "Build state cleanup incomplete: $target remains" >&2
+       return 1
+     fi
+   done
++<<<<<<< .our
+ }
+ 
+ function reset_build_state {
+   with_cache_guard remove_build_state || return 1
++=======
++>>>>>>> .their
+   BUILD_STATE_RESET=1
+   FORCE_REBUILD=1
+ }
+ 
++<<<<<<< .our
+ # Both a stale config.lock and an inaccessible cache can cause SConsLockFailure.
+ # All cache users must follow the same guard protocol. Once this guard is held,
+ # no cooperating build is using the cache: remove a leftover config.lock
+@@ -483,6 +498,8 @@
+   return "$rc"
+ }
+ 
++=======
++>>>>>>> .their
+ # Persist rebuild requests outside the repository so repository cleanup cannot
+ # remove them. Request creation must not require a working build environment.
+ REBUILD_REQUEST="/data/rebuild_all.request"
+@@ -636,6 +653,7 @@
+     show_startup_failure "Runtime dependency installation failed"
+   fi
+ 
++<<<<<<< .our
+   # A Rebuild All request and an unusable SCons cache must be handled before the
+   # Params build, which shares /data/scons_cache; otherwise a failure there would
+   # keep them pending.
+@@ -643,6 +661,10 @@
+     show_startup_failure "SCons cache is unusable and could not be removed: /data/scons_cache"
+     return 1
+   fi
++=======
++  # A Rebuild All request must reset build state before the Params build, which
++  # shares /data/scons_cache; otherwise a failure there would keep it pending.
++>>>>>>> .their
+   if ! consume_rebuild_request; then
+     show_startup_failure "Rebuild All cleanup failed; see /data/rebuild_all.last.log"
+     return 1
+added in both
+  our    100644 f935405a591406e78409cbe813a690ae53a24b81 openpilot/common/rebuild_request.py
+  their  100644 ee835ea7abd7e63d7a18f00f380e92c093e9820d openpilot/common/rebuild_request.py
+@@ -12,7 +12,11 @@
+   # which is exactly when a full rebuild is needed.
+   tmp = path.with_name(path.name + '.tmp')
+   with tmp.open('w') as f:
++<<<<<<< .our
+     f.write(f'{time.monotonic()}\n')
++=======
++    f.write(f'{time.time()}\n')
++>>>>>>> .their
+     f.flush()
+     os.fsync(f.fileno())
+   os.replace(tmp, path)
+added in both
+  our    100644 139702210499f88d874c7812ba310e7dd445d434 openpilot/system/tests/test_rebuild_cleanup.py
+  their  100644 5f0858617a85d2d1d61b4723172a165a57bf6e93 openpilot/system/tests/test_rebuild_cleanup.py
+@@ -1,10 +1,23 @@
++<<<<<<< .our
++=======
++import ast
++import io
++>>>>>>> .their
+ import os
+ from pathlib import Path
+ import subprocess
+ import tempfile
++<<<<<<< .our
+ import unittest  # noqa: TID251 -- preserve contributed process-lifetime cleanup fixtures
+ 
+ ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'SConstruct').is_file())
++=======
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++>>>>>>> .their
+ 
+ 
+ class RebuildCleanupTests(unittest.TestCase):
+@@ -35,8 +48,12 @@
+ timeout() { echo simulated-clean; return 2; }
+ git() { echo test-head; }
+ ''' + mocks + '\n' + command
++<<<<<<< .our
+     return subprocess.run(['bash', '-c', script], env=dict(os.environ, SCONS_CACHE_DIR=str(self.cache)),
+                           capture_output=True, text=True, timeout=5)
++=======
++    return subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++>>>>>>> .their
+ 
+   def test_cleanup_success_despite_scons_failure(self):
+     r = self.shell('consume_rebuild_request')
+@@ -98,7 +115,11 @@
+ 
+   def test_unremovable_cache_falls_back_to_sudo(self):
+     # The cache may belong to root after a `sudo scons`; only sudo can drop it.
++<<<<<<< .our
+     mocks = ('rm() { if [[ "$*" == *scons_cache* ]] && [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n' +
++=======
++    mocks = ('rm() { if [[ "$*" == *scons_cache* ]] && [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n'
++>>>>>>> .their
+              'sudo() { [ "$1" = -n ] && shift; AS_ROOT=1 "$@"; }')
+     r = self.shell('consume_rebuild_request', mocks)
+     self.assertEqual(r.returncode, 0, r.stderr + self.log.read_text())
+@@ -119,8 +140,12 @@
+ 
+   def test_launch_stops_before_params_on_cleanup_failure(self):
+     block = self.source[self.source.index('  if ! consume_rebuild_request;'):self.source.index('  # Build Params before')]
++<<<<<<< .our
+     script = ('consume_rebuild_request() { return 1; }\nshow_startup_failure() { echo "$*"; }\nlaunch_test() {\n' +
+               block + '\necho unexpected-params;\n}\nlaunch_test')
++=======
++    script = 'consume_rebuild_request() { return 1; }\nshow_startup_failure() { echo "$*"; }\nlaunch_test() {\n' + block + '\necho unexpected-params;\n}\nlaunch_test'
++>>>>>>> .their
+     r = subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
+     self.assertNotEqual(r.returncode, 0)
+     self.assertNotIn('unexpected', r.stdout)

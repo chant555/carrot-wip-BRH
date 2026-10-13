@@ -1,0 +1,13 @@
+test_busy_notice_does_not_change_controller_state (__main__.PatchTests) ... ok
+test_desktop_is_not_polled_twice (__main__.PatchTests) ... ok
+test_edges_and_gap (__main__.PatchTests) ... ok
+test_error_area (__main__.PatchTests) ... ok
+test_no_press_no_action (__main__.PatchTests) ... ok
+test_press_is_persisted_before_action (__main__.PatchTests) ... ok
+test_record_failure_does_not_raise (__main__.PatchTests) ... ok
+test_rotation (__main__.PatchTests) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.028s
+
+OK

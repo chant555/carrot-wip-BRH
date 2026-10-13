@@ -1,0 +1,92 @@
+--- a/openpilot/system/ui/startup_recovery.py
++++ b/openpilot/system/ui/startup_recovery.py
+@@ -8,7 +8,10 @@
+ import time
+ 
+ import pyray as rl
+-
++from raylib import _BACKEND as RAYLIB_BACKEND
++
++from openpilot.common.reboot import reboot_device
++from openpilot.common.startup_touch_log import TouchLog
+ from openpilot.common.network_info import label_with_port, start_ip_monitor
+ from openpilot.common.startup_recovery import BUSY_STATES, RecoveryUpdate, read_startup_error
+ 
+@@ -198,7 +201,14 @@
+     rl.close_window()
+     return
+   touch = TouchPress()
+-  update = RecoveryUpdate(ROOT)
++  touch_log = TouchLog(Path('/data/startup_recovery_touch.jsonl'))
++
++  def logged_reboot():
++    touch_log.record('reboot', sync=True, request_exists=Path('/data/rebuild_all.request').exists())
++    reboot_device()
++
++  update = RecoveryUpdate(ROOT, reboot=logged_reboot)
++  touch_log.record('start', sync=True, backend=RAYLIB_BACKEND, width=width, height=height, raw_touch=touch.fd is not None)
+   next_check = time.monotonic() + 5
+   was_busy = False
+   wake_display()
+@@ -215,13 +225,19 @@
+       rl.begin_drawing()
+       rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page)
+       rl.end_drawing()
++      # COMMA leaves polling to the caller; desktop EndDrawing already polls.
++      if RAYLIB_BACKEND == "comma":
++        rl.poll_input_events()
+       if touch.pressed():
+         position = rl.get_touch_position(0) if touch.fd is not None else rl.get_mouse_position()
+-        if rl.check_collision_point_rec(position, rebuild_button):
+-          update.start_rebuild()
+-        elif rl.check_collision_point_rec(position, update_button):
+-          update.start()
+-        elif rl.check_collision_point_rec(position, error_area):
++        hit = next((name for name, area in (('rebuild', rebuild_button), ('update', update_button), ('error', error_area))
++                    if rl.check_collision_point_rec(position, area)), 'outside')
++        # Persist the coordinates before an action can start its reboot thread.
++        touch_log.record('press', sync=True, x=position.x, y=position.y, hit=hit, state=update.state[0])
++        if hit in ('rebuild', 'update'):
++          accepted = update.start_rebuild() if hit == 'rebuild' else update.start()
++          touch_log.record('action', sync=True, hit=hit, accepted=accepted, state=update.state[0])
++        elif hit == 'error':
+           page = (page + 1) % len(pages)
+       time.sleep(.001)
+   finally:
+--- /dev/null
++++ b/openpilot/common/startup_touch_log.py
+@@ -0,0 +1,34 @@
++"""Bounded, best-effort diagnostic records; failures must not block recovery."""
++import json
++import os
++from pathlib import Path
++import time
++import threading
++
++class TouchLog:
++  def __init__(self, path, max_bytes=262144):
++    self._lock = threading.Lock()
++    self.path = Path(path)
++    self.max_bytes = max_bytes
++    try:
++      self.boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
++    except OSError:
++      self.boot_id = ''
++
++  def record(self, event, sync=False, **fields):
++    with self._lock:
++      return self._record(event, sync, fields)
++
++  def _record(self, event, sync, fields):
++    try:
++      self.path.parent.mkdir(parents=True, exist_ok=True)
++      if self.path.exists() and self.path.stat().st_size >= self.max_bytes:
++        os.replace(self.path, self.path.with_suffix(self.path.suffix + '.1'))
++      with self.path.open('a') as output:
++        output.write(json.dumps(dict(event=event, time=time.time(), monotonic=time.monotonic(), boot_id=self.boot_id, **fields)) + '\n')
++        if sync:
++          output.flush()
++          os.fsync(output.fileno())
++      return True
++    except (OSError, ValueError, TypeError):
++      return False

@@ -1,0 +1,13 @@
+--- tested-original/openpilot/common/startup_recovery.py
++++ published/openpilot/common/startup_recovery.py
+@@ -114,8 +114,8 @@
+ 
+   def _rebuild(self):
+     try:
+-      # `scons -c` cannot be trusted here (top-level clean removes nothing and
+-      # exits 0, and leaves /data/scons_cache). The launcher resets build state
++      # Defer cleanup to the launcher: a broken build environment can prevent
++      # SCons cleanup, and cached outputs must also be removed. Reset build state
+       # and cache on the next boot, before the Params build.
+       with repo_lock():
+         request_full_rebuild()

@@ -1,0 +1,13 @@
+diff --git a/openpilot/common/rebuild_request.py b/openpilot/common/rebuild_request.py
+index ee835ea..f935405 100644
+--- a/openpilot/common/rebuild_request.py
++++ b/openpilot/common/rebuild_request.py
+@@ -12,7 +12,7 @@ def request_full_rebuild(path: Path = REBUILD_REQUEST_PATH):
+   # which is exactly when a full rebuild is needed.
+   tmp = path.with_name(path.name + '.tmp')
+   with tmp.open('w') as f:
+-    f.write(f'{time.time()}\n')
++    f.write(f'{time.monotonic()}\n')
+     f.flush()
+     os.fsync(f.fileno())
+   os.replace(tmp, path)

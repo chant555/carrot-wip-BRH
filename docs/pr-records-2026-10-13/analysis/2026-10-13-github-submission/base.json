@@ -1,0 +1,8 @@
+{
+  "repository": "ajouatom/openpilot",
+  "base_branch": "carrot-wip",
+  "base_sha": "b98d5053e224ae0d0e419d096c70ce110511a1d6",
+  "base_tree": "579ee54105300f18fd47270008725232554e15a0",
+  "fork": "chant555/carrot-wip-BRH",
+  "checks": "patch applicability only; no additional runtime or device tests"
+}

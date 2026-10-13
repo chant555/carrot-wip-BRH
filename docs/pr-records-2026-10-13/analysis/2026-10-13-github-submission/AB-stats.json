@@ -1,0 +1,67 @@
+[
+  {
+    "path": "SConstruct",
+    "added": 15,
+    "removed": 1
+  },
+  {
+    "path": "launch_chffrplus.sh",
+    "added": 131,
+    "removed": 1
+  },
+  {
+    "path": "openpilot/common/rebuild_request.py",
+    "added": 18,
+    "removed": 0
+  },
+  {
+    "path": "openpilot/common/scons_cache_lock.py",
+    "added": 63,
+    "removed": 0
+  },
+  {
+    "path": "openpilot/common/startup_recovery.py",
+    "added": 6,
+    "removed": 15
+  },
+  {
+    "path": "openpilot/selfdrive/carrot/recovery/server.py",
+    "added": 8,
+    "removed": 11
+  },
+  {
+    "path": "openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+    "added": 17,
+    "removed": 6
+  },
+  {
+    "path": "openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+    "added": 20,
+    "removed": 6
+  },
+  {
+    "path": "openpilot/system/manager/build.py",
+    "added": 42,
+    "removed": 9
+  },
+  {
+    "path": "openpilot/system/tests/test_build_cache.py",
+    "added": 323,
+    "removed": 0
+  },
+  {
+    "path": "openpilot/system/tests/test_rebuild_cleanup.py",
+    "added": 133,
+    "removed": 0
+  },
+  {
+    "path": "openpilot/system/tests/test_startup_recovery.py",
+    "added": 41,
+    "removed": 30
+  },
+  {
+    "path": "scripts/ensure_params_build.sh",
+    "added": 28,
+    "removed": 0
+  }
+]
