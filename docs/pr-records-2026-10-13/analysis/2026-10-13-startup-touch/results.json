@@ -1,0 +1,148 @@
+{
+  "status": "diagnostic_verified_original_state_restored_backup_deleted",
+  "device_branch": "carrot-wip-brh",
+  "device_head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+  "source_base": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "source_matches_original_device": true,
+  "phases": {
+    "baseline": {
+      "press_count": 4,
+      "hits": {
+        "outside": 4
+      },
+      "positions": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "fixed": {
+      "press_count": 18,
+      "hits": {
+        "left": 9,
+        "outside": 3,
+        "right": 6
+      },
+      "positions": [
+        [
+          152.0,
+          211.0
+        ],
+        [
+          142.0,
+          223.0
+        ],
+        [
+          392.0,
+          232.0
+        ],
+        [
+          413.0,
+          220.0
+        ],
+        [
+          127.0,
+          230.0
+        ],
+        [
+          151.0,
+          212.0
+        ],
+        [
+          157.0,
+          223.0
+        ],
+        [
+          393.0,
+          224.0
+        ],
+        [
+          393.0,
+          214.0
+        ],
+        [
+          293.0,
+          220.0
+        ],
+        [
+          291.0,
+          221.0
+        ],
+        [
+          290.0,
+          223.0
+        ],
+        [
+          145.0,
+          35.0
+        ],
+        [
+          144.0,
+          220.0
+        ],
+        [
+          139.0,
+          229.0
+        ],
+        [
+          154.0,
+          235.0
+        ],
+        [
+          144.0,
+          225.0
+        ],
+        [
+          140.0,
+          230.0
+        ]
+      ]
+    }
+  },
+  "patch_check": {
+    "apply_check": true,
+    "applied_source_matches_fixed": true,
+    "syntax_check": true,
+    "baseline_sha256": "f80fe2d92a735fdca90c0bf4e3ead4ce3c77869f07fe4772626eb542ad48f15f",
+    "patch_sha256": "0dcf8d093bc9d9d2d22bb64641c40f466581fae26c2161151ba5b57c8200da71"
+  },
+  "local_tests_passed": 5,
+  "production_patch_installed": false,
+  "reboot_performed": false,
+  "recovery_actions_enabled": false,
+  "center_area_verified": false,
+  "same_frame_press_release_verified": false,
+  "extra_press_in_last_sequence_unexplained": true,
+  "restoration_matched": true,
+  "healthcheck_exit": 1,
+  "healthcheck_functional_passed": 4,
+  "healthcheck_log_error_count": 5,
+  "healthcheck_log_errors": [
+    "athenad.ws_recv.exception (4)",
+    "athenad.ws_send.exception (1)"
+  ],
+  "healthcheck_crashes": 0,
+  "backup_deletion": {
+    "deleted_at": "2026-10-13T15:35:31+0900",
+    "path": "/data/maintenance-backups/startup-touch-20261013",
+    "bytes": 101830,
+    "branch": "carrot-wip-brh",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "original_state_matched": true,
+    "backup_absent": true,
+    "snapshot_tool_absent": true
+  }
+}

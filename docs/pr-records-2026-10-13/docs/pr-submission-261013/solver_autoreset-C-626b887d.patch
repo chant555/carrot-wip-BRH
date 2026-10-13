@@ -1,0 +1,151 @@
+diff --git a/launch_chffrplus.sh b/launch_chffrplus.sh
+--- a/launch_chffrplus.sh
++++ b/launch_chffrplus.sh
+@@ -479,6 +479,41 @@ function heal_scons_cache {
+   return "$rc"
+ }
+ 
++# Empty generated C files or missing module-init symbols indicate unusable
++# solver outputs. Cached corruption can survive incremental builds and cause
++# plannerd imports to fail. These checks do not identify how corruption began.
++# Inspect only existing outputs; absent files are normal before a first build.
++# Check file contents without importing potentially broken native modules.
++AUTORESET_STAMP="/data/build_autoreset.stamp"
++
++function check_mpc_solvers {
++  local lib gen broken="" head
++  for lib in longitudinal_mpc_lib lateral_mpc_lib; do
++    gen="$DIR/openpilot/selfdrive/controls/lib/$lib/c_generated_code"
++    if [ -e "$gen/acados_ocp_solver_pyx.c" ] && [ ! -s "$gen/acados_ocp_solver_pyx.c" ]; then
++      broken="$broken $lib:empty-c"
++    fi
++    if [ -f "$gen/acados_ocp_solver_pyx.so" ] && ! grep -qa PyInit_acados_ocp_solver_pyx "$gen/acados_ocp_solver_pyx.so"; then
++      broken="$broken $lib:no-PyInit"
++    fi
++  done
++  [ -z "$broken" ] && return 0
++
++  # At most one automatic reset per commit: if a full rebuild did not fix it,
++  # retain the evidence and avoid repeating automatic cleanup on every boot.
++  head="$(git -C "$DIR" rev-parse HEAD 2>/dev/null)"
++  if [ -n "$head" ] && [ "$(cat "$AUTORESET_STAMP" 2>/dev/null)" = "$head" ]; then
++    echo "MPC solver outputs still broken after an automatic reset:$broken"
++    return 0
++  fi
++  echo "MPC solver outputs are broken:$broken; resetting build state and cache"
++  reset_build_state || return 1
++  if ! printf '%s' "$head" > "$AUTORESET_STAMP"; then
++    echo "Cannot record automatic build reset" >&2
++    return 1
++  fi
++}
++
+ # Persist rebuild requests outside the repository so repository cleanup cannot
+ # remove them. Request creation must not require a working build environment.
+ REBUILD_REQUEST="/data/rebuild_all.request"
+@@ -669,6 +704,11 @@ function launch {
+   invalidate_native_build_if_needed
+ 
+ 
++  if ! check_mpc_solvers; then
++    show_startup_failure "Automatic solver build cleanup failed"
++    return 1
++  fi
++
+   rm -f openpilot/selfdrive/pandad/*.so
+   # write tmux scrollback to a file
+   tmux capture-pane -pq -S-1500 > /tmp/launch_log
+diff --git a/openpilot/system/tests/test_solver_autoreset.py b/openpilot/system/tests/test_solver_autoreset.py
+new file mode 100644
+--- /dev/null
++++ b/openpilot/system/tests/test_solver_autoreset.py
+@@ -0,0 +1,89 @@
++import ast
++import io
++import os
++from pathlib import Path
++import subprocess
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++
++
++class SolverAutoresetTests(unittest.TestCase):
++  def setUp(self):
++    self.temp = tempfile.TemporaryDirectory()
++    self.addCleanup(self.temp.cleanup)
++    self.root = Path(self.temp.name)
++    self.repo = self.root / 'repo'
++    self.repo.mkdir()
++    self.cache = self.root / 'scons_cache'
++    self.cache.mkdir()
++    (self.cache / 'entry').touch()
++    (self.repo / 'prebuilt').touch()
++    (self.repo / '.sconsign.dblite').touch()
++    self.request = self.root / 'rebuild_all.request'
++    self.request.touch()
++    self.log = self.root / 'rebuild_all.last.log'
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    self.source = source
++    self.functions = source[source.index('BUILD_STATE_RESET=0'):source.index('function start_manager {')]
++    self.functions = self.functions.replace('/data/', str(self.root) + '/')
++
++  def shell(self, command, mocks=''):
++    # Only temporary paths are used. Never invoke SCons, sudo, or reboot.
++    script = self.functions + '\nDIR=' + str(self.repo) + '''
++FORCE_REBUILD=0
++sudo() { return 1; }
++timeout() { echo simulated-clean; return 2; }
++git() { echo "${TEST_HEAD:-test-head}"; }
++''' + mocks + '\n' + command
++    return subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++
++  def broken_solver(self, name='acados_ocp_solver_pyx.c', contents=''):
++    gen = self.repo / 'openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code'
++    gen.mkdir(parents=True, exist_ok=True)
++    (gen / name).write_text(contents)
++
++  def test_no_outputs_keeps_cache(self):
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertTrue(self.cache.exists())
++
++  def test_normal_outputs_keep_cache(self):
++    self.broken_solver(contents='generated source')
++    self.broken_solver('acados_ocp_solver_pyx.so', 'PyInit_acados_ocp_solver_pyx')
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertTrue(self.cache.exists())
++
++  def test_empty_source_resets_and_stamps(self):
++    self.broken_solver()
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertFalse(self.cache.exists())
++    self.assertEqual((self.root / 'build_autoreset.stamp').read_text(), 'test-head')
++
++  def test_missing_init_symbol_resets(self):
++    self.broken_solver('acados_ocp_solver_pyx.so', 'no init symbol')
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertFalse(self.cache.exists())
++
++  def test_failed_reset_does_not_stamp(self):
++    self.broken_solver()
++    self.assertNotEqual(self.shell('check_mpc_solvers', 'rm() { return 1; }').returncode, 0)
++    self.assertFalse((self.root / 'build_autoreset.stamp').exists())
++
++  def test_same_commit_is_not_reset_again(self):
++    self.broken_solver()
++    (self.root / 'build_autoreset.stamp').write_text('test-head')
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertTrue(self.cache.exists())
++
++  def test_new_commit_can_reset_again(self):
++    self.broken_solver()
++    (self.root / 'build_autoreset.stamp').write_text('old-head')
++    self.assertEqual(self.shell('check_mpc_solvers').returncode, 0)
++    self.assertFalse(self.cache.exists())
++
++
++if __name__ == '__main__':
++  unittest.main()

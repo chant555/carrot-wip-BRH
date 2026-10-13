@@ -1,0 +1,49 @@
+--- tested-original/launch_chffrplus.sh
++++ published/launch_chffrplus.sh
+@@ -393,9 +393,9 @@
+   fi
+ }
+ 
+-# Full reset of the incremental build. Outputs can be corrupted in place and
+-# /data/scons_cache can hand the corrupted result back, so clear build state and
+-# cache together; every target is then rebuilt from source.
++# Clear incremental state and cache together to avoid reusing corrupt outputs.
++# Cleanup success only permits the next build; it does not prove build success.
++# Concurrency protection is provided separately by the common cache guard.
+ BUILD_STATE_RESET=0
+ 
+ SCONS_CACHE="/data/scons_cache"
+@@ -445,10 +445,10 @@
+   FORCE_REBUILD=1
+ }
+ 
+-# SCons reports a stale config.lock and a cache this user cannot write (e.g. one
+-# created by `sudo scons`) the same way: SConsLockFailure on every build. With
+-# the guard held no patched SCons process is running, so a config.lock is stale
+-# and an unusable cache can be dropped; the cache is disposable.
++# Both a stale config.lock and an inaccessible cache can cause SConsLockFailure.
++# All cache users must follow the same guard protocol. Once this guard is held,
++# no cooperating build is using the cache: remove a leftover config.lock
++# or discard an unusable cache. Builds that bypass the guard are not protected.
+ function repair_scons_cache {
+   if [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
+     sudo -n rm -f "$SCONS_CACHE/config.lock"
+@@ -472,15 +472,15 @@
+   local rc=0
+   with_cache_guard repair_scons_cache || rc=$?
+   if [ "$rc" = 75 ]; then
+-    # Never touch a cache a running build is using; that build will report.
++    # A cooperating build holds the guard; leave its cache unchanged.
+     echo "SCons cache is in use; repair skipped"
+     return 0
+   fi
+   return "$rc"
+ }
+ 
+-# Written by the web UI / recovery "Rebuild All". Lives outside the repo so git
+-# reset/clean cannot drop it, and needs nothing but a file write to request.
++# Persist rebuild requests outside the repository so repository cleanup cannot
++# remove them. Request creation must not require a working build environment.
+ REBUILD_REQUEST="/data/rebuild_all.request"
+ REBUILD_LOG="/data/rebuild_all.last.log"
+ 

@@ -1,0 +1,8 @@
+--- tested-original/openpilot/common/startup_touch_log.py
++++ published/openpilot/common/startup_touch_log.py
+@@ -1,4 +1,4 @@
+-"""Bounded, best-effort diagnostic records; failures must not block recovery."""
++"""Rotate recovery input records; logging failures must not block recovery."""
+ import json
+ import os
+ from pathlib import Path

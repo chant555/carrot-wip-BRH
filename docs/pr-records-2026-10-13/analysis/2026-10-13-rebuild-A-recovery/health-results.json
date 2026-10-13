@@ -1,0 +1,30 @@
+{
+  "web": {
+    "buildcheck.py": 0,
+    "bootcheck.py": 0,
+    "mstate.py": 0,
+    "pandafaults.py": 0,
+    "jetlink.py": 0
+  },
+  "recovery": {
+    "buildcheck.py": 0,
+    "bootcheck.py": 0,
+    "mstate.py": 0,
+    "pandafaults.py": 0,
+    "jetlink.py": 0
+  },
+  "manual-recovery": {
+    "buildcheck.py": 0,
+    "bootcheck.py": 1,
+    "mstate.py": 0,
+    "pandafaults.py": 0,
+    "jetlink.py": 0
+  },
+  "restored": {
+    "buildcheck.py": 0,
+    "bootcheck.py": 0,
+    "mstate.py": 0,
+    "pandafaults.py": 0,
+    "jetlink.py": 0
+  }
+}

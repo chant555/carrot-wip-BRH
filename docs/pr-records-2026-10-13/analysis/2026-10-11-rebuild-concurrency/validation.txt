@@ -1,0 +1,70 @@
+검증 범위: 임시 폴더에서 수행한 로컬 검증입니다. 기기 전체 빌드는 수행하지 않았습니다.
+패치 SHA-256(보안 해시 알고리즘 256비트): 606851c314f38a5279f9b77ffede8090ad2febc82f0f90db7aad0cf9856e063e
+기준 커밋: 910bd82fb744999020c769f6e7e6379826c490af
+명령: git apply --check /home/jooheon/C4_500/docs/rebuild_all-910bd82f.patch
+
+종료코드: 0
+명령: git apply --whitespace=error /home/jooheon/C4_500/docs/rebuild_all-910bd82f.patch
+
+종료코드: 0
+명령: bash -n launch_chffrplus.sh
+
+종료코드: 0
+명령: bash -n scripts/ensure_params_build.sh
+
+종료코드: 0
+파이썬 문법 검사: 10개 파일이 통과했습니다.
+명령: python3 openpilot/system/tests/test_rebuild_cleanup.py -v
+test_absent_request_does_not_clean (__main__.RebuildCleanupTests) ... ok
+test_autoreset_failure_does_not_write_stamp (__main__.RebuildCleanupTests) ... ok
+test_autoreset_success_writes_stamp (__main__.RebuildCleanupTests) ... ok
+test_busy_guard_retains_rebuild_request (__main__.RebuildCleanupTests) ... ok
+test_cleanup_success_despite_scons_failure (__main__.RebuildCleanupTests) ... ok
+test_dangling_symlink_is_not_treated_as_removed (__main__.RebuildCleanupTests) ... ok
+test_delete_error_retains_request_and_has_no_success (__main__.RebuildCleanupTests) ... ok
+test_failure_does_not_set_success_flags (__main__.RebuildCleanupTests) ... ok
+test_heal_never_invokes_removal (__main__.RebuildCleanupTests) ... ok
+test_heal_preserves_existing_lock (__main__.RebuildCleanupTests) ... ok
+test_launch_stops_before_params_on_cleanup_failure (__main__.RebuildCleanupTests) ... ok
+test_log_open_failure_preserves_request (__main__.RebuildCleanupTests) ... ok
+test_real_permission_error_retains_request (__main__.RebuildCleanupTests) ... ok
+test_request_delete_failure_is_reported (__main__.RebuildCleanupTests) ... ok
+test_retry_after_delete_failure (__main__.RebuildCleanupTests) ... ok
+test_zero_exit_with_remaining_files_is_failure (__main__.RebuildCleanupTests) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.422s
+
+OK
+
+종료코드: 0
+명령: python3 openpilot/system/tests/test_build_cache.py -v
+test_agnos_does_not_remove_config_lock (__main__.CacheExclusionTests) ... ok
+test_another_process_blocks_pruning (__main__.CacheExclusionTests) ... ok
+test_another_process_blocks_reset (__main__.CacheExclusionTests) ... ok
+test_cache_recreation_does_not_split_guard (__main__.CacheExclusionTests) ... ok
+test_cleanup_guard_blocks_new_builder (__main__.CacheExclusionTests) ... ok
+test_guard_open_error_preserves_cache (__main__.CacheExclusionTests) ... ok
+test_inherited_descriptor_reuses_lock_and_parent_keeps_it (__main__.CacheExclusionTests) ... ok
+test_invalid_inherited_descriptor_is_rejected (__main__.CacheExclusionTests) ... ok
+test_lock_failure_preserves_cache_and_stops_retries (__main__.CacheExclusionTests) ... ok
+test_params_holds_guard_through_scons_and_stamp (__main__.CacheExclusionTests) ... ok
+test_process_death_releases_guard_without_unlink (__main__.CacheExclusionTests) ... ok
+test_sconstruct_keeps_guard_until_process_exit (__main__.CacheExclusionTests) ... ok
+test_second_builder_is_rejected (__main__.CacheExclusionTests) ... ok
+test_symlink_guard_is_rejected (__main__.CacheExclusionTests) ... ok
+test_wrong_inherited_guard_is_rejected (__main__.CacheExclusionTests) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.194s
+
+OK
+Skipping cache pruning: SCons cache is in use: /tmp/tmp6jvhu8jn/cache; no cleanup performed
+Skipping cache pruning: [Errno 21] Is a directory: '/tmp/tmpgddsxetu/cache.build.lock'
+SCons cache lock failed; cache preserved. Check other builds and cache permissions.
+SCons cache lock failed; cache preserved. Check other builds and cache permissions.
+
+종료코드: 0
+기존 pytest 시험 묶음은 기본 환경에 pytest가 없어 이번에 재실행하지 않았습니다.
+기존 문서의 331개 통과 기록은 이전 검증 결과이며 이번 실행 결과가 아닙니다.
+모든 이번 로컬 검증이 완료되었습니다. 기기 변경, 이슈 등록 및 외부 제출은 하지 않았습니다.

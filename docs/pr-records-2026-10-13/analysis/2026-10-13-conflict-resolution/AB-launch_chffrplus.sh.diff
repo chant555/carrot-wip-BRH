@@ -1,0 +1,26 @@
+diff --git a/launch_chffrplus.sh b/launch_chffrplus.sh
+index aad413b..052125f 100755
+--- a/launch_chffrplus.sh
++++ b/launch_chffrplus.sh
+@@ -398,7 +398,11 @@ function invalidate_native_build_if_needed {
+ # Concurrency protection is provided separately by the common cache guard.
+ BUILD_STATE_RESET=0
+ 
+-SCONS_CACHE="/data/scons_cache"
++SCONS_CACHE="${SCONS_CACHE_DIR:-/tmp/scons_cache}"
++if [ -z "${SCONS_CACHE_DIR:-}" ] && [ -f /TICI ]; then
++  SCONS_CACHE="/data/scons_cache"
++fi
++export SCONS_CACHE_DIR="$SCONS_CACHE"
+ SCONS_CACHE_GUARD="${SCONS_CACHE}.build.lock"
+ 
+ # Run "$@" holding the SCons cache guard, the flock SConstruct holds for a whole
+@@ -450,7 +454,7 @@ function reset_build_state {
+ # no cooperating build is using the cache: remove a leftover config.lock
+ # or discard an unusable cache. Builds that bypass the guard are not protected.
+ function repair_scons_cache {
+-  if [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
++  if [ ! -L "$SCONS_CACHE" ] && [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
+     sudo -n rm -f "$SCONS_CACHE/config.lock"
+   fi
+   [ -e "$SCONS_CACHE" ] || [ -L "$SCONS_CACHE" ] || return 0

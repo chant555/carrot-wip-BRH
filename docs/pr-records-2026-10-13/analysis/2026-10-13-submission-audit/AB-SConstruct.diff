@@ -1,0 +1,21 @@
+--- tested-original/SConstruct
++++ published/SConstruct
+@@ -241,7 +241,7 @@
+ # Setup cache dir
+ cache_dir = '/data/scons_cache' if arch == "larch64" else '/tmp/scons_cache'
+ # Hold a stable, external guard for the entire SCons process, including clean,
+-# so cache cleanup never runs under a build. Builds wait for each other.
++# so cooperating builds and cleanup cannot overlap. Builds wait for each other.
+ # atexit retains the handle even after this SConstruct scope is discarded.
+ import atexit
+ from pathlib import Path
+@@ -317,7 +317,7 @@
+   ])
+ 
+ 
+-# The compilation database entries fail during `scons -c`, which silently aborts
+-# the whole top-level clean (rc=0, nothing removed, cache kept). Skip it there.
++# Compilation database generation can end a clean without removing outputs.
++# Skip this build-only step when cleaning.
+ if not GetOption('clean'):
+   env.CompilationDatabase('compile_commands.json')

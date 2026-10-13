@@ -1,0 +1,12 @@
+[
+  {
+    "path": "openpilot/common/startup_touch_log.py",
+    "added": 34,
+    "removed": 0
+  },
+  {
+    "path": "openpilot/system/ui/startup_recovery.py",
+    "added": 23,
+    "removed": 7
+  }
+]

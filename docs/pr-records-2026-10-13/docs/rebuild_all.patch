@@ -1,0 +1,202 @@
+diff -ruN a/SConstruct b/SConstruct
+--- a/SConstruct	2026-09-19 18:48:53.292928326 +0900
++++ b/SConstruct	2026-09-19 18:49:16.320873770 +0900
+@@ -299,4 +299,7 @@
+   ])
+ 
+ 
+-env.CompilationDatabase('compile_commands.json')
++# The compilation database entries fail during `scons -c`, which silently aborts
++# the whole top-level clean (rc=0, nothing removed, cache kept). Skip it there.
++if not GetOption('clean'):
++  env.CompilationDatabase('compile_commands.json')
+diff -ruN a/launch_chffrplus.sh b/launch_chffrplus.sh
+--- a/launch_chffrplus.sh	2026-09-19 18:48:53.293028345 +0900
++++ b/launch_chffrplus.sh	2026-09-19 19:30:59.888780881 +0900
+@@ -397,6 +397,69 @@
+   fi
+ }
+ 
++# Full reset of the incremental build. Outputs can be corrupted in place and
++# /data/scons_cache can hand the corrupted result back, so clear build state and
++# cache together; every target is then rebuilt from source.
++function reset_build_state {
++  rm -rf "$DIR/.sconsign.dblite" /data/scons_cache "$DIR/prebuilt"
++  FORCE_REBUILD=1
++}
++
++# A build interrupted while cythonizing leaves an empty acados_ocp_solver_pyx.c
++# (also pushed into the cache). scons keeps treating it as up to date and links
++# it into a module with no init function, so plannerd crash-loops on import and
++# engagement is impossible. Only judge outputs that exist (a first build has
++# none) and only by file contents, so the check cannot depend on the Python env.
++AUTORESET_STAMP="/data/build_autoreset.stamp"
++
++function check_mpc_solvers {
++  local lib gen broken="" head
++  for lib in longitudinal_mpc_lib lateral_mpc_lib; do
++    gen="$DIR/openpilot/selfdrive/controls/lib/$lib/c_generated_code"
++    if [ -e "$gen/acados_ocp_solver_pyx.c" ] && [ ! -s "$gen/acados_ocp_solver_pyx.c" ]; then
++      broken="$broken $lib:empty-c"
++    fi
++    if [ -f "$gen/acados_ocp_solver_pyx.so" ] && ! grep -qa PyInit_acados_ocp_solver_pyx "$gen/acados_ocp_solver_pyx.so"; then
++      broken="$broken $lib:no-PyInit"
++    fi
++  done
++  [ -z "$broken" ] && return 0
++
++  # At most one automatic reset per commit: if a full rebuild did not fix it,
++  # the cause is elsewhere and resetting on every boot would only slow boots.
++  head="$(git -C "$DIR" rev-parse HEAD 2>/dev/null)"
++  if [ -n "$head" ] && [ "$(cat "$AUTORESET_STAMP" 2>/dev/null)" = "$head" ]; then
++    echo "MPC solver outputs still broken after an automatic reset:$broken"
++    return 0
++  fi
++  echo "MPC solver outputs are broken:$broken; resetting build state and cache"
++  echo -n "$head" > "$AUTORESET_STAMP"
++  reset_build_state
++}
++
++# Written by the web UI / recovery "Rebuild All". Lives outside the repo so git
++# reset/clean cannot drop it, and needs nothing but a file write to request.
++REBUILD_REQUEST="/data/rebuild_all.request"
++REBUILD_LOG="/data/rebuild_all.last.log"
++
++function consume_rebuild_request {
++  [ -f "$REBUILD_REQUEST" ] || return 0
++  # Consume first so a failing build can never turn into a reboot loop.
++  rm -f "$REBUILD_REQUEST"
++  echo "Rebuild All requested: clearing build outputs, build state and cache"
++  {
++    date
++    # Best effort: removes generated outputs. It must not gate the reset below,
++    # because the environment it needs may be exactly what is broken.
++    if ! (cd "$DIR" && timeout 600 scons -c); then
++      echo "scons -c failed; continuing with state/cache reset"
++    fi
++  } > "$REBUILD_LOG" 2>&1
++  # Guaranteed part: works even if the clean above failed.
++  reset_build_state
++  echo "state/cache reset done" >> "$REBUILD_LOG"
++}
++
+ function start_manager {
+   # A warm start or a long build can leave the launcher on an isolated CPU.
+   # Set the manager's initial mask before Python creates threads or forks:
+@@ -516,6 +579,8 @@
+   prepare_big_model_if_needed
+   invalidate_modeld_build_if_needed
+   invalidate_native_build_if_needed
++  check_mpc_solvers
++  consume_rebuild_request
+ 
+   rm -f openpilot/selfdrive/pandad/*.so
+   # write tmux scrollback to a file
+diff -ruN a/openpilot/selfdrive/carrot/recovery/server.py b/openpilot/selfdrive/carrot/recovery/server.py
+--- a/openpilot/selfdrive/carrot/recovery/server.py	2026-09-19 18:48:53.294029025 +0900
++++ b/openpilot/selfdrive/carrot/recovery/server.py	2026-09-19 18:49:16.336478577 +0900
+@@ -680,13 +680,9 @@
+       "git clean -xfd"
+     )
+   if action == "git_rebuild":
+-    return (
+-      "cd /data/openpilot && "
+-      "scons -c && "
+-      "rm -f .sconsign.dblite && "
+-      "rm -rf /tmp/scons_cache && "
+-      "rm -f prebuilt"
+-    )
++    # "Will rebuild on next boot": leave the request for launch_chffrplus.sh,
++    # which resets build state and /data/scons_cache (not /tmp on AGNOS).
++    return "touch /data/rebuild_all.request && sync"
+   return None
+ 
+ 
+@@ -760,9 +756,10 @@
+ 
+ def _tool_action(action: str, payload: dict) -> dict:
+   if action == "rebuild_all":
+-    # Same as the tools button: clean build + drop prebuilt, then reboot.
+-    # Returned as a command so it runs in the visible PTY (like the git menu).
+-    return {"ok": True, "command": "cd /data/openpilot && scons -c && rm -rf prebuilt && sudo reboot"}
++    # Same as the tools button: request a full clean build at next boot, then
++    # reboot. No scons here: the login-shell PTY resets PYTHONPATH, and a broken
++    # build environment is exactly when this button is needed.
++    return {"ok": True, "command": "touch /data/rebuild_all.request && sync && sudo reboot"}
+   if action == "send_tmux_log":
+     rc, err = _capture_tmux_log()
+     if rc != 0:
+@@ -2333,7 +2330,7 @@
+   async function onTool(action) {
+     closeMenus();
+     if (action === \"rebuild_all\") {
+-      if (await appConfirm(\"Clean the build cache and reboot.\\n\\n\\u2022 scons -c\\n\\u2022 rm -rf prebuilt\\n\\u2022 sudo reboot\", { title: \"rebuild\", confirmLabel: \"Rebuild\" })) {
++      if (await appConfirm(\"Clean the build cache and reboot.\\n\\nA full clean build runs on the next boot (several minutes).\", { title: \"rebuild\", confirmLabel: \"Rebuild\" })) {
+         await dispatchGit(\"rebuild_all\");
+       }
+       return;
+diff -ruN a/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py b/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py
+--- a/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py	2026-09-19 18:48:53.293772195 +0900
++++ b/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py	2026-09-19 18:49:16.334324762 +0900
+@@ -18,6 +18,7 @@
+ import shlex
+ import shutil
+ import subprocess
++import time
+ import traceback
+ from typing import Any, Dict, List, Optional, Tuple
+ 
+@@ -34,6 +35,19 @@
+ from ...services.git_status import clear_git_status_cache
+ from ...services.params import HAS_PARAMS, Params, ParamKeyType, get_all_param_values_for_backup
+ from . import jobs
++
++# Consumed by launch_chffrplus.sh:consume_rebuild_request on the next boot.
++REBUILD_REQUEST_PATH = "/data/rebuild_all.request"
++
++
++def request_rebuild_all() -> None:
++  # Only a file write: must keep working when scons/python deps are broken.
++  tmp = REBUILD_REQUEST_PATH + ".tmp"
++  with open(tmp, "w") as f:
++    f.write(f"{time.time()}\n")
++    f.flush()
++    os.fsync(f.fileno())
++  os.replace(tmp, REBUILD_REQUEST_PATH)
+ from .actions import normalize_action, validate_action, validate_shell_argv
+ 
+ 
+@@ -784,9 +798,14 @@
+ 
+     if action == "rebuild_all":
+       jobs.progress(job, message="rebuild all", current=1, total=1)
+-      cmd = "cd /data/openpilot && scons -c && rm -rf prebuilt && sudo reboot"
+-      subprocess.Popen(["bash", "-lc", cmd])
+-      jobs.finish(job, ok=True, result={"ok": True, "out": "rebuild_all requested (clean + remove prebuilt + reboot)"})
++      try:
++        request_rebuild_all()
++      except OSError as e:
++        jobs.finish(job, ok=False, result={"ok": False, "error": f"rebuild request failed: {e}"}, error=str(e))
++        return
++      jobs.finish(job, ok=True, result={"ok": True, "out": "rebuild scheduled: rebooting, full clean build runs at boot"})
++      await asyncio.sleep(1)
++      subprocess.Popen(["sudo", "reboot"])
+       return
+ 
+     if action == "shell_cmd":
+@@ -1243,9 +1262,12 @@
+       return web.json_response({"ok": True, "out": "reboot requested"})
+ 
+     if action == "rebuild_all":
+-      cmd = "cd /data/openpilot && scons -c && rm -rf prebuilt && sudo reboot"
+-      subprocess.Popen(["bash", "-lc", cmd])
+-      return web.json_response({"ok": True, "out": "rebuild_all requested (clean + remove prebuilt + reboot)"})
++      try:
++        request_rebuild_all()
++      except OSError as e:
++        return web.json_response({"ok": False, "error": f"rebuild request failed: {e}"}, status=500)
++      subprocess.Popen(["bash", "-c", "sleep 1 && sudo reboot"])
++      return web.json_response({"ok": True, "out": "rebuild scheduled: rebooting, full clean build runs at boot"})
+ 
+     if action == "shell_cmd":
+       cmd_str = (body.get("cmd") or "").strip()

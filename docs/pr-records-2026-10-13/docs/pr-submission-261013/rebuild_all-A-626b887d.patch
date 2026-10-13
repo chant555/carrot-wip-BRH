@@ -1,0 +1,548 @@
+diff --git a/SConstruct b/SConstruct
+--- a/SConstruct
++++ b/SConstruct
+@@ -306,4 +306,7 @@ if arch != "larch64":
+   ])
+ 
+ 
+-env.CompilationDatabase('compile_commands.json')
++# Compilation database generation can end a clean without removing outputs.
++# Skip this build-only step when cleaning.
++if not GetOption('clean'):
++  env.CompilationDatabase('compile_commands.json')
+diff --git a/launch_chffrplus.sh b/launch_chffrplus.sh
+--- a/launch_chffrplus.sh
++++ b/launch_chffrplus.sh
+@@ -393,6 +393,57 @@ function invalidate_native_build_if_needed {
+   fi
+ }
+ 
++# Clear incremental state and cache together to avoid reusing corrupt outputs.
++# Cleanup success only permits the next build; it does not prove build success.
++# Concurrency protection is provided separately by the common cache guard.
++BUILD_STATE_RESET=0
++
++function reset_build_state {
++  local target
++  # The cache is disposable. One created by another user (e.g. `sudo scons`)
++  # cannot be removed as this user, so fall back to sudo before giving up.
++  if ! rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache; then
++    sudo -n rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache
++  fi
++  for target in "$DIR/.sconsign.dblite" /data/scons_cache "$DIR/prebuilt"; do
++    if [ -e "$target" ] || [ -L "$target" ]; then
++      echo "Build state cleanup incomplete: $target remains" >&2
++      return 1
++    fi
++  done
++  BUILD_STATE_RESET=1
++  FORCE_REBUILD=1
++}
++
++# Persist rebuild requests outside the repository so repository cleanup cannot
++# remove them. Request creation must not require a working build environment.
++REBUILD_REQUEST="/data/rebuild_all.request"
++REBUILD_LOG="/data/rebuild_all.last.log"
++
++function consume_rebuild_request {
++  [ -f "$REBUILD_REQUEST" ] || return 0
++  # Keep the request if cleanup fails or is interrupted. This function never
++  # reboots; successful cleanup consumes it before compilation starts.
++  echo "Rebuild All requested: clearing build outputs, build state and cache"
++  {
++    date
++    # Best effort: removes generated outputs. It must not gate the reset below,
++    # because the environment it needs may be exactly what is broken.
++    if ! (cd "$DIR" && timeout 600 scons -c); then
++      echo "scons -c failed; continuing with state/cache reset"
++    fi
++    if ! reset_build_state; then
++      echo "state/cache reset failed; request retained"
++      return 1
++    fi
++    if ! rm -f "$REBUILD_REQUEST" || [ -e "$REBUILD_REQUEST" ] || [ -L "$REBUILD_REQUEST" ]; then
++      echo "Cannot consume rebuild request; cleanup will need to be retried"
++      return 1
++    fi
++    echo "state/cache reset done (full build still pending)"
++  } > "$REBUILD_LOG" 2>&1
++}
++
+ function start_manager {
+   # A warm start or a long build can leave the launcher on an isolated CPU.
+   # Set the manager's initial mask before Python creates threads or forks:
+@@ -517,6 +568,13 @@ function launch {
+     show_startup_failure "Runtime dependency installation failed"
+   fi
+ 
++  # A Rebuild All request must reset build state before the Params build, which
++  # shares /data/scons_cache; otherwise a failure there would keep it pending.
++  if ! consume_rebuild_request; then
++    show_startup_failure "Rebuild All cleanup failed; see /data/rebuild_all.last.log"
++    return 1
++  fi
++
+   # Build Params before any long-running carrot service imports it.
+   if ! run_startup_command bash "$DIR/scripts/ensure_params_build.sh"; then
+     echo "Params registry build failed, not starting openpilot."
+@@ -535,6 +593,8 @@ function launch {
+ 
+ 
+   FORCE_REBUILD=0
++  # A reset before the Params build must still force the full build below.
++  [ "$BUILD_STATE_RESET" = "1" ] && FORCE_REBUILD=1
+   prepare_big_model_if_needed
+   invalidate_modeld_build_if_needed
+   invalidate_native_build_if_needed
+diff --git a/openpilot/common/rebuild_request.py b/openpilot/common/rebuild_request.py
+new file mode 100644
+--- /dev/null
++++ b/openpilot/common/rebuild_request.py
+@@ -0,0 +1,18 @@
++"""Rebuild All request, consumed by launch_chffrplus.sh:consume_rebuild_request."""
++import os
++from pathlib import Path
++import time
++
++# Outside the repo so git reset/clean cannot drop it.
++REBUILD_REQUEST_PATH = Path('/data/rebuild_all.request')
++
++
++def request_full_rebuild(path: Path = REBUILD_REQUEST_PATH):
++  # Only a file write: must keep working when SCons or Python deps are broken,
++  # which is exactly when a full rebuild is needed.
++  tmp = path.with_name(path.name + '.tmp')
++  with tmp.open('w') as f:
++    f.write(f'{time.time()}\n')
++    f.flush()
++    os.fsync(f.fileno())
++  os.replace(tmp, path)
+diff --git a/openpilot/common/startup_recovery.py b/openpilot/common/startup_recovery.py
+--- a/openpilot/common/startup_recovery.py
++++ b/openpilot/common/startup_recovery.py
+@@ -9,6 +9,7 @@ import time
+ 
+ from openpilot.common.repo_update import child_lock_kwargs, recover_stale_index_lock, repo_lock
+ from openpilot.common.reboot import reboot_device
++from openpilot.common.rebuild_request import request_full_rebuild
+ from openpilot.selfdrive.carrot.server.services.git_config import prepare_git_pull
+ 
+ 
+@@ -36,19 +37,6 @@ def read_startup_error(log_path: Path | None) -> str:
+   return '\n'.join(lines)
+ 
+ 
+-def clean_startup_build(repo: Path):
+-  """Use the project's clean targets; never reset sources or fetch an update."""
+-  command = ['scons', '-c']
+-  if Path('/AGNOS').exists():
+-    command.append('--minimal')
+-  result = subprocess.run(command, cwd=repo, capture_output=True, text=True,
+-                          encoding='utf-8', errors='replace', timeout=180, **child_lock_kwargs())
+-  if result.returncode:
+-    detail = (result.stdout + '\n' + result.stderr).strip()[-2000:]
+-    raise RuntimeError(detail or 'Build cleanup failed; no reboot requested.')
+-  (repo / 'prebuilt').unlink(missing_ok=True)
+-
+-
+ def capture_startup_output(source, destination, log_path: Path):
+   """Forward output while keeping at most 64 KiB of startup/error history."""
+   chunks = deque()
+@@ -126,9 +114,12 @@ class RecoveryUpdate:
+ 
+   def _rebuild(self):
+     try:
++      # Defer cleanup to the launcher: a broken build environment can prevent
++      # SCons cleanup, and cached outputs must also be removed. Reset build state
++      # and cache on the next boot, before the Params build.
+       with repo_lock():
+-        clean_startup_build(self.repo)
+-        self._set('rebuild_rebooting', 'Build cleanup complete. Rebuilding after reboot.')
++        request_full_rebuild()
++        self._set('rebuild_rebooting', 'Full rebuild requested. Rebuilding after reboot.')
+         self.reboot()
+     except Exception as exc:
+       print(f'Startup recovery rebuild failed: {exc}', flush=True)
+diff --git a/openpilot/selfdrive/carrot/recovery/server.py b/openpilot/selfdrive/carrot/recovery/server.py
+--- a/openpilot/selfdrive/carrot/recovery/server.py
++++ b/openpilot/selfdrive/carrot/recovery/server.py
+@@ -680,13 +680,9 @@ def _git_command(action: str, payload: dict) -> str | None:
+       "git clean -xfd"
+     )
+   if action == "git_rebuild":
+-    return (
+-      "cd /data/openpilot && "
+-      "scons -c && "
+-      "rm -f .sconsign.dblite && "
+-      "rm -rf /tmp/scons_cache && "
+-      "rm -f prebuilt"
+-    )
++    # "Will rebuild on next boot": leave the request for launch_chffrplus.sh,
++    # which resets build state and /data/scons_cache (not /tmp on AGNOS).
++    return "touch /data/rebuild_all.request && sync"
+   return None
+ 
+ 
+@@ -766,9 +762,10 @@ def _capture_tmux_log() -> tuple[int, str]:
+ 
+ def _tool_action(action: str, payload: dict) -> dict:
+   if action == "rebuild_all":
+-    # Same as the tools button: clean build + drop prebuilt, then reboot.
+-    # Returned as a command so it runs in the visible PTY (like the git menu).
+-    return {"ok": True, "command": "cd /data/openpilot && scons -c && rm -rf prebuilt && sudo reboot"}
++    # Same as the tools button: request a full clean build at next boot, then
++    # reboot. No scons here: the login-shell PTY resets PYTHONPATH, and a broken
++    # build environment is exactly when this button is needed.
++    return {"ok": True, "command": "touch /data/rebuild_all.request && sync && sudo reboot"}
+   if action == "send_tmux_log":
+     rc, err = _capture_tmux_log()
+     if rc != 0:
+@@ -2339,7 +2336,7 @@ RECOVERY_JS = """\"use strict\";
+   async function onTool(action) {
+     closeMenus();
+     if (action === \"rebuild_all\") {
+-      if (await appConfirm(\"Clean the build cache and reboot.\\n\\n\\u2022 scons -c\\n\\u2022 rm -rf prebuilt\\n\\u2022 sudo reboot\", { title: \"rebuild\", confirmLabel: \"Rebuild\" })) {
++      if (await appConfirm(\"Clean the build cache and reboot.\\n\\nA full clean build runs on the next boot (several minutes).\", { title: \"rebuild\", confirmLabel: \"Rebuild\" })) {
+         await dispatchGit(\"rebuild_all\");
+       }
+       return;
+diff --git a/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py b/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py
+--- a/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py
++++ b/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py
+@@ -25,6 +25,7 @@ from aiohttp import web
+ 
+ from openpilot.common.async_process import prepare_repo, run_locked_thread
+ from openpilot.common.reboot import spawn_reboot
++from openpilot.common.rebuild_request import request_full_rebuild
+ from openpilot.common.repo_update import RepoBusyError, child_lock_kwargs, repo_lock
+ from openpilot.system.hardware import HARDWARE
+ 
+@@ -787,9 +788,16 @@ async def _run_tool_job(job: Dict[str, Any]) -> None:
+ 
+     if action == "rebuild_all":
+       jobs.progress(job, message="rebuild all", current=1, total=1)
+-      cmd = "cd /data/openpilot && scons -c && rm -rf prebuilt && python3 -m openpilot.common.reboot"
+-      subprocess.Popen(["bash", "-lc", cmd])
+-      jobs.finish(job, ok=True, result={"ok": True, "out": "rebuild_all requested (clean + remove prebuilt + reboot)"})
++      # No SCons here: a login shell resets PYTHONPATH, and a broken build is
++      # exactly when this button is needed. The launcher resets on next boot.
++      try:
++        request_full_rebuild()
++      except OSError as e:
++        jobs.finish(job, ok=False, result={"ok": False, "error": f"rebuild request failed: {e}"}, error=str(e))
++        return
++      jobs.finish(job, ok=True, result={"ok": True, "out": "rebuild scheduled: rebooting, full clean build runs at boot"})
++      await asyncio.sleep(1)
++      spawn_reboot()
+       return
+ 
+     if action == "shell_cmd":
+@@ -1246,9 +1254,12 @@ async def _dispatch_sync(request: web.Request, body: Dict[str, Any]) -> web.Resp
+       return web.json_response({"ok": True, "out": "reboot requested"})
+ 
+     if action == "rebuild_all":
+-      cmd = "cd /data/openpilot && scons -c && rm -rf prebuilt && python3 -m openpilot.common.reboot"
+-      subprocess.Popen(["bash", "-lc", cmd])
+-      return web.json_response({"ok": True, "out": "rebuild_all requested (clean + remove prebuilt + reboot)"})
++      try:
++        request_full_rebuild()
++      except OSError as e:
++        return web.json_response({"ok": False, "error": f"rebuild request failed: {e}"}, status=500)
++      spawn_reboot(delay=1.0)
++      return web.json_response({"ok": True, "out": "rebuild scheduled: rebooting, full clean build runs at boot"})
+ 
+     if action == "shell_cmd":
+       cmd_str = (body.get("cmd") or "").strip()
+diff --git a/openpilot/selfdrive/carrot/server/tests/test_git_config.py b/openpilot/selfdrive/carrot/server/tests/test_git_config.py
+--- a/openpilot/selfdrive/carrot/server/tests/test_git_config.py
++++ b/openpilot/selfdrive/carrot/server/tests/test_git_config.py
+@@ -240,6 +240,7 @@ def test_web_reboots_use_chime_helper(web_dispatcher, monkeypatch, api, action):
+     return real_popen(argv, **kwargs)
+ 
+   monkeypatch.setattr(dispatcher, 'spawn_reboot', lambda **kw: calls.append(('reboot', kw)))
++  monkeypatch.setattr(dispatcher, 'request_full_rebuild', lambda: calls.append(('request', None)))
+   monkeypatch.setattr(dispatcher.subprocess, 'Popen', popen)
+   monkeypatch.setattr(dispatcher.os, 'remove', lambda path: None)
+ 
+@@ -249,12 +250,25 @@ def test_web_reboots_use_chime_helper(web_dispatcher, monkeypatch, api, action):
+   monkeypatch.setattr(dispatcher.asyncio, 'sleep', no_sleep)
+   result = dispatch(dispatcher, api, action)
+   assert result['ok']
+-  if action == 'rebuild_all':
+-    assert calls == [('command', ['bash', '-lc',
+-                                 'cd /data/openpilot && scons -c && rm -rf prebuilt && python3 -m openpilot.common.reboot'])]
+-  else:
+-    delay = {'delay': 1.0} if action == 'reset_calib' and api == 'sync' else {}
+-    assert calls == [('reboot', delay)]
++  delay = {'delay': 1.0} if action in ('reset_calib', 'rebuild_all') and api == 'sync' else {}
++  # Rebuild All never runs SCons from the web server; it leaves a request for
++  # the launcher and reboots.
++  assert calls == ([('request', None)] if action == 'rebuild_all' else []) + [('reboot', delay)]
++
++
++@pytest.mark.parametrize('api', ['job', 'sync'])
++def test_rebuild_all_does_not_reboot_without_request(web_dispatcher, monkeypatch, api):
++  dispatcher, _, _ = web_dispatcher
++  calls = []
++
++  def fail():
++    raise OSError('read-only file system')
++
++  monkeypatch.setattr(dispatcher, 'spawn_reboot', lambda **kw: calls.append(('reboot', kw)))
++  monkeypatch.setattr(dispatcher, 'request_full_rebuild', fail)
++  result = dispatch(dispatcher, api, 'rebuild_all')
++  assert not result['ok'] and 'read-only file system' in result['error']
++  assert calls == []
+ 
+ 
+ def dispatch(dispatcher, api, action, **payload):
+diff --git a/openpilot/system/tests/test_rebuild_cleanup.py b/openpilot/system/tests/test_rebuild_cleanup.py
+new file mode 100644
+--- /dev/null
++++ b/openpilot/system/tests/test_rebuild_cleanup.py
+@@ -0,0 +1,133 @@
++import ast
++import io
++import os
++from pathlib import Path
++import subprocess
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++
++
++class RebuildCleanupTests(unittest.TestCase):
++  def setUp(self):
++    self.temp = tempfile.TemporaryDirectory()
++    self.addCleanup(self.temp.cleanup)
++    self.root = Path(self.temp.name)
++    self.repo = self.root / 'repo'
++    self.repo.mkdir()
++    self.cache = self.root / 'scons_cache'
++    self.cache.mkdir()
++    (self.cache / 'entry').touch()
++    (self.repo / 'prebuilt').touch()
++    (self.repo / '.sconsign.dblite').touch()
++    self.request = self.root / 'rebuild_all.request'
++    self.request.touch()
++    self.log = self.root / 'rebuild_all.last.log'
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    self.source = source
++    self.functions = source[source.index('BUILD_STATE_RESET=0'):source.index('function start_manager {')]
++    self.functions = self.functions.replace('/data/', str(self.root) + '/')
++
++  def shell(self, command, mocks=''):
++    # Only temporary paths are used. Never invoke SCons, sudo, or reboot.
++    script = self.functions + '\nDIR=' + str(self.repo) + '''
++FORCE_REBUILD=0
++sudo() { return 1; }
++timeout() { echo simulated-clean; return 2; }
++git() { echo test-head; }
++''' + mocks + '\n' + command
++    return subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++
++  def test_cleanup_success_despite_scons_failure(self):
++    r = self.shell('consume_rebuild_request')
++    self.assertEqual(r.returncode, 0, r.stderr)
++    self.assertFalse(self.request.exists())
++    self.assertFalse(self.cache.exists())
++    self.assertFalse((self.repo / 'prebuilt').exists())
++    self.assertIn('full build still pending', self.log.read_text())
++
++  @unittest.skipIf(os.geteuid() == 0, 'requires ordinary user permissions')
++  def test_real_permission_error_retains_request(self):
++    self.repo.chmod(0o500)
++    try:
++      r = self.shell('consume_rebuild_request')
++    finally:
++      self.repo.chmod(0o700)
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.request.exists())
++    self.assertIn('Permission denied', self.log.read_text())
++    self.assertNotIn('reset done', self.log.read_text())
++
++  def test_delete_error_retains_request_and_has_no_success(self):
++    r = self.shell('consume_rebuild_request', 'rm() { return 1; }')
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.request.exists())
++    self.assertIn('reset failed', self.log.read_text())
++    self.assertNotIn('reset done', self.log.read_text())
++
++  def test_zero_exit_with_remaining_files_is_failure(self):
++    r = self.shell('consume_rebuild_request', 'rm() { return 0; }')
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.request.exists())
++    self.assertIn('remains', self.log.read_text())
++
++  def test_failure_does_not_set_success_flags(self):
++    r = self.shell('reset_build_state; rc=$?; echo "$rc $BUILD_STATE_RESET $FORCE_REBUILD"', 'rm() { return 1; }')
++    self.assertEqual(r.stdout.strip(), '1 0 0')
++
++  def test_request_delete_failure_is_reported(self):
++    mocks = 'rm() { if [[ "$*" == *rebuild_all.request* ]]; then return 1; fi; command rm "$@"; }'
++    r = self.shell('consume_rebuild_request', mocks)
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.request.exists())
++    self.assertIn('Cannot consume', self.log.read_text())
++    self.assertNotIn('reset done', self.log.read_text())
++
++  def test_retry_after_delete_failure(self):
++    self.shell('consume_rebuild_request', 'rm() { return 1; }')
++    r = self.shell('consume_rebuild_request')
++    self.assertEqual(r.returncode, 0)
++    self.assertFalse(self.request.exists())
++
++  def test_log_open_failure_preserves_request(self):
++    self.log.mkdir()
++    r = self.shell('consume_rebuild_request')
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.request.exists())
++    self.assertTrue(self.cache.exists())
++
++  def test_unremovable_cache_falls_back_to_sudo(self):
++    # The cache may belong to root after a `sudo scons`; only sudo can drop it.
++    mocks = ('rm() { if [[ "$*" == *scons_cache* ]] && [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n'
++             'sudo() { [ "$1" = -n ] && shift; AS_ROOT=1 "$@"; }')
++    r = self.shell('consume_rebuild_request', mocks)
++    self.assertEqual(r.returncode, 0, r.stderr + self.log.read_text())
++    self.assertFalse(self.cache.exists())
++    self.assertFalse(self.request.exists())
++
++  def test_absent_request_does_not_clean(self):
++    self.request.unlink()
++    r = self.shell('consume_rebuild_request')
++    self.assertEqual(r.returncode, 0)
++    self.assertTrue(self.cache.exists())
++
++  def test_dangling_symlink_is_not_treated_as_removed(self):
++    (self.repo / 'prebuilt').unlink()
++    (self.repo / 'prebuilt').symlink_to(self.root / 'missing')
++    r = self.shell('reset_build_state', 'rm() { return 0; }')
++    self.assertNotEqual(r.returncode, 0)
++
++  def test_launch_stops_before_params_on_cleanup_failure(self):
++    block = self.source[self.source.index('  if ! consume_rebuild_request;'):self.source.index('  # Build Params before')]
++    script = 'consume_rebuild_request() { return 1; }\nshow_startup_failure() { echo "$*"; }\nlaunch_test() {\n' + block + '\necho unexpected-params;\n}\nlaunch_test'
++    r = subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++    self.assertNotEqual(r.returncode, 0)
++    self.assertNotIn('unexpected', r.stdout)
++    self.assertIn('cleanup failed', r.stdout)
++
++
++if __name__ == '__main__':
++  unittest.main()
+diff --git a/openpilot/system/tests/test_startup_recovery.py b/openpilot/system/tests/test_startup_recovery.py
+--- a/openpilot/system/tests/test_startup_recovery.py
++++ b/openpilot/system/tests/test_startup_recovery.py
+@@ -8,7 +8,7 @@ import threading
+ 
+ import pytest
+ 
+-from openpilot.common import repo_update, startup_recovery
++from openpilot.common import rebuild_request, repo_update, startup_recovery
+ from openpilot.common import text_window
+ 
+ 
+@@ -214,31 +214,42 @@ def test_error_log_handles_tracebacks_missing_and_large_logs(tmp_path):
+   assert 'File "manager.py"' in text and len(text) <= 65536
+ 
+ 
+-@pytest.mark.parametrize('clean_fails', [False, True])
+-def test_rebuild_cleans_offline_and_reboots_only_on_success(tmp_path, monkeypatch, clean_fails):
++def test_rebuild_request_is_written_atomically(tmp_path):
++  path = tmp_path / 'rebuild_all.request'
++  rebuild_request.request_full_rebuild(path)
++  assert path.read_text().strip()
++  assert [p.name for p in tmp_path.iterdir()] == ['rebuild_all.request']
++
++
++@pytest.mark.parametrize('request_fails', [False, True])
++def test_rebuild_requests_boot_reset_and_reboots_only_on_success(tmp_path, monkeypatch, request_fails):
+   monkeypatch.setattr(repo_update, 'LOCK_PATH', str(tmp_path / 'update.lock'))
+-  (tmp_path / 'prebuilt').touch()
+-  (tmp_path / 'source.txt').write_text('local source changes')
++  repo, request = tmp_path / 'repo', tmp_path / 'rebuild_all.request'
++  repo.mkdir()
++  (repo / 'prebuilt').touch()
++  (repo / 'source.txt').write_text('local source changes')
+   calls = []
+ 
+-  def run(command, **kwargs):
+-    assert command[:2] == ['scons', '-c']
+-    assert kwargs['cwd'] == tmp_path
+-    # Cleanup must own the same lock used by Git and the launcher.
++  def write_request():
++    # The request must own the same lock used by Git and the launcher.
+     with pytest.raises(repo_update.RepoBusyError), repo_update.repo_lock():
+-      pytest.fail('cleanup did not hold repository lock')
+-    calls.append('clean')
+-    return subprocess.CompletedProcess(command, int(clean_fails), '', 'cleanup error' if clean_fails else '')
+-
+-  monkeypatch.setattr(startup_recovery.subprocess, 'run', run)
+-  update = startup_recovery.RecoveryUpdate(tmp_path, reboot=lambda: calls.append('reboot'))
++      pytest.fail('rebuild request did not hold repository lock')
++    calls.append('request')
++    if request_fails:
++      raise OSError('read-only file system')
++    rebuild_request.request_full_rebuild(request)
++
++  monkeypatch.setattr(startup_recovery, 'request_full_rebuild', write_request)
++  update = startup_recovery.RecoveryUpdate(repo, reboot=lambda: calls.append('reboot'))
+   update._rebuild()
+-  assert (tmp_path / 'source.txt').read_text() == 'local source changes'
+-  assert (tmp_path / 'prebuilt').exists() == clean_fails
+-  assert calls == (['clean'] if clean_fails else ['clean', 'reboot'])
+-  assert update.state[0] == ('failed' if clean_fails else 'rebuild_rebooting')
+-  if clean_fails:
+-    assert 'cleanup error' in update.state[1]
++  # Nothing is cleaned here; the launcher resets build state on the next boot.
++  assert (repo / 'source.txt').read_text() == 'local source changes'
++  assert (repo / 'prebuilt').exists()
++  assert request.exists() != request_fails
++  assert calls == (['request'] if request_fails else ['request', 'reboot'])
++  assert update.state[0] == ('failed' if request_fails else 'rebuild_rebooting')
++  if request_fails:
++    assert 'read-only file system' in update.state[1]
+ 
+ 
+ def test_rebuild_and_git_exclude_each_other(tmp_path, monkeypatch):
+@@ -262,21 +273,21 @@ def test_rebuild_and_git_exclude_each_other(tmp_path, monkeypatch):
+   assert done.wait(2)
+ 
+ 
+-@pytest.mark.parametrize('failure', ['busy', 'timeout', 'reboot'])
++@pytest.mark.parametrize('failure', ['busy', 'write', 'reboot'])
+ def test_rebuild_failure_is_retryable(tmp_path, monkeypatch, failure):
+   monkeypatch.setattr(repo_update, 'LOCK_PATH', str(tmp_path / 'update.lock'))
+   calls = []
+ 
+-  def clean(repo):
+-    calls.append('clean')
+-    if failure == 'timeout':
+-      raise subprocess.TimeoutExpired('scons', 180)
++  def write_request():
++    calls.append('request')
++    if failure == 'write':
++      raise OSError('disk full')
+ 
+   def reboot():
+     calls.append('reboot')
+     raise OSError('reboot failed')
+ 
+-  monkeypatch.setattr(startup_recovery, 'clean_startup_build', clean)
++  monkeypatch.setattr(startup_recovery, 'request_full_rebuild', write_request)
+   update = startup_recovery.RecoveryUpdate(tmp_path, reboot=reboot)
+   if failure == 'busy':
+     with repo_update.repo_lock():
+@@ -284,7 +295,7 @@ def test_rebuild_failure_is_retryable(tmp_path, monkeypatch, failure):
+   else:
+     update._rebuild()
+   assert update.state[0] == 'failed' and update.state[1]
+-  assert calls == {'busy': [], 'timeout': ['clean'], 'reboot': ['clean', 'reboot']}[failure]
++  assert calls == {'busy': [], 'write': ['request'], 'reboot': ['request', 'reboot']}[failure]
+ 
+ 
+ def test_error_pages_wrap_without_losing_long_paths(monkeypatch):
