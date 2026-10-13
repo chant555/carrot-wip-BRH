@@ -1,0 +1,16 @@
+[
+  {
+    "path": "openpilot/common/startup_touch_log.py",
+    "bytes": 1165,
+    "sha256": "b95f3f82bbdc12cde07edcbbe490b405f5a0c0c96a5c6e3dbd966bef853be2af",
+    "sensitive_pattern_matches": [],
+    "base_source_exists": false
+  },
+  {
+    "path": "openpilot/system/ui/startup_recovery.py",
+    "bytes": 10363,
+    "sha256": "359b0ca27411f317aaa126af1b32d5004bb76000eaa3f81ffa06e8042958127e",
+    "sensitive_pattern_matches": [],
+    "base_source_exists": true
+  }
+]

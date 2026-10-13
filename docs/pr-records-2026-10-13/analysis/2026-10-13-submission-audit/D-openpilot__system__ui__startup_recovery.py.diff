@@ -1,0 +1,19 @@
+--- tested-original/openpilot/system/ui/startup_recovery.py
++++ published/openpilot/system/ui/startup_recovery.py
+@@ -225,14 +225,14 @@
+       rl.begin_drawing()
+       rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page)
+       rl.end_drawing()
+-      # COMMA leaves polling to the caller; desktop EndDrawing already polls.
++      # Poll the loaded COMMA backend even if evdev is unavailable; desktop already polls.
+       if RAYLIB_BACKEND == "comma":
+         rl.poll_input_events()
+       if touch.pressed():
+         position = rl.get_touch_position(0) if touch.fd is not None else rl.get_mouse_position()
+         hit = next((name for name, area in (('rebuild', rebuild_button), ('update', update_button), ('error', error_area))
+                     if rl.check_collision_point_rec(position, area)), 'outside')
+-        # Persist the coordinates before an action can start its reboot thread.
++        # Save the hit and coordinates before starting an action that may reboot.
+         touch_log.record('press', sync=True, x=position.x, y=position.y, hit=hit, state=update.state[0])
+         if hit in ('rebuild', 'update'):
+           accepted = update.start_rebuild() if hit == 'rebuild' else update.start()

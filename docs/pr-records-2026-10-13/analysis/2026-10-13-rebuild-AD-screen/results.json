@@ -1,0 +1,172 @@
+{
+  "status": "physical_button_recovery_confirmed_on_second_attempt_with_observation_prints_restored_backups_deleted",
+  "base_commit": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "patches": {
+    "rebuild_all-A-626b887d.patch": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+    "startup-touch-D-626b887d.patch": "0dcf8d093bc9d9d2d22bb64641c40f466581fae26c2161151ba5b57c8200da71"
+  },
+  "first_touch": {
+    "operator": "user",
+    "source_variant": "A+D",
+    "response": "no visible response",
+    "request_observed": false,
+    "cause": "undetermined; no press coordinates retained"
+  },
+  "second_touch": {
+    "operator": "user",
+    "source_variant": "A+D plus two observation-only print statements",
+    "requested_hold_seconds": 1,
+    "response": "reboot started",
+    "request_observed_at": "2026-10-13T07:01:38.417705+00:00",
+    "ready_observed_at": "2026-10-13T16:08:44.327905+09:00",
+    "elapsed_seconds_with_observation_delay": 425.9102,
+    "touch_coordinates_retained": false
+  },
+  "cleanup": {
+    "removed_cache_files": 2522,
+    "removed_file_lines": 2864,
+    "removed_directories": 265,
+    "reset_completed": true
+  },
+  "solvers": {
+    "phase": "rebuilt",
+    "observed_at": "2026-10-13T16:10:25+0900",
+    "boot_id": "4f59739f-80f6-4da1-915a-c49b0a1c491b",
+    "solvers": [
+      {
+        "kind": "longitudinal",
+        "c_bytes": 1788014,
+        "c_sha256": "7e344d2914a67d04b004b9b8df6ca18bec1d6c4f85665013a4f9902c90e222c4",
+        "so_bytes": 1138728,
+        "has_init_symbol": true,
+        "compile_marker_absent": true
+      },
+      {
+        "kind": "lateral",
+        "c_bytes": 1787995,
+        "c_sha256": "fcbfbd7e6880dd08dce73be37c22118dec3d7c106b474ece4a7b685a7ae22b83",
+        "so_bytes": 1138616,
+        "has_init_symbol": true,
+        "compile_marker_absent": true
+      }
+    ],
+    "imports": [
+      {
+        "module": "openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+        "returncode": 0,
+        "output": "import OK\n"
+      },
+      {
+        "module": "openpilot.selfdrive.controls.lib.lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+        "returncode": 0,
+        "output": "import OK\n"
+      },
+      {
+        "module": "openpilot.selfdrive.controls.plannerd",
+        "returncode": 0,
+        "output": "import OK\n"
+      }
+    ],
+    "request_exists": false
+  },
+  "healthchecks": {
+    "rebuilt": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": []
+      }
+    },
+    "restored": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": []
+      }
+    }
+  },
+  "source_matches_before_after_trace_removal": true,
+  "restoration_checks": {
+    "original_head_restored": true,
+    "original_dirty_patch_identical": true,
+    "original_status_identical": true,
+    "original_git_config_identical": true,
+    "original_web_settings_identical": true,
+    "control_params_restored": true,
+    "user_settings_match": true
+  },
+  "final_runtime": {
+    "observed_at": "2026-10-13T16:15:05+0900",
+    "branch": "carrot-wip-brh",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "test_branch_exists": false,
+    "backup_absent": true,
+    "upload_absent": true,
+    "request_exists": false,
+    "is_onroad": "0",
+    "services": {
+      "ui": true,
+      "updated": true,
+      "manager": true
+    },
+    "staging_exists": true,
+    "staging_consistent": false,
+    "staging_head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "git_newer_than_overlay_init": false
+  },
+  "backup_deletion": {
+    "deleted_at": "2026-10-13T16:14:12+0900",
+    "targets": [
+      {
+        "path": "/data/maintenance-backups/rebuild-AD-20261013-626b887d",
+        "logical_bytes_before": 4915043042,
+        "absent_after": true
+      },
+      {
+        "path": "/data/rebuild-AD-upload",
+        "logical_bytes_before": 47428,
+        "absent_after": true
+      }
+    ],
+    "guard_inode_before": 20,
+    "guard_inode_after": 20,
+    "guard_preserved": true,
+    "filesystem": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda12       89G   19G   65G  23% /data\n"
+  },
+  "limitations": [
+    "First touch failed and its cause is not determined.",
+    "Successful attempt included observation-only print statements and a requested one-second hold.",
+    "No proof that every brief tap succeeds; center area and same-frame press/release remain outside this test.",
+    "No issues or pull requests published."
+  ]
+}

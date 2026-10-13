@@ -1,0 +1,26 @@
+--- tested-original/launch_chffrplus.sh
++++ published/launch_chffrplus.sh
+@@ -393,9 +393,9 @@
+   fi
+ }
+ 
+-# Full reset of the incremental build. Outputs can be corrupted in place and
+-# /data/scons_cache can hand the corrupted result back, so clear build state and
+-# cache together; every target is then rebuilt from source.
++# Clear incremental state and cache together to avoid reusing corrupt outputs.
++# Cleanup success only permits the next build; it does not prove build success.
++# Concurrency protection is provided separately by the common cache guard.
+ BUILD_STATE_RESET=0
+ 
+ function reset_build_state {
+@@ -415,8 +415,8 @@
+   FORCE_REBUILD=1
+ }
+ 
+-# Written by the web UI / recovery "Rebuild All". Lives outside the repo so git
+-# reset/clean cannot drop it, and needs nothing but a file write to request.
++# Persist rebuild requests outside the repository so repository cleanup cannot
++# remove them. Request creation must not require a working build environment.
+ REBUILD_REQUEST="/data/rebuild_all.request"
+ REBUILD_LOG="/data/rebuild_all.last.log"
+ 

@@ -1,0 +1,13 @@
+diff --git a/openpilot/system/manager/build.py b/openpilot/system/manager/build.py
+index d3f29c5..c8cf308 100755
+--- a/openpilot/system/manager/build.py
++++ b/openpilot/system/manager/build.py
+@@ -17,7 +17,7 @@ from openpilot.system.hardware import HARDWARE, AGNOS
+ from openpilot.system.version import get_build_metadata
+ 
+ MAX_CACHE_SIZE = 4e9 if "CI" in os.environ else 2e9
+-CACHE_DIR = Path("/data/scons_cache" if AGNOS else "/tmp/scons_cache")
++CACHE_DIR = Path(os.environ.get("SCONS_CACHE_DIR") or ("/data/scons_cache" if AGNOS else "/tmp/scons_cache"))
+ 
+ TOTAL_SCONS_NODES = 2705
+ MAX_BUILD_PROGRESS = 100

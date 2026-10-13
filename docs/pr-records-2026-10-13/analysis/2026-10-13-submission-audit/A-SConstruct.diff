@@ -1,0 +1,12 @@
+--- tested-original/SConstruct
++++ published/SConstruct
+@@ -306,7 +306,7 @@
+   ])
+ 
+ 
+-# The compilation database entries fail during `scons -c`, which silently aborts
+-# the whole top-level clean (rc=0, nothing removed, cache kept). Skip it there.
++# Compilation database generation can end a clean without removing outputs.
++# Skip this build-only step when cleaning.
+ if not GetOption('clean'):
+   env.CompilationDatabase('compile_commands.json')

@@ -1,0 +1,14 @@
+{
+  "A": {
+    "sha": "c691f1097119f492c22d8af285b9f8810108f5a2",
+    "branch": "fix/rebuild-all-request-261013"
+  },
+  "B": {
+    "sha": "e5e96114167324da8a595fb50f39cb39201ec67b",
+    "branch": "fix/scons-cache-guard-261013"
+  },
+  "D": {
+    "sha": "f7f36343fc53d816f1b6442f90e2d65c7fc0021c",
+    "branch": "fix/startup-recovery-touch-261013"
+  }
+}

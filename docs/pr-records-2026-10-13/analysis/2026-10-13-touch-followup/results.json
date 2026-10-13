@@ -1,0 +1,56 @@
+{
+  "status": "completed_restored_backups_deleted",
+  "phases": {
+    "normal": {
+      "press_count": 14,
+      "hits": {
+        "left": 5,
+        "right": 4,
+        "outside": 1,
+        "center": 4
+      },
+      "original_outside_now_button": 0,
+      "same_batch_release": 1
+    },
+    "slow": {
+      "press_count": 5,
+      "hits": {
+        "left": 4,
+        "outside": 1
+      },
+      "original_outside_now_button": 0,
+      "same_batch_release": 0
+    },
+    "expanded": {
+      "press_count": 7,
+      "hits": {
+        "left": 4,
+        "right": 3
+      },
+      "original_outside_now_button": 6,
+      "same_batch_release": 0
+    },
+    "busy": {
+      "press_count": 1,
+      "hits": {
+        "left": 1
+      },
+      "original_outside_now_button": 0,
+      "same_batch_release": 0
+    }
+  },
+  "practice_excluded_before_row": 34,
+  "busy_notice_seen_by_user": true,
+  "restoration_matched": true,
+  "backup_deletion": {
+    "deleted_at": "2026-10-13T16:50:04+0900",
+    "path": "/data/maintenance-backups/touch-followup-20261013",
+    "bytes": 83666,
+    "branch": "carrot-wip-brh",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "original_state_matched": true,
+    "backup_absent": true,
+    "snapshot_tool_absent": true
+  },
+  "limitation": "Raw recontacts exceed reported intentional taps in center and left boundary tests; cause undetermined."
+}
