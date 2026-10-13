@@ -1,0 +1,192 @@
+{
+  "status": "physical_short_press_recovery_verified_restored_backups_deleted",
+  "base_commit": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "patches": {
+    "rebuild_all-A-626b887d.patch": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+    "startup-touch-D-626b887d-v2.patch": "e432449c40b347dc7a20ac3f45e965ac8db08c850c144fcdf1f26dc26c076c55",
+    "startup-touch-usability-E-626b887d.patch": "0b56495bd0b70d33c73bcd05009414945e1af82f03c330d452a3df7f0d29e4e0"
+  },
+  "source_before_after_identical": true,
+  "user_action": {
+    "response_recorded_at": "2026-10-13T16:58:05.443275+09:00",
+    "instruction": "본체 왼쪽 버튼의 글자 중앙을 평소처럼 짧게 한 번 누름",
+    "response": "재부팅 됐다",
+    "web_or_terminal_action": false
+  },
+  "touch": {
+    "press": {
+      "event": "press",
+      "time": 1791878246.134462,
+      "monotonic": 129.381734593,
+      "boot_id": "5ad13613-71e9-495b-a311-49517f3093e3",
+      "x": 143.0,
+      "y": 207.0,
+      "hit": "rebuild",
+      "state": "failed"
+    },
+    "action": {
+      "event": "action",
+      "time": 1791878246.1530857,
+      "monotonic": 129.400357077,
+      "boot_id": "5ad13613-71e9-495b-a311-49517f3093e3",
+      "hit": "rebuild",
+      "accepted": true,
+      "state": "cleaning"
+    },
+    "reboot": {
+      "event": "reboot",
+      "time": 1791878246.1572545,
+      "monotonic": 129.404525803,
+      "boot_id": "5ad13613-71e9-495b-a311-49517f3093e3",
+      "request_exists": true
+    }
+  },
+  "request_at": "2026-10-13T07:57:26.165024+00:00",
+  "ready_at": "2026-10-13T17:04:23.025487+09:00",
+  "elapsed_seconds_including_observation_delay": 416.860463,
+  "cache_files_removed": 2521,
+  "solvers": {
+    "phase": "rebuilt",
+    "observed_at": "2026-10-13T17:04:48+0900",
+    "boot_id": "5be2ba77-8fce-4b06-be1e-def7a71dcab1",
+    "solvers": [
+      {
+        "kind": "longitudinal",
+        "c_bytes": 1788014,
+        "c_sha256": "7e344d2914a67d04b004b9b8df6ca18bec1d6c4f85665013a4f9902c90e222c4",
+        "so_bytes": 1138728,
+        "has_init_symbol": true,
+        "compile_marker_absent": true
+      },
+      {
+        "kind": "lateral",
+        "c_bytes": 1787995,
+        "c_sha256": "fcbfbd7e6880dd08dce73be37c22118dec3d7c106b474ece4a7b685a7ae22b83",
+        "so_bytes": 1138616,
+        "has_init_symbol": true,
+        "compile_marker_absent": true
+      }
+    ],
+    "imports": [
+      {
+        "module": "openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+        "returncode": 0,
+        "output": "import OK\n"
+      },
+      {
+        "module": "openpilot.selfdrive.controls.lib.lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+        "returncode": 0,
+        "output": "import OK\n"
+      },
+      {
+        "module": "openpilot.selfdrive.controls.plannerd",
+        "returncode": 0,
+        "output": "import OK\n"
+      }
+    ],
+    "request_exists": false
+  },
+  "healthchecks": {
+    "rebuilt": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": []
+      }
+    },
+    "restored": {
+      "buildcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "bootcheck.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "mstate.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "pandafaults.py": {
+        "exit_code": 0,
+        "findings": []
+      },
+      "jetlink.py": {
+        "exit_code": 0,
+        "findings": []
+      }
+    }
+  },
+  "restoration": {
+    "original_head_restored": true,
+    "original_dirty_patch_identical": true,
+    "original_status_identical": true,
+    "original_git_config_identical": true,
+    "original_web_settings_identical": true,
+    "control_params_restored": true,
+    "user_settings_match": true
+  },
+  "final_runtime": {
+    "observed_at": "2026-10-13T17:10:22+0900",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "branch": "carrot-wip-brh",
+    "boot_id": "ec90dde3-53cf-41e6-8d47-4130a6312888",
+    "manager_running": true,
+    "ui_running": true,
+    "updater_running": true,
+    "request_exists": false,
+    "stamp_exists": false,
+    "touch_log_exists": false,
+    "test_branches": "",
+    "staging_exists": true,
+    "staging_head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "staging_consistent": true,
+    "backup_exists": false,
+    "upload_exists": false,
+    "git_mtime": 1791878904.5346177,
+    "overlay_init_mtime": 1791878934.7941523,
+    "git_newer_than_overlay_init": false
+  },
+  "backup_deletion": {
+    "deleted_at": "2026-10-13T17:09:19+0900",
+    "targets": [
+      {
+        "path": "/data/maintenance-backups/rebuild-ADE-20261013-626b887d",
+        "logical_bytes_before": 4915387856,
+        "absent_after": true
+      },
+      {
+        "path": "/data/rebuild-ADE-upload",
+        "logical_bytes_before": 53054,
+        "absent_after": true
+      }
+    ],
+    "guard_inode_before": 20,
+    "guard_inode_after": 20,
+    "guard_preserved": true,
+    "filesystem": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda12       89G   20G   65G  23% /data\n"
+  },
+  "limitations": [
+    "One short physical press with A+D(v2)+E; not a reliability percentage.",
+    "Earlier A+D first missed touch remains unexplained because no coordinates were retained.",
+    "Boundary and busy-message diagnosis used a no-action diagnostic screen; busy refusal was also locally tested.",
+    "Recontact origin remains undetermined; no debounce introduced.",
+    "A lacks B concurrency protection; B and C were not applied.",
+    "No issue or pull request published."
+  ]
+}

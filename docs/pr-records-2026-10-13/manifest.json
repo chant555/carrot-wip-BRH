@@ -1,0 +1,762 @@
+[
+  {
+    "path": "analysis/2026-10-11-rebuild-concurrency/validation.txt",
+    "sha256": "f2e804bb0abd16e55698f3431d95a38879eb6783633b37c1d314c1cc13ed0f2a",
+    "bytes": 4194
+  },
+  {
+    "path": "analysis/2026-10-11-rebuild-review/validation.txt",
+    "sha256": "5c372c6d7b0661b931d3f7604d3f1949ab900744f5509e826a0fdf08c0823104",
+    "bytes": 2938
+  },
+  {
+    "path": "analysis/2026-10-11-rebuild-split/previous-device-results.txt",
+    "sha256": "f04360a82811d634a40ed5ffe2883542ef41e93bcaae543b76532e3d6eaaf4c6",
+    "bytes": 1211
+  },
+  {
+    "path": "analysis/2026-10-11-rebuild-split/results.json",
+    "sha256": "8fec7743d4f1ab0f39113a3d91aef860d980770c3f1cd005e26b99a79205e202",
+    "bytes": 35821
+  },
+  {
+    "path": "analysis/2026-10-11-rebuild-split/validation.txt",
+    "sha256": "6ed38bef6a0c6aacc075ae4edee1cf707332787cd948482f549f9d94a91f4294",
+    "bytes": 1125
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/A-SConstruct.diff",
+    "sha256": "23861e4acc8eabd364692e6751a86af197baaf83fb5631309692959a5ba6c653",
+    "bytes": 1064
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/A-launch_chffrplus.sh.diff",
+    "sha256": "c2b2f5184d295533a58f2908936b7e049a25589153b6c947cc2eb5571a85c686",
+    "bytes": 5362
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/A-merge-tree.txt",
+    "sha256": "c1ea59f13d5b7a2d1889a1556156bc5dd7df109d10a4dcee572cfb090cdc3fd0",
+    "bytes": 6252
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/A-openpilot__common__rebuild_request.py.diff",
+    "sha256": "df3fa9d46bb931d344ef36ec93da54e9a4cee97dc1fe60f3bca1c780e5f602bb",
+    "bytes": 542
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/A-openpilot__system__tests__test_rebuild_cleanup.py.diff",
+    "sha256": "f4577d312cc578d475bb83f9333011270def6817374f71d27c145b201a203de4",
+    "bytes": 2637
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-SConstruct.diff",
+    "sha256": "e6e22dc2f322030b0ba242139b83c80856dbb74a8cb68448e6c699cef5aa0f62",
+    "bytes": 656
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-launch_chffrplus.sh.diff",
+    "sha256": "8e28d6878f4badc104a04e533b924e4b493f094db57b5992eec55c59186ba609",
+    "bytes": 1196
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-merge-tree.txt",
+    "sha256": "339c436166be08db978256d9abfa68f2bfdfcaf24ab6629bf7ae806e8ef7c7bc",
+    "bytes": 13331
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-openpilot__common__rebuild_request.py.diff",
+    "sha256": "df3fa9d46bb931d344ef36ec93da54e9a4cee97dc1fe60f3bca1c780e5f602bb",
+    "bytes": 542
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-openpilot__system__manager__build.py.diff",
+    "sha256": "154a5460d45b3ca6d67d8db291b06b0cbd274f7878db3d1effcb604a01d3fe79",
+    "bytes": 614
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-openpilot__system__tests__test_build_cache.py.diff",
+    "sha256": "1379d0b9485542468dcfcb2e218972351fc4e49ba64326512360129ca5ef9db7",
+    "bytes": 7827
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-openpilot__system__tests__test_rebuild_cleanup.py.diff",
+    "sha256": "f4577d312cc578d475bb83f9333011270def6817374f71d27c145b201a203de4",
+    "bytes": 2637
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/AB-scripts__ensure_params_build.sh.diff",
+    "sha256": "ea9de764ecd4297e5c4b03623579b3ff13c2200f5a94fb85316db96aa62c4f27",
+    "bytes": 1161
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/D-merge-tree.txt",
+    "sha256": "b3276053ecca9e6019bde6357277041a01f5a5654e4b0b634d653daa7487d60c",
+    "bytes": 2118
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/D-openpilot__common__startup_touch_log.py.diff",
+    "sha256": "55fdb5f5e8191657a1a2422be41098c269d25fc9399f10dd5a582f4468c6c01f",
+    "bytes": 864
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/D-openpilot__system__ui__startup_recovery.py.diff",
+    "sha256": "08c6c0898f0979166d8ae8a6c20adb33f273351995ec77f679393fb350684ac7",
+    "bytes": 1955
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/comparison.json",
+    "sha256": "f53387d8b59dd67719462976ca43c01292c4f42a17ec3a74213b349e25c98669",
+    "bytes": 3711
+  },
+  {
+    "path": "analysis/2026-10-13-conflict-resolution/upstream-review.md",
+    "sha256": "fc1ecdabd99b9fcf3d9b05be24af867bb0eaa281c74644584874a8d55507b54f",
+    "bytes": 6444
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/A-stats.json",
+    "sha256": "6c902260c7dde0907bc2997458e42d0a9cb4581bb5e6e7b6f51295703d2fa1cb",
+    "bytes": 892
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/A-tree.json",
+    "sha256": "e15c970d0df3e0170cfdd183c7ca576c3d7edfe7b747b6632138a5ef14e96374",
+    "bytes": 252375
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/AB-stats.json",
+    "sha256": "3c3d2500c093d182a5185645c01d632ab99321f8d73b0d43c51d27b1a7c4f92e",
+    "bytes": 1272
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/AB-tree.json",
+    "sha256": "78e9e5e063e015d2fa12a5711fbd0460454d451fe85f4ca490d176296d73dc7b",
+    "bytes": 292736
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/D-publication-audit.json",
+    "sha256": "e1f72c5a306e91dcbc398c3a9d06bc27d2e21e328dbc626d056562957ee279a4",
+    "bytes": 469
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/D-stats.json",
+    "sha256": "f63454decfe9a25ed4241ca518aa308e85298fb92ca18dbf6548dfe2a4d9b830",
+    "bytes": 196
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/D-tree.json",
+    "sha256": "fdb226fb43ce360ffde97880db53b5f78adc358e274054c36f7a84eb800247b1",
+    "bytes": 12475
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/base.json",
+    "sha256": "1b75ea35d5a4e8e7f4ce1a164e94579a46897095f380deccd9ad04d285b6ffe6",
+    "bytes": 305
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/closed-verified-gh.json",
+    "sha256": "000a4e5d90e25276a9c95a7f52cd1327964432a7517f3ed41885413b4842a7ac",
+    "bytes": 47147
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-A.json",
+    "sha256": "a991e7dcdaac49cec6511f5188527cc941b506786a5181e597f02ff0cb847e55",
+    "bytes": 2850
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-A.md",
+    "sha256": "787d9fc42e4d3cdf7d5be191b22c0c4a85ffe783123da33d07dfbf3f71194c4a",
+    "bytes": 2788
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-B.json",
+    "sha256": "d19dff673861027b1437bdd4c58f082267c3a8c6c4e7615ec1c283916987026b",
+    "bytes": 2799
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-B.md",
+    "sha256": "de1d9318cc59252fcbf7abf80645c1d22c781a11c56ed222b3702ca723eba4bb",
+    "bytes": 2736
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-D.json",
+    "sha256": "a78a6b8dedbe24813d2723c1e15ce71f6039a03cab6fe51478d74475f0666c55",
+    "bytes": 3165
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/issue-D.md",
+    "sha256": "b69ac5442224b4c17903f26441a5dd7046628240718e4196e529a1490b75ca9b",
+    "bytes": 3092
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-A.json",
+    "sha256": "4bd288222d8cb8d151d27e7d1c9e5766d97ab837109a40ed6c80a96429cfa7eb",
+    "bytes": 2539
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-A.md",
+    "sha256": "7b6aeeb9f4e8543cfb336679c50ae5debd273bd5131d2cce424be32edfad5475",
+    "bytes": 2484
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-B.json",
+    "sha256": "c8a95d9655dad51a469af837005858aff8f58aabe8960a42f0e75334e033a112",
+    "bytes": 2774
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-B.md",
+    "sha256": "faed9b042dc7877cabcd7c813aa411fa00ba60687fe831151c6072142b25cd71",
+    "bytes": 2720
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-D.json",
+    "sha256": "420946c656f4b5b37cc5c8618ff0455a0537361d1af6ab23c5ede1c8977301ed",
+    "bytes": 3433
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/pr-D.md",
+    "sha256": "3f272765691990d0acf004bf073e6424e4aa062c4008f5af0863872a331ec733",
+    "bytes": 3370
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/prepare.py",
+    "sha256": "0d360407ad5181a821ebdbe2b597d9e233f5b77e1d47c4b6ae6a87fd26df133e",
+    "bytes": 2016
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/publication-status.json",
+    "sha256": "4fb8c5ef5da2f0cd94919f7ab99002e7cd40c11b7cd5f4042106e12cbbd30a6a",
+    "bytes": 51585
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/published-branches.json",
+    "sha256": "62b6af6aa5e1b4f88c38ff138cd1e2ff53bab2e38bcf062d07ba0edd11c6c93d",
+    "bytes": 352
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/SConstruct",
+    "sha256": "24f9131b4010d2bce1c18123d1ec8543b55f6a76d493b5c34910e103da4b1b9a",
+    "bytes": 10114
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/launch_chffrplus.sh",
+    "sha256": "3377610f446310a896499f8e3cd35018d95090ced7afe29e596a53bb7a79a116",
+    "bytes": 25142
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/common/rebuild_request.py",
+    "sha256": "806f3b5f34a642b7fc4946b898e60026c0ff7ec9f9f3a79d6470752c0bad2f62",
+    "bytes": 602
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/common/startup_recovery.py",
+    "sha256": "440f4f26dcaafbb199da9dd859658addeb89195ab2fd6f8819f08084b66e7d4f",
+    "bytes": 6178
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/selfdrive/carrot/recovery/server.py",
+    "sha256": "4d89cb498932104c28c5a2b5489ad2263febb0670b5f2d00d607450e02074370",
+    "bytes": 98685
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+    "sha256": "178eab221574fb917b583c095834205cfe125bc6b27625d924306e7476d23678",
+    "bytes": 55155
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+    "sha256": "3fbc46dc75ca1b820be5c111c99707c98dc2551c271b09b54a03391085113b9d",
+    "bytes": 22194
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/system/manager/build.py",
+    "sha256": "166e8d1910d8b508cc8396c3e9b41ec3534ab9bebb5ade8f3e6538d627cb07f3",
+    "bytes": 14246
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/system/tests/test_rebuild_cleanup.py",
+    "sha256": "762fc3fd56dc33d6a1a82fffb335ca09c739a797cd2cd2c9edd5706cac67cba4",
+    "bytes": 5584
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/system/tests/test_startup_recovery.py",
+    "sha256": "a9126ce99f07adbebb3886d6e04fd0b1d3ab0f8fa74068f289f7213a1bf2605a",
+    "bytes": 13989
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/openpilot/system/ui/startup_recovery.py",
+    "sha256": "f80fe2d92a735fdca90c0bf4e3ead4ce3c77869f07fe4772626eb542ad48f15f",
+    "bytes": 9309
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-A/scripts/ensure_params_build.sh",
+    "sha256": "3e44ce02f28e0b1c5ebe8b366bf75c93ae97380601b2b4749d8d72b5af713ba6",
+    "bytes": 1281
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/SConstruct",
+    "sha256": "65e3922945ceed56dc7bf580381f44737d3908333825ff96b7d633c6abcde864",
+    "bytes": 10699
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/launch_chffrplus.sh",
+    "sha256": "03e7695b7c76867553b18a48b65ebb634c890141bddfcd30e73d3a993a0ace02",
+    "bytes": 27738
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/common/rebuild_request.py",
+    "sha256": "806f3b5f34a642b7fc4946b898e60026c0ff7ec9f9f3a79d6470752c0bad2f62",
+    "bytes": 602
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/common/scons_cache_lock.py",
+    "sha256": "c5b4acd9bf7baf034c0953747c278102108271b9640f4d22851593f418cd33f8",
+    "bytes": 2265
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/common/startup_recovery.py",
+    "sha256": "440f4f26dcaafbb199da9dd859658addeb89195ab2fd6f8819f08084b66e7d4f",
+    "bytes": 6178
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/selfdrive/carrot/recovery/server.py",
+    "sha256": "4d89cb498932104c28c5a2b5489ad2263febb0670b5f2d00d607450e02074370",
+    "bytes": 98685
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+    "sha256": "178eab221574fb917b583c095834205cfe125bc6b27625d924306e7476d23678",
+    "bytes": 55155
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+    "sha256": "3fbc46dc75ca1b820be5c111c99707c98dc2551c271b09b54a03391085113b9d",
+    "bytes": 22194
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/system/manager/build.py",
+    "sha256": "7b97eb72d15bb778670a262221e58713360fe4734f0e99910aca3d935f8888e4",
+    "bytes": 15678
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/system/tests/test_build_cache.py",
+    "sha256": "238e1b8b28086537963b8070f9a808a4982228c57e4be429699ea160464fbdae",
+    "bytes": 15304
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/system/tests/test_rebuild_cleanup.py",
+    "sha256": "762fc3fd56dc33d6a1a82fffb335ca09c739a797cd2cd2c9edd5706cac67cba4",
+    "bytes": 5584
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/system/tests/test_startup_recovery.py",
+    "sha256": "a9126ce99f07adbebb3886d6e04fd0b1d3ab0f8fa74068f289f7213a1bf2605a",
+    "bytes": 13989
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/openpilot/system/ui/startup_recovery.py",
+    "sha256": "f80fe2d92a735fdca90c0bf4e3ead4ce3c77869f07fe4772626eb542ad48f15f",
+    "bytes": 9309
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-AB/scripts/ensure_params_build.sh",
+    "sha256": "b9126df2e4ffa54084cd252708bfd41a354f707a17a2590617e2e86cd3be2561",
+    "bytes": 2211
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/SConstruct",
+    "sha256": "f6b22a3ad9221a1c5fda96b86a26608de2a60b8c0f5be770d6fb55451da33b34",
+    "bytes": 9966
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/launch_chffrplus.sh",
+    "sha256": "8d73c4abff40192cf5cf831c8efcd788f14162d1f9ad0e577a22b06aa8e559c6",
+    "bytes": 22611
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/common/startup_recovery.py",
+    "sha256": "ad5c91cfdaa11c059bbb5013fecbe32dc6c60a8932cb72d3cf159705b2a52da8",
+    "bytes": 6501
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/common/startup_touch_log.py",
+    "sha256": "b95f3f82bbdc12cde07edcbbe490b405f5a0c0c96a5c6e3dbd966bef853be2af",
+    "bytes": 1165
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/selfdrive/carrot/recovery/server.py",
+    "sha256": "196480685f81a6a2a40580b8943174d783c82f095ad93dc4ffff4097b7d98069",
+    "bytes": 98591
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+    "sha256": "3b11239bc9b80f1c8c4f7b8c57d8e92b39e6701f77f53db3b3b3500b72afb2ce",
+    "bytes": 54775
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+    "sha256": "b0ed9e7ab5ad206336d2cfeda1faa55f1cd90a0f32d7dd5bb60bb7ff3123f870",
+    "bytes": 21578
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/system/manager/build.py",
+    "sha256": "166e8d1910d8b508cc8396c3e9b41ec3534ab9bebb5ade8f3e6538d627cb07f3",
+    "bytes": 14246
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/system/tests/test_startup_recovery.py",
+    "sha256": "226ae8a56896254e38e0802861a740f615c24d27ce8fc3c60d37c5e682582a71",
+    "bytes": 13574
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/openpilot/system/ui/startup_recovery.py",
+    "sha256": "359b0ca27411f317aaa126af1b32d5004bb76000eaa3f81ffa06e8042958127e",
+    "bytes": 10363
+  },
+  {
+    "path": "analysis/2026-10-13-github-submission/source-D/scripts/ensure_params_build.sh",
+    "sha256": "3e44ce02f28e0b1c5ebe8b366bf75c93ae97380601b2b4749d8d72b5af713ba6",
+    "bytes": 1281
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-A-recovery/health-results.json",
+    "sha256": "def6552500969285d4c77b4406b8bc153f126b07a5b4ac66124027faf0cde74e",
+    "bytes": 536
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-A-recovery/results.json",
+    "sha256": "8c465998d458eb182684c1694aff3321f2b1c8929d2e691e2cc33d93d282110b",
+    "bytes": 16717
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-A-recovery/validation.txt",
+    "sha256": "6e28e8750d6341cbd86be6daeb4476063dbccefa8ba58dc1b321c9dbfc930201",
+    "bytes": 8560
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-AD-screen/document-results.py",
+    "sha256": "90eab3c6a92a835d7811b20ecb80e68ca5b3f323134baf100a18b616e90262d0",
+    "bytes": 15788
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-AD-screen/results.json",
+    "sha256": "ed6d16044bcb476e2035f5c788854243074c3c096570e17e6c81a660d0a64df1",
+    "bytes": 5134
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-AD-screen/validation.txt",
+    "sha256": "8803c7882ba47a6ba5097bc8d54b39bd1ec199cb979b693610093c47a77a88d4",
+    "bytes": 5900
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-ADE-screen/document-results.py",
+    "sha256": "d383295c2a82f2ceef706b76ad7d61c3852e1e40c831c2166f9d27e49b819c28",
+    "bytes": 13718
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-ADE-screen/results.json",
+    "sha256": "baec84ed959f66a403fd725f2ea4b1c3342307231a2ccc8f101712ad55c84e76",
+    "bytes": 5923
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-ADE-screen/validation.md",
+    "sha256": "34ace229902f8f8016e9641ae5ae2bea611fc25753804d5e112c8acb76c91b3e",
+    "bytes": 3777
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-device/device-source-hashes.json",
+    "sha256": "a23f93b74189aa7a726f45d4e19b3e83d49152184f566515fa27bc5501916497",
+    "bytes": 1671
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-device/patch-hashes.txt",
+    "sha256": "03ceca20ca7ef97f81aa4a72ea1d89dbb262f4358aff9687fff69ffd706839a6",
+    "bytes": 497
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-device/results.json",
+    "sha256": "6564e0ea1bfb69958b29374ba9991ad867d7d327dc8e09c04e06f77d86df6ab3",
+    "bytes": 15374
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-device/validation.txt",
+    "sha256": "3270488157665174767aa8810982c6d2aaaf4019a41f6198d062e9eb0972d7d4",
+    "bytes": 7621
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-heal-boot/results.json",
+    "sha256": "89e4114655d758f5e624728852a09c8cf26418ebb7079e3b90fd787fca9b8753",
+    "bytes": 10411
+  },
+  {
+    "path": "analysis/2026-10-13-rebuild-heal-boot/validation.txt",
+    "sha256": "e0145f63493a5acc6b6f037e1ebbe43de71e05aa64dcad62afe64a42fb014564",
+    "bytes": 7348
+  },
+  {
+    "path": "analysis/2026-10-13-startup-touch/document-results.py",
+    "sha256": "9fec00e45b4d4a09fbb3bf6290516c832cc52fc66bb513b8ba4d2956e2825e9f",
+    "bytes": 16571
+  },
+  {
+    "path": "analysis/2026-10-13-startup-touch/results.json",
+    "sha256": "30a69656849405fef33148b15ab4892b3c07907f49f815bc14904b5b75026bdf",
+    "bytes": 2917
+  },
+  {
+    "path": "analysis/2026-10-13-startup-touch/unit-results.txt",
+    "sha256": "9f8e76c94541b384fdf3cefcc855cd999a19dba219faa5fb4bd0190c032299d7",
+    "bytes": 491
+  },
+  {
+    "path": "analysis/2026-10-13-startup-touch/validation.txt",
+    "sha256": "58d726a72520b0e8e7873c385df7fa0b0fa989f3defe5531ee809685d27bf9bb",
+    "bytes": 6023
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/A-SConstruct.diff",
+    "sha256": "6f4151f64970643067ae1237dbb8a873ecab5e3615f0e912248ada8bccdc6799",
+    "bytes": 450
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/A-launch_chffrplus.sh.diff",
+    "sha256": "47f0082af60208ca0e2146cd6909905184fd7d41c85f249ddceb00bc9d57c376",
+    "bytes": 1067
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/A-openpilot__common__startup_recovery.py.diff",
+    "sha256": "230da3f8ab266dddc33f61ac58c10f3e46f305a01cbbb97ad99c85ccf80774e6",
+    "bytes": 605
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/A-original-at-submission-base.json",
+    "sha256": "e342e14a9599f1ed26349bbbc030fa696b647d2e28f98d0ab0f24003d2cfd702",
+    "bytes": 251882
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/AB-SConstruct.diff",
+    "sha256": "a713a258d62ef35403a501c70f1f7e80a89dd569784cb5c5afbfe4ac161fd428",
+    "bytes": 919
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/AB-launch_chffrplus.sh.diff",
+    "sha256": "9dfdf5b3bfbaa92ced3471994ed34855398de31af6a30c7ca6e7f96693c0843e",
+    "bytes": 2210
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/AB-openpilot__common__startup_recovery.py.diff",
+    "sha256": "230da3f8ab266dddc33f61ac58c10f3e46f305a01cbbb97ad99c85ccf80774e6",
+    "bytes": 605
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/AB-original-at-submission-base.json",
+    "sha256": "56312cced7873e8f6909d1b7ab5601589a31110fedd27c6920f98c0c42e04487",
+    "bytes": 291993
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/D-openpilot__common__startup_touch_log.py.diff",
+    "sha256": "6e1234f471b85b236be25a3ea07dcde13915dd5545f18023a20263044ce2f192",
+    "bytes": 338
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/D-openpilot__system__ui__startup_recovery.py.diff",
+    "sha256": "fe16b69f65f4468d06f82dc3e3609fe6f37f2eb29e93b80b45edf53390b10f5a",
+    "bytes": 1296
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/D-original-at-submission-base.json",
+    "sha256": "e70f4ba49ef234f30713a1351638dc45da40ac82e2587a8c3c47300979aebe42",
+    "bytes": 11926
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/audit.json",
+    "sha256": "4c9e33538d7d38bd581ecf6f56a470d068c69201454995aefd579f916e7cf37e",
+    "bytes": 7771
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/pr-541-body.md",
+    "sha256": "b0f373612994150e15665f8205a1c2364a2b200dc78620b490feab80e575992a",
+    "bytes": 2391
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/pr-542-body.md",
+    "sha256": "178c32f13a2cc88a3d673886229b3e94470419ffae5bd4638a2bae2e37763fe6",
+    "bytes": 2647
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/pr-543-body.md",
+    "sha256": "2f51d62abd257b2791a2fd9860bfaa6df70ac5903866b21548072582efb33ea0",
+    "bytes": 3259
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/pr-backlinks-verified.json",
+    "sha256": "a5a309f491b1d04bfac61a0574cffc598217001ec5ed54f4772ec593ea4b79e8",
+    "bytes": 12592
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/published-pr-snapshots.json",
+    "sha256": "6c0520390de399b7e5d0a64f251b1007ffafc548e90d786577e71a37d65759e3",
+    "bytes": 12362
+  },
+  {
+    "path": "analysis/2026-10-13-submission-audit/ready-for-review-verified.json",
+    "sha256": "00b8710606e46e52a55ad3423334df7ebf7f0db0afeff2c67a58c6bd53d22c0c",
+    "bytes": 12894
+  },
+  {
+    "path": "analysis/2026-10-13-touch-followup/log-unit-results.txt",
+    "sha256": "668ef344fd1c71f85201928f90a3c2d28ea0bd04a3ff7096e7e885534a9a662d",
+    "bytes": 362
+  },
+  {
+    "path": "analysis/2026-10-13-touch-followup/patch-unit-results.txt",
+    "sha256": "5e1bc87dfa9d88d47c38eaa631c4eed8e7abad00aab87611638924b4b547ec16",
+    "bytes": 559
+  },
+  {
+    "path": "analysis/2026-10-13-touch-followup/results.json",
+    "sha256": "69e0f837ee8f980c77ae5ff013640288b9083ea155bb605b63fa60537a624d28",
+    "bytes": 1385
+  },
+  {
+    "path": "analysis/2026-10-13-touch-followup/test_patches.py",
+    "sha256": "4b6ce102775feb00a333f078d445d193a8240daf4b7ba106c0f9583ced2c9c6e",
+    "bytes": 3427
+  },
+  {
+    "path": "analysis/2026-10-13-touch-followup/validation.md",
+    "sha256": "107e3493b140efcd027355e8158c9df35eadbbae7e688e4fe4e8fb7d26a52835",
+    "bytes": 4088
+  },
+  {
+    "path": "docs/Rebuild-All-GitHub-게시현황-261013.md",
+    "sha256": "8459f0a9b358bb4ba0df41cfb607578e6f38aa335b9ab17f41a5639f9403d4a1",
+    "bytes": 51559
+  },
+  {
+    "path": "docs/Rebuild-All-PR본문-261013.md",
+    "sha256": "2cf98be104abc395ad9ba103329137f7266933535bcae727a3ad05e9dd45196f",
+    "bytes": 16298
+  },
+  {
+    "path": "docs/Rebuild-All-수정제안.md",
+    "sha256": "56a606bf6ce8770db7d8cbee19fd4517100129d506d47e8ba820c426b04bfd56",
+    "bytes": 14272
+  },
+  {
+    "path": "docs/Rebuild-All-수정제안2.md",
+    "sha256": "4689c2ac212dd3be109f7c39889747220db3631f028a6c845e5907a624a0d428",
+    "bytes": 12397
+  },
+  {
+    "path": "docs/Rebuild-All-이슈-PR-제출요점-261013.md",
+    "sha256": "b9a1087b5cacb421e1d09c0a92ad58f03bf5a8eda95ddf5fb29ac49e02b4f7eb",
+    "bytes": 10929
+  },
+  {
+    "path": "docs/Rebuild-All-이슈-간결초안-261013.md",
+    "sha256": "97df51758bf2c7a8d0ee34db5724283f25f3972cb20b0f5731b9e1a0fcfa6454",
+    "bytes": 8477
+  },
+  {
+    "path": "docs/Rebuild-All-이슈본문-261011.md",
+    "sha256": "b232b073bda15c09952da2524bbec3755e6f15be8769583faa6d772145df519d",
+    "bytes": 25036
+  },
+  {
+    "path": "docs/Rebuild-All-이슈요약-261011.md",
+    "sha256": "a0db3414e4a6d2b5c8d49c76aec7e18fa213e01b759da087b71dd7eb906be957",
+    "bytes": 33438
+  },
+  {
+    "path": "docs/Rebuild-All-제출요약-클코-261013.md",
+    "sha256": "aca2b76a7555c5c89070f4640e82c304195a9cba48c76a0811b663a44678eff8",
+    "bytes": 5082
+  },
+  {
+    "path": "docs/SCons-캐시잠금-분석-261011.md",
+    "sha256": "f3f714bccf6ee13f5c16944edd4c6e38f9b68959792a14f041ffe53638ddd949",
+    "bytes": 16307
+  },
+  {
+    "path": "docs/pr-submission-261013/PR-A.md",
+    "sha256": "de1005d8101b888b1d4de679ca81da2a292b41a80747f3eb31eda88555fcd66b",
+    "bytes": 1745
+  },
+  {
+    "path": "docs/pr-submission-261013/PR-B.md",
+    "sha256": "c1dcb60c674d16cd50b041571eae13cce3592a87a3c001baad4d9d670bf27682",
+    "bytes": 1647
+  },
+  {
+    "path": "docs/pr-submission-261013/PR-D.md",
+    "sha256": "243603250708623387bd9800e722c8b93d297d8be445adf1c8caf5432adda8c8",
+    "bytes": 2271
+  },
+  {
+    "path": "docs/pr-submission-261013/README.md",
+    "sha256": "c77572df6919c2704577305973e78855873b149aeca453e83c554d7e02db59a5",
+    "bytes": 3919
+  },
+  {
+    "path": "docs/pr-submission-261013/provenance.json",
+    "sha256": "ac7806b308f8d30c42da4d5f7e98d854835077259fb07377e44a6b51fadf2f20",
+    "bytes": 2269
+  },
+  {
+    "path": "docs/pr-submission-261013/rebuild_all-A-626b887d.patch",
+    "sha256": "1d3a86180e7a53bb2f9676101edf9963d880469ad5f4bb17cd211d047ec45150",
+    "bytes": 24641
+  },
+  {
+    "path": "docs/pr-submission-261013/scons_cache_guard-B-626b887d.patch",
+    "sha256": "5fb12e782bce67b74bc887f105de1a757fb9fa44bd57d1d547a60425786e2bc7",
+    "bytes": 28756
+  },
+  {
+    "path": "docs/pr-submission-261013/solver_autoreset-C-626b887d.patch",
+    "sha256": "753d2a997932bd39f93a0819ca2cc255856ddda3e99bd9d236f416fbd4934d3c",
+    "bytes": 6058
+  },
+  {
+    "path": "docs/pr-submission-261013/startup-touch-D-626b887d-v2.patch",
+    "sha256": "443b2d067e8a14bd25c99b676eb355ab8542ca7aa07402d70d42d5d90a30f366",
+    "bytes": 3830
+  },
+  {
+    "path": "docs/pr-submission-261013/startup-touch-usability-E-626b887d.patch",
+    "sha256": "3320acef71523b0a1ce1a80a41ed6c2dcfeb5a0bd5aa6fcca792b642ad2a7673",
+    "bytes": 3946
+  },
+  {
+    "path": "docs/rebuild_all-A-910bd82f.patch",
+    "sha256": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+    "bytes": 24922
+  },
+  {
+    "path": "docs/rebuild_all.patch",
+    "sha256": "fa8b4b17b1b75a64477e8d9b5b518042b98edaf236a224b3611bb8406438a398",
+    "bytes": 8879
+  },
+  {
+    "path": "docs/scons_cache_guard-B-910bd82f.patch",
+    "sha256": "2d4876cb880890beaf14ba1f9ee897df0db511165ff8e37273adb1ec835c5fdb",
+    "bytes": 28897
+  },
+  {
+    "path": "docs/solver_autoreset-C-910bd82f.patch",
+    "sha256": "2f95ab0e21fc500df7881678aa2f3a6ef27bb8a434bb93211b1bcc7ac8e5d6f4",
+    "bytes": 6125
+  },
+  {
+    "path": "docs/startup-touch-D-626b887d-v2.patch",
+    "sha256": "e432449c40b347dc7a20ac3f45e965ac8db08c850c144fcdf1f26dc26c076c55",
+    "bytes": 3817
+  },
+  {
+    "path": "docs/startup-touch-usability-E-626b887d.patch",
+    "sha256": "0b56495bd0b70d33c73bcd05009414945e1af82f03c330d452a3df7f0d29e4e0",
+    "bytes": 3787
+  }
+]

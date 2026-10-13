@@ -1,0 +1,223 @@
+{
+  "heads": {
+    "A": "c691f1097119f492c22d8af285b9f8810108f5a2",
+    "AB": "e5e96114167324da8a595fb50f39cb39201ec67b",
+    "D": "f7f36343fc53d816f1b6442f90e2d65c7fc0021c"
+  },
+  "source_hashes_verified": true,
+  "runtime_tests_run": false,
+  "files": [
+    {
+      "variant": "A",
+      "path": "SConstruct",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "launch_chffrplus.sh",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/common/rebuild_request.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/common/startup_recovery.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/selfdrive/carrot/recovery/server.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/system/tests/test_rebuild_cleanup.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "A",
+      "path": "openpilot/system/tests/test_startup_recovery.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "SConstruct",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "launch_chffrplus.sh",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/common/rebuild_request.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/common/scons_cache_lock.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/common/startup_recovery.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/selfdrive/carrot/recovery/server.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/selfdrive/carrot/server/features/tools/dispatcher.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/selfdrive/carrot/server/tests/test_git_config.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/system/manager/build.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/system/tests/test_build_cache.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/system/tests/test_rebuild_cleanup.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "openpilot/system/tests/test_startup_recovery.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "AB",
+      "path": "scripts/ensure_params_build.sh",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "D",
+      "path": "openpilot/common/startup_touch_log.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    },
+    {
+      "variant": "D",
+      "path": "openpilot/system/ui/startup_recovery.py",
+      "remote_matches_submission": true,
+      "original_same_across_bases": true,
+      "executable_matches_tested_original": true,
+      "only_comments_docstrings_changed_at_submission_base": true
+    }
+  ],
+  "device_source_hash_verification": [
+    {
+      "variant": "A",
+      "record": "analysis/2026-10-13-rebuild-A-recovery/source-evidence.json",
+      "files": 9,
+      "mismatches": []
+    },
+    {
+      "variant": "ABC",
+      "record": "analysis/2026-10-13-rebuild-heal-boot/source-check.json",
+      "files": 14,
+      "mismatches": []
+    },
+    {
+      "variant": "ADE",
+      "record": "analysis/2026-10-13-rebuild-ADE-screen/source-evidence-before.json",
+      "files": 11,
+      "mismatches": []
+    }
+  ]
+}

@@ -1,0 +1,432 @@
+{
+  "status": "tested_with_known_touch_failure_restored_backups_deleted",
+  "base_commit": "626b887d527ff3c619e885ff65c303255e2933c6",
+  "patches": "A only; unchanged",
+  "source_evidence": {
+    "head": "626b887d527ff3c619e885ff65c303255e2933c6",
+    "branch": "codex/rebuild-A-626b887d",
+    "patch_sha256": "8da0501378e95c58d2336ddd0322cc01354fdcf17b963d1c3f8dec61935e3afe",
+    "files": {
+      "SConstruct": "567a7b9619742e55740bb3c717009386e880ade39c859e07f123919505f6bf88",
+      "launch_chffrplus.sh": "9601e7ef268c28b95c71cf20247bbc7463d18908b19e35d6501c8f361d973fa1",
+      "openpilot/common/rebuild_request.py": "806f3b5f34a642b7fc4946b898e60026c0ff7ec9f9f3a79d6470752c0bad2f62",
+      "openpilot/common/startup_recovery.py": "40d85530c77dce8190074874f2bd1f6f397d6e1d6eb9f962247ca7bb03e76fad",
+      "openpilot/selfdrive/carrot/recovery/server.py": "4d89cb498932104c28c5a2b5489ad2263febb0670b5f2d00d607450e02074370",
+      "openpilot/selfdrive/carrot/server/features/tools/dispatcher.py": "178eab221574fb917b583c095834205cfe125bc6b27625d924306e7476d23678",
+      "openpilot/selfdrive/carrot/server/tests/test_git_config.py": "3fbc46dc75ca1b820be5c111c99707c98dc2551c271b09b54a03391085113b9d",
+      "openpilot/system/tests/test_rebuild_cleanup.py": "762fc3fd56dc33d6a1a82fffb335ca09c739a797cd2cd2c9edd5706cac67cba4",
+      "openpilot/system/tests/test_startup_recovery.py": "a9126ce99f07adbebb3886d6e04fd0b1d3ab0f8fa74068f289f7213a1bf2605a"
+    },
+    "B_module_exists": false,
+    "C_module_exists": false
+  },
+  "unit_tests_passed": 12,
+  "first_web_click": {
+    "ok": true,
+    "id": "c545572d6883",
+    "action": "rebuild_all",
+    "payload": {
+      "action": "rebuild_all"
+    },
+    "status": "failed",
+    "done": true,
+    "log": "",
+    "progress": 0,
+    "message": "",
+    "step_current": 0,
+    "step_total": 0,
+    "error": "Build or another Git operation is running; retry when it finishes.",
+    "error_code": "GIT_BUSY",
+    "error_detail": null,
+    "created_at": 1791864300.9725704,
+    "updated_at": 1791864301.0027559,
+    "result": {
+      "ok": false,
+      "error": "Build or another Git operation is running; retry when it finishes.",
+      "error_code": "GIT_BUSY"
+    }
+  },
+  "scenarios": {
+    "web": {
+      "request": {
+        "phase": "web",
+        "boot_before": "a49bb7e2-3bba-43c5-87cf-65de747bd07b",
+        "watch_started_at": "2026-10-13T04:07:34.972666+00:00",
+        "request_observed_at": "2026-10-13T04:07:49.734064+00:00",
+        "request_exists": true
+      },
+      "ready_observed_at": "2026-10-13T13:14:55+09:00",
+      "observed_elapsed_seconds": 425.265936,
+      "removed_files": 2745,
+      "removed_cache_files": 2401,
+      "removed_directories": 265,
+      "solvers": {
+        "phase": "web-rebuilt",
+        "observed_at": "2026-10-13T13:15:22+0900",
+        "boot_id": "54525df4-4b4a-492d-b96d-283e09ae0a2c",
+        "is_onroad": "0",
+        "request_exists": false,
+        "autoreset_stamp_exists": false,
+        "solvers": [
+          {
+            "kind": "longitudinal",
+            "c_bytes": 1788014,
+            "object_bytes": 1588808,
+            "so_bytes": 1138728,
+            "has_init_symbol": true,
+            "c_sha256": "7e344d2914a67d04b004b9b8df6ca18bec1d6c4f85665013a4f9902c90e222c4",
+            "cache_exists": true,
+            "cache_bytes": 1788014,
+            "cache_equals_source": true
+          },
+          {
+            "kind": "lateral",
+            "c_bytes": 1787995,
+            "object_bytes": 1588640,
+            "so_bytes": 1138616,
+            "has_init_symbol": true,
+            "c_sha256": "fcbfbd7e6880dd08dce73be37c22118dec3d7c106b474ece4a7b685a7ae22b83",
+            "cache_exists": true,
+            "cache_bytes": 1787995,
+            "cache_equals_source": true
+          }
+        ],
+        "imports": [
+          {
+            "module": "openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.lib.lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.plannerd",
+            "returncode": 0,
+            "output": "import OK\n"
+          }
+        ]
+      }
+    },
+    "recovery": {
+      "request": {
+        "phase": "recovery",
+        "boot_before": "54525df4-4b4a-492d-b96d-283e09ae0a2c",
+        "watch_started_at": "2026-10-13T04:16:01.233356+00:00",
+        "request_observed_at": "2026-10-13T04:16:17.808223+00:00",
+        "request_exists": true
+      },
+      "ready_observed_at": "2026-10-13T13:23:20+09:00",
+      "observed_elapsed_seconds": 422.191777,
+      "removed_files": 692,
+      "removed_cache_files": 348,
+      "removed_directories": 205,
+      "solvers": {
+        "phase": "recovery-rebuilt",
+        "observed_at": "2026-10-13T13:24:18+0900",
+        "boot_id": "864a6fef-11e5-41e3-96c2-56bf0faf4a34",
+        "is_onroad": "0",
+        "request_exists": false,
+        "autoreset_stamp_exists": false,
+        "solvers": [
+          {
+            "kind": "longitudinal",
+            "c_bytes": 1788014,
+            "object_bytes": 1588808,
+            "so_bytes": 1138728,
+            "has_init_symbol": true,
+            "c_sha256": "7e344d2914a67d04b004b9b8df6ca18bec1d6c4f85665013a4f9902c90e222c4",
+            "cache_exists": true,
+            "cache_bytes": 1788014,
+            "cache_equals_source": true
+          },
+          {
+            "kind": "lateral",
+            "c_bytes": 1787995,
+            "object_bytes": 1588640,
+            "so_bytes": 1138616,
+            "has_init_symbol": true,
+            "c_sha256": "fcbfbd7e6880dd08dce73be37c22118dec3d7c106b474ece4a7b685a7ae22b83",
+            "cache_exists": true,
+            "cache_bytes": 1787995,
+            "cache_equals_source": true
+          }
+        ],
+        "imports": [
+          {
+            "module": "openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.lib.lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.plannerd",
+            "returncode": 0,
+            "output": "import OK\n"
+          }
+        ]
+      }
+    },
+    "manual-recovery": {
+      "request": {
+        "phase": "manual-recovery",
+        "boot_before": "62acaca1-ee8e-4692-b959-034219319f75",
+        "watch_started_at": "2026-10-13T04:27:11.193587+00:00",
+        "request_observed_at": "2026-10-13T04:31:36.017805+00:00",
+        "request_exists": true
+      },
+      "ready_observed_at": "2026-10-13T13:38:15+09:00",
+      "observed_elapsed_seconds": 398.982195,
+      "removed_files": 693,
+      "removed_cache_files": 351,
+      "removed_directories": 207,
+      "solvers": {
+        "phase": "manual-recovery-rebuilt",
+        "observed_at": "2026-10-13T13:39:38+0900",
+        "boot_id": "92f8e274-07b5-4fbb-b2b0-bb4854d4d806",
+        "is_onroad": "0",
+        "request_exists": false,
+        "autoreset_stamp_exists": false,
+        "solvers": [
+          {
+            "kind": "longitudinal",
+            "c_bytes": 1788014,
+            "object_bytes": 1588808,
+            "so_bytes": 1138728,
+            "has_init_symbol": true,
+            "c_sha256": "7e344d2914a67d04b004b9b8df6ca18bec1d6c4f85665013a4f9902c90e222c4",
+            "cache_exists": true,
+            "cache_bytes": 1788014,
+            "cache_equals_source": true
+          },
+          {
+            "kind": "lateral",
+            "c_bytes": 1787995,
+            "object_bytes": 1588640,
+            "so_bytes": 1138616,
+            "has_init_symbol": true,
+            "c_sha256": "fcbfbd7e6880dd08dce73be37c22118dec3d7c106b474ece4a7b685a7ae22b83",
+            "cache_exists": true,
+            "cache_bytes": 1787995,
+            "cache_equals_source": true
+          }
+        ],
+        "imports": [
+          {
+            "module": "openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.lib.lateral_mpc_lib.c_generated_code.acados_ocp_solver_pyx",
+            "returncode": 0,
+            "output": "import OK\n"
+          },
+          {
+            "module": "openpilot.selfdrive.controls.plannerd",
+            "returncode": 0,
+            "output": "import OK\n"
+          }
+        ]
+      }
+    }
+  },
+  "physical_startup_button": {
+    "result": "failed_user_report_no_response",
+    "request_observed": false,
+    "suspected_cause": "missing raylib input polling; not confirmed by a patched device test",
+    "fixed": false
+  },
+  "manual_action": {
+    "operator": "user",
+    "surface": "6999 recovery terminal",
+    "method": "typed command",
+    "command": "touch /data/rebuild_all.request && sync && sudo reboot",
+    "user_confirmed_method": true,
+    "not_a_manual_button_click": true,
+    "device_touch_button_report": "no response; no request observed"
+  },
+  "health": {
+    "web": {
+      "buildcheck.py": 0,
+      "bootcheck.py": 0,
+      "mstate.py": 0,
+      "pandafaults.py": 0,
+      "jetlink.py": 0
+    },
+    "recovery": {
+      "buildcheck.py": 0,
+      "bootcheck.py": 0,
+      "mstate.py": 0,
+      "pandafaults.py": 0,
+      "jetlink.py": 0
+    },
+    "manual-recovery": {
+      "buildcheck.py": 0,
+      "bootcheck.py": 1,
+      "mstate.py": 0,
+      "pandafaults.py": 0,
+      "jetlink.py": 0
+    },
+    "restored": {
+      "buildcheck.py": 0,
+      "bootcheck.py": 0,
+      "mstate.py": 0,
+      "pandafaults.py": 0,
+      "jetlink.py": 0
+    }
+  },
+  "restoration": {
+    "phase": "restored",
+    "observed_at": "2026-10-13T13:44:29+0900",
+    "boot_id": "3222738e-13b4-47a0-9f19-3e75746fe307",
+    "branch": "carrot-wip-brh",
+    "head": "8399bb8362c1f2e833c9d507865588e23ac5728a",
+    "dirty_sha256": "95b6c5e1f914f248a5ef5a29025875118466dd0792baafbc7c4c2c26c5800bb6",
+    "status": [
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_180_generated.dbc",
+      " M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_235_generated.dbc",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-Medium.png",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.fnt",
+      " M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.png",
+      "?? opendbc_repo/opendbc/can/_can_native.cpp",
+      "?? opendbc_repo/opendbc/dbc/generator/hyundai/hyundai_canfd_radar.dbc",
+      "?? openpilot/cereal/gen/",
+      "?? openpilot/cereal/messaging/bridge",
+      "?? openpilot/cereal/services.h",
+      "?? openpilot/pydeps/",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Black.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Light.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Regular.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.png",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.fnt",
+      "?? openpilot/selfdrive/assets/fonts/Inter-Thin.png",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.fnt",
+      "?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.png",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.fnt",
+      "?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.png",
+      "?? openpilot/selfdrive/assets/fonts/unifont.fnt",
+      "?? openpilot/selfdrive/assets/fonts/unifont.png",
+      "?? openpilot/selfdrive/carrot/radar_motion/_motion_native.cpp",
+      "?? openpilot/selfdrive/modeld/models/.build_stamp",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_metadata.pkl",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunk01of01",
+      "?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of03",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk04of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk05of05",
+      "?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest",
+      "?? openpilot/selfdrive/modeld/models/tg_input_devices.json",
+      "?? openpilot/system/camerad/camerad",
+      "?? openpilot/system/ui/lib/_draw_native.cpp",
+      "?? pydeps/"
+    ],
+    "user_settings": {
+      "DriverMonitoringEnabled": "0",
+      "OpenpilotEnabledToggle": "1",
+      "DrivingModelName": null,
+      "DisableDM": "2",
+      "MaxTimeOffroadMin": "120",
+      "ExperimentalMode": null,
+      "LongitudinalPersonality": "0"
+    },
+    "user_settings_match": true,
+    "control_params": {
+      "SoftwareMenu": "1",
+      "DisableUpdates": null,
+      "UpdaterTargetBranch": "carrot-wip-brh",
+      "GitBranch": "carrot-wip-brh",
+      "GitRemote": "https://github.com/chant555/carrot-wip-BRH",
+      "UpdateAvailable": "0"
+    },
+    "is_onroad": "0",
+    "is_offroad": "1",
+    "source_model_sha256": "433f85f956837606ad1f1cbee4aa7e2158ad23c768dea914b20436c97232741b",
+    "model_manifest": "5",
+    "request_exists": false,
+    "rebuild_log_exists": false,
+    "autoreset_stamp_exists": false,
+    "cache_config_lock_exists": false,
+    "build_failure_alert_exists": false,
+    "panda_mismatch_alert_exists": false,
+    "original_head_restored": true,
+    "original_dirty_patch_identical": true,
+    "original_status_identical": true,
+    "original_git_config_identical": true,
+    "original_web_settings_identical": true,
+    "control_params_restored": true
+  },
+  "runtime": {
+    "observed_at": "2026-10-13T13:44:52+0900",
+    "original_model_files_identical": true,
+    "model_sha256": {
+      "openpilot/selfdrive/modeld/models/driving_supercombo.onnx": "433f85f956837606ad1f1cbee4aa7e2158ad23c768dea914b20436c97232741b",
+      "openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+    },
+    "manager_running": true,
+    "updater_running": true,
+    "test_branch_exists": false,
+    "cache": {
+      "inode": 2627149,
+      "uid": 1000,
+      "gid": 1000,
+      "mode": "0o775"
+    },
+    "guard": {
+      "inode": 20,
+      "uid": 1000,
+      "gid": 1000,
+      "mode": "0o644"
+    },
+    "staging_exists": true,
+    "staging_install_marker": false,
+    "staged_head": null,
+    "git_newer_than_overlay_init": false
+  },
+  "backup_deletion": {
+    "deleted_at": "2026-10-13T13:45:56+0900",
+    "targets": [
+      {
+        "path": "/data/maintenance-backups/rebuild-A-20261013-626b887d",
+        "logical_bytes_before": 4914925782,
+        "absent_after": true
+      },
+      {
+        "path": "/data/rebuild-A-upload",
+        "logical_bytes_before": 51062,
+        "absent_after": true
+      }
+    ],
+    "guard_inode_before": 20,
+    "guard_inode_after": 20,
+    "guard_preserved": true,
+    "filesystem": "Filesystem      Size  Used Avail Use% Mounted on\n/dev/sda12       89G   22G   62G  27% /data\n"
+  },
+  "published_issue_or_pr": false
+}

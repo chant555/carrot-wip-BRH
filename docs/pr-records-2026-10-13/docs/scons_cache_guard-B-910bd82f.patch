@@ -1,0 +1,666 @@
+diff --git a/SConstruct b/SConstruct
+index ac04253..177adde 100644
+--- a/SConstruct
++++ b/SConstruct
+@@ -240,6 +240,17 @@ Export('env', 'arch', 'acados', 'ffmpeg_libs')
+ 
+ # Setup cache dir
+ cache_dir = '/data/scons_cache' if arch == "larch64" else '/tmp/scons_cache'
++# Hold a stable, external guard for the entire SCons process, including clean,
++# so cache cleanup never runs under a build. Builds wait for each other.
++# atexit retains the handle even after this SConstruct scope is discarded.
++import atexit
++from pathlib import Path
++from openpilot.common.scons_cache_lock import acquire_cache_lock
++try:
++  _cache_guard = acquire_cache_lock(Path(cache_dir), os.environ.get("SCONS_CACHE_LOCK_FD"), timeout=300)
++except (OSError, RuntimeError, ValueError) as exc:
++  raise SCons.Errors.UserError(str(exc)) from exc
++atexit.register(_cache_guard.close)
+ CacheDir(cache_dir)
+ Clean(["."], cache_dir)
+ 
+diff --git a/launch_chffrplus.sh b/launch_chffrplus.sh
+index b04a6da..14b6ae8 100755
+--- a/launch_chffrplus.sh
++++ b/launch_chffrplus.sh
+@@ -171,7 +171,7 @@ function show_agnos_update_failure {
+ function agnos_init {
+   # TODO: move this to agnos
+   sudo rm -f /data/etc/NetworkManager/system-connections/*.nmmeta
+-  rm -f /data/scons_cache/config.lock
++  # Cache repair runs under the common cache guard before any Params build.
+ 
+   sudo abctl --set_success
+ 
+@@ -398,23 +398,87 @@ function invalidate_native_build_if_needed {
+ # cache together; every target is then rebuilt from source.
+ BUILD_STATE_RESET=0
+ 
+-function reset_build_state {
++SCONS_CACHE="/data/scons_cache"
++SCONS_CACHE_GUARD="${SCONS_CACHE}.build.lock"
++
++# Run "$@" holding the SCons cache guard, the flock SConstruct holds for a whole
++# build (also taken by build.py's cache pruning and ensure_params_build.sh).
++# Exits 75 without running anything if a build is using the cache. The guard
++# is opened read-only and is never removed or replaced.
++function with_cache_guard {
++  (
++    if [ -L "$SCONS_CACHE_GUARD" ]; then
++      echo "SCons cache guard must not be a symlink; no cleanup performed" >&2
++      exit 1
++    fi
++    if ! { [ -e "$SCONS_CACHE_GUARD" ] || : >> "$SCONS_CACHE_GUARD"; } || [ ! -f "$SCONS_CACHE_GUARD" ] ||
++       ! exec 8<"$SCONS_CACHE_GUARD"; then
++      echo "Cannot open SCons cache guard; no cleanup performed" >&2
++      exit 1
++    fi
++    if ! flock -n 8; then
++      echo "SCons cache is in use; no cleanup performed" >&2
++      exit 75
++    fi
++    "$@"
++  )
++}
++
++function remove_build_state {
+   local target
+   # The cache is disposable. One created by another user (e.g. `sudo scons`)
+   # cannot be removed as this user, so fall back to sudo before giving up.
+-  if ! rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache; then
+-    sudo -n rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" /data/scons_cache
++  if ! rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" "$SCONS_CACHE"; then
++    sudo -n rm -rf "$DIR/.sconsign.dblite" "$DIR/prebuilt" "$SCONS_CACHE"
+   fi
+-  for target in "$DIR/.sconsign.dblite" /data/scons_cache "$DIR/prebuilt"; do
++  for target in "$DIR/.sconsign.dblite" "$SCONS_CACHE" "$DIR/prebuilt"; do
+     if [ -e "$target" ] || [ -L "$target" ]; then
+       echo "Build state cleanup incomplete: $target remains" >&2
+       return 1
+     fi
+   done
++}
++
++function reset_build_state {
++  with_cache_guard remove_build_state || return 1
+   BUILD_STATE_RESET=1
+   FORCE_REBUILD=1
+ }
+ 
++# SCons reports a stale config.lock and a cache this user cannot write (e.g. one
++# created by `sudo scons`) the same way: SConsLockFailure on every build. With
++# the guard held no patched SCons process is running, so a config.lock is stale
++# and an unusable cache can be dropped; the cache is disposable.
++function repair_scons_cache {
++  if [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
++    sudo -n rm -f "$SCONS_CACHE/config.lock"
++  fi
++  [ -e "$SCONS_CACHE" ] || [ -L "$SCONS_CACHE" ] || return 0
++  if [ -L "$SCONS_CACHE" ] || [ ! -d "$SCONS_CACHE" ] || [ ! -O "$SCONS_CACHE" ] || [ ! -w "$SCONS_CACHE" ] ||
++     [ ! -x "$SCONS_CACHE" ] || [ -e "$SCONS_CACHE/config.lock" ] ||
++     [ -n "$(find "$SCONS_CACHE" -maxdepth 2 ! -user "$(id -un)" -print -quit 2>/dev/null)" ]; then
++    echo "SCons cache is not usable by $(id -un); removing $SCONS_CACHE"
++    if ! rm -rf "$SCONS_CACHE" 2>/dev/null; then
++      sudo -n rm -rf "$SCONS_CACHE"
++    fi
++    if [ -e "$SCONS_CACHE" ] || [ -L "$SCONS_CACHE" ]; then
++      echo "Cannot remove unusable SCons cache: $SCONS_CACHE" >&2
++      return 1
++    fi
++  fi
++}
++
++function heal_scons_cache {
++  local rc=0
++  with_cache_guard repair_scons_cache || rc=$?
++  if [ "$rc" = 75 ]; then
++    # Never touch a cache a running build is using; that build will report.
++    echo "SCons cache is in use; repair skipped"
++    return 0
++  fi
++  return "$rc"
++}
++
+ # Written by the web UI / recovery "Rebuild All". Lives outside the repo so git
+ # reset/clean cannot drop it, and needs nothing but a file write to request.
+ REBUILD_REQUEST="/data/rebuild_all.request"
+@@ -568,8 +632,13 @@ function launch {
+     show_startup_failure "Runtime dependency installation failed"
+   fi
+ 
+-  # A Rebuild All request must reset build state before the Params build, which
+-  # shares /data/scons_cache; otherwise a failure there would keep it pending.
++  # A Rebuild All request and an unusable SCons cache must be handled before the
++  # Params build, which shares /data/scons_cache; otherwise a failure there would
++  # keep them pending.
++  if ! heal_scons_cache; then
++    show_startup_failure "SCons cache is unusable and could not be removed: /data/scons_cache"
++    return 1
++  fi
+   if ! consume_rebuild_request; then
+     show_startup_failure "Rebuild All cleanup failed; see /data/rebuild_all.last.log"
+     return 1
+@@ -599,6 +668,7 @@ function launch {
+   invalidate_modeld_build_if_needed
+   invalidate_native_build_if_needed
+ 
++
+   rm -f openpilot/selfdrive/pandad/*.so
+   # write tmux scrollback to a file
+   tmux capture-pane -pq -S-1500 > /tmp/launch_log
+diff --git a/openpilot/common/scons_cache_lock.py b/openpilot/common/scons_cache_lock.py
+new file mode 100644
+index 0000000..917982b
+--- /dev/null
++++ b/openpilot/common/scons_cache_lock.py
+@@ -0,0 +1,63 @@
++"""Process-lifetime exclusion for users and cleaners of a shared SCons cache."""
++import fcntl
++import os
++from pathlib import Path
++import stat
++import sys
++import time
++
++
++class CacheBusyError(RuntimeError):
++  pass
++
++
++def guard_path(cache_dir: Path) -> Path:
++  # A sibling of the cache, so deleting the cache never splits the lock.
++  return cache_dir.with_name(cache_dir.name + '.build.lock')
++
++
++def _open_guard(lock_path: Path) -> int:
++  # Read-only: flock needs no write access, so a guard created by another user
++  # (e.g. by `sudo scons`) still works for everyone. It is never unlinked.
++  try:
++    return os.open(lock_path, os.O_RDONLY | os.O_NOFOLLOW)
++  except FileNotFoundError:
++    os.close(os.open(lock_path, os.O_CREAT | os.O_WRONLY | os.O_NOFOLLOW, 0o666))
++    return os.open(lock_path, os.O_RDONLY | os.O_NOFOLLOW)
++
++
++def acquire_cache_lock(cache_dir: Path, inherited_fd: str | None = None, timeout: float = 0.0):
++  """Builders pass a timeout and wait for each other; cleaners never wait."""
++  lock_path = guard_path(cache_dir)
++  if inherited_fd is not None:
++    fd = os.dup(int(inherited_fd))
++    try:
++      inherited = os.fstat(fd)
++      expected = os.stat(lock_path, follow_symlinks=False)
++      if not stat.S_ISREG(expected.st_mode) or (inherited.st_dev, inherited.st_ino) != (expected.st_dev, expected.st_ino):
++        raise OSError('Inherited cache guard does not match the cache path')
++    except BaseException:
++      os.close(fd)
++      raise
++  else:
++    fd = _open_guard(lock_path)
++  handle = os.fdopen(fd, 'r')
++  try:
++    if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
++      raise OSError(f'Cache guard is not a regular file: {lock_path}')
++    deadline = time.monotonic() + timeout
++    reported_wait = False
++    while True:
++      try:
++        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
++        return handle
++      except BlockingIOError as exc:
++        if time.monotonic() >= deadline:
++          raise CacheBusyError(f'SCons cache is in use: {cache_dir}') from exc
++        if not reported_wait:
++          print(f"Waiting for another SCons build to release {cache_dir} (up to {timeout:g}s)", file=sys.stderr, flush=True)
++          reported_wait = True
++        time.sleep(0.2)
++  except BaseException:
++    handle.close()
++    raise
+diff --git a/openpilot/system/manager/build.py b/openpilot/system/manager/build.py
+index 28f988d..d3f29c5 100755
+--- a/openpilot/system/manager/build.py
++++ b/openpilot/system/manager/build.py
+@@ -8,6 +8,7 @@ from pathlib import Path
+ 
+ # NOTE: Do NOT import anything here that needs be built (e.g. params)
+ from openpilot.common.basedir import BASEDIR
++from openpilot.common.scons_cache_lock import acquire_cache_lock
+ from openpilot.common.file_chunker import get_manifest_path
+ from openpilot.common.spinner import Spinner
+ from openpilot.common.text_window import TextWindow
+@@ -271,6 +272,14 @@ def build(spinner: Spinner, dirty: bool = False, minimal: bool = False) -> None:
+ 
+     if scons.returncode == 0:
+       break
++    compile_output += scons.stdout.read().split(b'\n')
++    if is_cache_lock_failure(compile_output) or any(b'SCons cache is in use:' in line for line in compile_output):
++      message = ("SCons cache lock failed; cache preserved. Reboot to let the launcher repair "
++                 "/data/scons_cache, or check for another running build.")
++      print(message)
++      spinner.update(message)
++      compile_output.append(message.encode('utf8'))
++      break
+ 
+   if scons.returncode != 0:
+     # Read remaining output
+@@ -289,15 +298,39 @@ def build(spinner: Spinner, dirty: bool = False, minimal: bool = False) -> None:
+         t.wait_for_exit()
+     exit(1)
+ 
+-  # enforce max cache size
+-  cache_files = [f for f in CACHE_DIR.rglob('*') if f.is_file()]
+-  cache_files.sort(key=lambda f: f.stat().st_mtime)
+-  cache_size = sum(f.stat().st_size for f in cache_files)
+-  for f in cache_files:
+-    if cache_size < MAX_CACHE_SIZE:
+-      break
+-    cache_size -= f.stat().st_size
+-    f.unlink()
++  # enforce max cache size only while no other patched SCons process uses it
++  prune_cache(CACHE_DIR)
++
++
++def prunable_cache_files(cache_dir: Path) -> list[Path]:
++  # Only cached build results, which SCons keeps in two-character bucket
++  # directories. The top level holds the SCons config (and its lock) and
++  # carrot's Params stamp; pruning those by age breaks or slows the next boot.
++  if not cache_dir.is_dir():
++    return []
++  return [f for d in cache_dir.iterdir() if d.is_dir() and len(d.name) == 2 for f in d.iterdir() if f.is_file()]
++
++
++def is_cache_lock_failure(output: list[bytes]) -> bool:
++  return any(b'SConsLockFailure' in line for line in output)
++
++
++def prune_cache(cache_dir: Path) -> None:
++  # The build just finished, but another process may already have started.
++  try:
++    guard = acquire_cache_lock(cache_dir)
++  except (OSError, RuntimeError) as exc:
++    print(f"Skipping cache pruning: {exc}")
++    return
++  with guard:
++    cache_files = prunable_cache_files(cache_dir)
++    cache_files.sort(key=lambda f: f.stat().st_mtime)
++    cache_size = sum(f.stat().st_size for f in cache_files)
++    for f in cache_files:
++      if cache_size < MAX_CACHE_SIZE:
++        break
++      cache_size -= f.stat().st_size
++      f.unlink()
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/openpilot/system/tests/test_build_cache.py b/openpilot/system/tests/test_build_cache.py
+new file mode 100644
+index 0000000..92571f8
+--- /dev/null
++++ b/openpilot/system/tests/test_build_cache.py
+@@ -0,0 +1,323 @@
++import ast
++import io
++import os
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++sys.path.insert(0, str(ROOT))
++from openpilot.common.scons_cache_lock import acquire_cache_lock, CacheBusyError
++
++
++class CacheExclusionTests(unittest.TestCase):
++  def setUp(self):
++    self.tmp = tempfile.TemporaryDirectory()
++    self.addCleanup(self.tmp.cleanup)
++    self.root = Path(self.tmp.name)
++    self.cache = self.root / 'cache'
++    (self.cache / 'AB').mkdir(parents=True)
++    (self.cache / 'AB/result').write_text('cached-result')
++    for name in ('config', 'CACHEDIR.TAG', 'carrot_params_keys.sha256'):
++      (self.cache / name).write_text(name)
++    self.env = dict(os.environ, PYTHONPATH=str(ROOT))
++    tree = ast.parse((ROOT / 'openpilot/system/manager/build.py').read_text())
++    names = {'prunable_cache_files', 'prune_cache', 'is_cache_lock_failure', 'build'}
++    body = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
++    self.ns = {'Path': Path, 'Spinner': object, 'acquire_cache_lock': acquire_cache_lock,
++               'MAX_CACHE_SIZE': 0, 'os': os, 'BASEDIR': str(ROOT), 'AGNOS': False, 'CACHE_DIR': self.cache}
++    exec(compile(ast.Module(body=body, type_ignores=[]), '<cache>', 'exec'), self.ns)
++
++  def holder(self, code=None):
++    code = code or 'from openpilot.common.scons_cache_lock import acquire_cache_lock; from pathlib import Path; import sys; h=acquire_cache_lock(Path(sys.argv[1])); print("ready",flush=True); sys.stdin.readline()'
++    process = subprocess.Popen([sys.executable, '-c', code, str(self.cache)], env=self.env,
++                               stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++    self.addCleanup(self.stop, process)
++    # Bounded readiness: a child failure cannot hang the test indefinitely.
++    import select
++    readable, _, _ = select.select([process.stdout], [], [], 5)
++    self.assertTrue(readable, 'lock holder did not become ready')
++    self.assertEqual(process.stdout.readline().strip(), 'ready')
++    return process
++
++  @staticmethod
++  def stop(process):
++    if process.poll() is None:
++      process.communicate('\n', timeout=5)
++    else:
++      process.communicate(timeout=5)
++
++  def reset(self):
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    repo = self.root / 'repo'
++    repo.mkdir(exist_ok=True)
++    for name in ('prebuilt', '.sconsign.dblite'):
++      (repo / name).touch()
++    return self.launcher('reset_build_state', repo), repo
++
++  def launcher(self, command, repo=None, mocks='sudo() { return 1; }'):
++    # Launcher cache functions on temporary paths only; sudo is never invoked.
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    function = source[source.index('BUILD_STATE_RESET=0'):source.index('# Written by the web UI')]
++    function = function.replace('/data/scons_cache', str(self.cache))
++    script = function + '\n' + mocks + '\nDIR="$1"\n' + command
++    return subprocess.run(['bash', '-c', script, 'test', str(repo or self.root)],
++                          capture_output=True, text=True, timeout=5)
++
++  def test_another_process_blocks_reset(self):
++    holder = self.holder()
++    r, repo = self.reset()
++    self.assertNotEqual(r.returncode, 0)
++    self.assertIn('in use', r.stderr)
++    self.assertTrue((self.cache / 'AB/result').exists())
++    self.assertTrue((repo / 'prebuilt').exists())
++    self.assertTrue((repo / '.sconsign.dblite').exists())
++    self.stop(holder)
++    r, _ = self.reset()
++    self.assertEqual(r.returncode, 0, r.stderr)
++    self.assertFalse(self.cache.exists())
++    self.assertTrue(self.cache.with_name('cache.build.lock').exists())
++
++  def test_another_process_blocks_pruning(self):
++    holder = self.holder()
++    self.ns['prune_cache'](self.cache)
++    self.assertTrue((self.cache / 'AB/result').exists())
++    self.stop(holder)
++    self.ns['prune_cache'](self.cache)
++    self.assertFalse((self.cache / 'AB/result').exists())
++    self.assertEqual({p.name for p in self.cache.iterdir() if p.is_file()},
++                     {'config', 'CACHEDIR.TAG', 'carrot_params_keys.sha256'})
++
++  def test_second_builder_is_rejected(self):
++    self.holder()
++    with self.assertRaises(CacheBusyError):
++      acquire_cache_lock(self.cache)
++
++  def test_cleanup_guard_blocks_new_builder(self):
++    lock_path = self.cache.with_name('cache.build.lock')
++    holder = subprocess.Popen(['bash', '-c', 'exec 8>>"$1"; flock -n 8 || exit; echo ready; read -r x', 'test', str(lock_path)],
++                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++    self.addCleanup(self.stop, holder)
++    import select
++    self.assertTrue(select.select([holder.stdout], [], [], 5)[0])
++    self.assertEqual(holder.stdout.readline().strip(), 'ready')
++    with self.assertRaises(CacheBusyError):
++      acquire_cache_lock(self.cache)
++
++  def test_process_death_releases_guard_without_unlink(self):
++    holder = self.holder()
++    guard = self.cache.with_name('cache.build.lock')
++    inode = guard.stat().st_ino
++    holder.kill()
++    holder.wait(timeout=5)
++    with acquire_cache_lock(self.cache):
++      self.assertEqual(guard.stat().st_ino, inode)
++
++  def test_cache_recreation_does_not_split_guard(self):
++    import shutil
++    with acquire_cache_lock(self.cache):
++      inode = self.cache.with_name('cache.build.lock').stat().st_ino
++      shutil.rmtree(self.cache)
++      self.cache.mkdir()
++      with self.assertRaises(CacheBusyError):
++        acquire_cache_lock(self.cache)
++      self.assertEqual(self.cache.with_name('cache.build.lock').stat().st_ino, inode)
++
++  def test_guard_open_error_preserves_cache(self):
++    guard = self.cache.with_name('cache.build.lock')
++    guard.mkdir()
++    r, repo = self.reset()
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue((self.cache / 'AB/result').exists())
++    self.assertTrue((repo / 'prebuilt').exists())
++    self.ns['prune_cache'](self.cache)
++    self.assertTrue((self.cache / 'AB/result').exists())
++
++  def test_symlink_guard_is_rejected(self):
++    target = self.root / 'target'
++    target.touch()
++    self.cache.with_name('cache.build.lock').symlink_to(target)
++    with self.assertRaises(OSError):
++      acquire_cache_lock(self.cache)
++    r, _ = self.reset()
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue((self.cache / 'AB/result').exists())
++
++  def test_sconstruct_keeps_guard_until_process_exit(self):
++    source = (ROOT / 'SConstruct').read_text()
++    block = source[source.index('# Hold a stable, external guard'):source.index('CacheDir(cache_dir)')]
++    code = ('import sys; from types import SimpleNamespace; '
++            'scope={"cache_dir":sys.argv[1],"os":__import__("os"),"SCons":SimpleNamespace(Errors=SimpleNamespace(UserError=RuntimeError))}; '
++            'exec(' + repr(block) + ',scope); del scope; import gc; gc.collect(); '
++            'print("ready",flush=True); sys.stdin.readline()')
++    self.holder(code)
++    with self.assertRaises(CacheBusyError):
++      acquire_cache_lock(self.cache)
++
++  def test_lock_failure_preserves_cache_and_stops_retries(self):
++    for output in (b'SConsLockFailure: config timeout', b'SCons cache is in use: cache'):
++      with self.subTest(output=output):
++        calls, errors = [], []
++        def popen(*a, **kw):
++          calls.append(a)
++          return SimpleNamespace(returncode=120, poll=lambda: 120, stdout=io.BytesIO(output))
++        self.ns.update(subprocess=SimpleNamespace(Popen=popen, PIPE=-1, STDOUT=-2),
++                       cloudlog=SimpleNamespace(error=errors.append), add_file_handler=lambda *a: None)
++        with patch.dict(os.environ, {'CARROT_STARTUP_RECOVERY': '1'}):
++          with self.assertRaises(SystemExit):
++            self.ns['build'](SimpleNamespace(update=lambda *a: None, close=lambda: None))
++        self.assertEqual(len(calls), 1)
++        self.assertIn('cache preserved', errors[0])
++        self.assertTrue((self.cache / 'AB/result').exists())
++
++  def test_inherited_descriptor_reuses_lock_and_parent_keeps_it(self):
++    with acquire_cache_lock(self.cache) as parent:
++      code = 'from pathlib import Path; import sys; from openpilot.common.scons_cache_lock import acquire_cache_lock; h=acquire_cache_lock(Path(sys.argv[1]),sys.argv[2]); h.close()'
++      r = subprocess.run([sys.executable, '-c', code, str(self.cache), str(parent.fileno())],
++                         env=self.env, pass_fds=(parent.fileno(),), capture_output=True, text=True, timeout=5)
++      self.assertEqual(r.returncode, 0, r.stderr)
++      with self.assertRaises(CacheBusyError):
++        acquire_cache_lock(self.cache)
++
++  def test_wrong_inherited_guard_is_rejected(self):
++    with acquire_cache_lock(self.root / 'other') as other:
++      with self.assertRaises(OSError):
++        acquire_cache_lock(self.cache, str(other.fileno()))
++
++  def test_invalid_inherited_descriptor_is_rejected(self):
++    with self.assertRaises((OSError, ValueError)):
++      acquire_cache_lock(self.cache, 'not-a-descriptor')
++
++  def test_params_holds_guard_through_scons_and_stamp(self):
++    repo = self.root / 'params-repo'
++    (repo / 'scripts').mkdir(parents=True)
++    common = repo / 'openpilot/common'
++    common.mkdir(parents=True)
++    (common / 'params_keys.h').write_text('header')
++    script = repo / 'scripts/ensure_params_build.sh'
++    script.write_text((ROOT / 'scripts/ensure_params_build.sh').read_text().replace(
++      'echo "Params registry changed; rebuilding params_pyx.so."', ':'))
++    bin_dir = self.root / 'bin'
++    bin_dir.mkdir()
++    fake = bin_dir / 'scons'
++    fake.write_text('#!' + sys.executable + '\n' +
++      'import os,sys\nfrom pathlib import Path\nfrom openpilot.common.scons_cache_lock import acquire_cache_lock\n' +
++      'h=acquire_cache_lock(Path(os.environ["SCONS_CACHE_DIR"]),os.environ["SCONS_CACHE_LOCK_FD"])\n' +
++      'print("ready",flush=True)\nsys.stdin.readline()\nh.close()\n')
++    fake.chmod(0o755)
++    # The device-specific Params import is outside this concurrency test.
++    (bin_dir / 'python3').write_text('#!/bin/sh\nexit 0\n')
++    (bin_dir / 'python3').chmod(0o755)
++    env = dict(self.env, SCONS_CACHE_DIR=str(self.cache), PATH=str(bin_dir)+os.pathsep+os.environ['PATH'])
++    process = subprocess.Popen(['bash', str(script)], env=env, stdin=subprocess.PIPE,
++                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
++    self.addCleanup(self.stop, process)
++    # Only the child readiness message is emitted, avoiding buffered-line races.
++    import select
++    self.assertTrue(select.select([process.stdout], [], [], 5)[0])
++    self.assertEqual(process.stdout.readline().strip(), 'ready')
++    with self.assertRaises(CacheBusyError):
++      acquire_cache_lock(self.cache)
++    out, err = process.communicate('\n', timeout=5)
++    self.assertEqual(process.returncode, 0, err)
++    self.assertEqual(len((self.cache / 'carrot_params_keys.sha256').read_text().strip()), 64)
++    with acquire_cache_lock(self.cache):
++      pass
++
++  def test_guard_created_by_another_user_still_locks(self):
++    # e.g. a guard created by `sudo scons`: read-only access must be enough.
++    guard = self.cache.with_name('cache.build.lock')
++    guard.touch()
++    guard.chmod(0o444)
++    with acquire_cache_lock(self.cache):
++      with self.assertRaises(CacheBusyError):
++        acquire_cache_lock(self.cache)
++    r, _ = self.reset()
++    self.assertEqual(r.returncode, 0, r.stderr)
++    self.assertFalse(self.cache.exists())
++
++  def test_builders_wait_for_each_other(self):
++    holder = self.holder()
++    import threading
++    threading.Timer(0.5, self.stop, (holder,)).start()
++    with acquire_cache_lock(self.cache, timeout=5):
++      pass
++
++  def test_heal_removes_stale_lock_and_keeps_healthy_cache(self):
++    (self.cache / 'config.lock').touch()
++    r = self.launcher('heal_scons_cache')
++    self.assertEqual(r.returncode, 0, r.stderr)
++    self.assertFalse((self.cache / 'config.lock').exists())
++    self.assertTrue((self.cache / 'AB/result').exists())
++
++  def test_heal_never_touches_a_cache_in_use(self):
++    (self.cache / 'config.lock').write_text('live')
++    self.holder()
++    r = self.launcher('heal_scons_cache', mocks='rm() { echo unexpected-removal; return 1; }')
++    self.assertEqual(r.returncode, 0, r.stderr)
++    self.assertNotIn('unexpected-removal', r.stdout)
++    self.assertEqual((self.cache / 'config.lock').read_text(), 'live')
++
++  def test_heal_drops_cache_owned_by_another_user_with_sudo(self):
++    # Simulate a root-owned cache: plain rm fails, only sudo can remove it.
++    mocks = ('rm() { if [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n'
++             'sudo() { [ "$1" = -n ] && shift; chmod 700 "$SCONS_CACHE"; AS_ROOT=1 "$@"; }')
++    self.cache.chmod(0o500)
++    try:
++      r = self.launcher('heal_scons_cache', mocks=mocks)
++    finally:
++      if self.cache.exists():
++        self.cache.chmod(0o700)
++    self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
++    self.assertFalse(self.cache.exists())
++    self.assertIn('not usable', r.stdout)
++
++  def test_heal_reports_cache_it_cannot_remove(self):
++    self.cache.chmod(0o500)
++    try:
++      r = self.launcher('heal_scons_cache')
++    finally:
++      self.cache.chmod(0o700)
++    self.assertNotEqual(r.returncode, 0)
++    self.assertTrue(self.cache.exists())
++    self.assertIn('Cannot remove', r.stderr)
++
++  def test_cache_pruning_is_outside_the_optional_model_build(self):
++    source = (ROOT / 'openpilot/system/manager/build.py').read_text()
++    body = source[source.index('def build_usbgpu_model'):source.index('def build(', source.index('def build_usbgpu_model'))]
++    self.assertNotIn('.unlink()', body)
++
++  def test_agnos_init_has_no_unguarded_cache_removal(self):
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    start = source.index('function agnos_init {')
++    end = source.index('\nfunction ', start + 1)
++    self.assertNotIn('scons_cache/config.lock', source[start:end])
++
++  def test_launcher_repairs_cache_before_consuming_request(self):
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++    block = source[source.index('  if ! heal_scons_cache;'):source.index('  # Build Params before')]
++    prefix = ('heal_scons_cache() { echo repair; return "$1"; }\n'
++              'consume_rebuild_request() { echo consume; }\n'
++              'show_startup_failure() { echo failure; }\n')
++    # Test both execution order and failure propagation, without actual cleanup.
++    for rc in (0, 1):
++      script = prefix.replace('return "$1"', 'return '+str(rc)) + 'run() {\n' + block + '\necho params;\n}\nrun'
++      result = subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++      self.assertEqual(result.stdout.splitlines(), ['repair', 'consume', 'params'] if rc == 0 else ['repair', 'failure'])
++      self.assertEqual(result.returncode, rc)
++
++  def test_wait_message_is_printed_once_and_timeout_preserves_cache(self):
++    from contextlib import redirect_stderr
++    self.holder()
++    output = io.StringIO()
++    with redirect_stderr(output), self.assertRaises(CacheBusyError):
++      acquire_cache_lock(self.cache, timeout=0.3)
++    self.assertEqual(output.getvalue().count('Waiting for another SCons build'), 1)
++    self.assertTrue((self.cache / 'AB/result').exists())
++
++if __name__ == '__main__':
++  unittest.main()
+diff --git a/scripts/ensure_params_build.sh b/scripts/ensure_params_build.sh
+index 786b019..0987fc4 100644
+--- a/scripts/ensure_params_build.sh
++++ b/scripts/ensure_params_build.sh
+@@ -6,8 +6,36 @@ HEADER="$ROOT/openpilot/common/params_keys.h"
+ MODULE="$ROOT/openpilot/common/params_pyx.so"
+ CACHE_DIR="${SCONS_CACHE_DIR:-/data/scons_cache}"
+ 
++# Hold the cache guard across output removal, SCons, validation and stamp writes.
++# SConstruct validates and reuses this inherited descriptor instead of relocking.
++# Read-only, so a guard created by another user still works; never removed.
++function lock_params_cache {
++  local guard="${CACHE_DIR}.build.lock"
++  if [ -L "$guard" ]; then
++    echo "SCons cache guard must not be a symlink" >&2
++    return 1
++  fi
++  [ -e "$guard" ] || : >> "$guard" || return 1
++  if [ ! -f "$guard" ]; then
++    echo "SCons cache guard must be a regular file" >&2
++    return 1
++  fi
++  exec 8<"$guard" || return 1
++  if ! flock -n 8; then
++    echo "Waiting for another SCons build to release $CACHE_DIR (up to 300s)" >&2
++    if ! flock -w 300 8; then
++      echo "SCons cache is in use: $CACHE_DIR; Params build deferred" >&2
++      return 1
++    fi
++  fi
++  export SCONS_CACHE_LOCK_FD=8
++}
++lock_params_cache || exit 1
++
+ if ! mkdir -p "$CACHE_DIR" 2>/dev/null; then
++  exec 8>&-
+   CACHE_DIR="/tmp/scons_cache"
++  lock_params_cache || exit 1
+   mkdir -p "$CACHE_DIR"
+ fi
+ 

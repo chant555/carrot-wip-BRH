@@ -1,0 +1,71 @@
+--- a/openpilot/system/ui/startup_recovery.py
++++ b/openpilot/system/ui/startup_recovery.py
+@@ -31,6 +31,7 @@
+ BUTTON_KO = 'Git pull 후 재부팅'
+ REBUILD_KO = '리빌드 · 재부팅'
+ ERROR_KO = '시작 오류 · 누르면 다음 내용'
++BUSY_NOTICE_KO = '다른 작업 중입니다. 잠시 뒤 다시 눌러 주십시오.'
+ 
+ 
+ def device_size():
+@@ -125,7 +126,7 @@
+   return [lines[i:i + 4] for i in range(0, len(lines), 4)] or [['No error output was captured.']]
+ 
+ 
+-def draw_screen(font, width, height, state, reason, address, pages, page=0):
++def draw_screen(font, width, height, state, reason, address, pages, page=0, notice=''):
+   scale = min(width / 536, height / 240)
+   x = (width - 536 * scale) / 2
+   y = (height - 240 * scale) / 2
+@@ -144,13 +145,13 @@
+   for i, text in enumerate(pages[page]):
+     line(text, 81 + i * 15, 12)
+   # Update status never replaces the original startup error.
+-  line(detail or en, 145, 11, rl.LIGHTGRAY)
++  line(notice or detail or en, 145, 11, rl.YELLOW if notice else rl.LIGHTGRAY)
+   line(AUTO_KO, 160, 11, rl.LIGHTGRAY)
+   line('Auto-check every 30s · reboot only after a new update', 173, 10, rl.LIGHTGRAY)
+   buttons = []
+   busy = status in BUSY_STATES
+   for left, ko, en in ((16, REBUILD_KO, 'Clean build & reboot'), (274, BUTTON_KO, 'Git pull & reboot')):
+-    button = rl.Rectangle(x + left * scale, y + 188 * scale, 246 * scale, 44 * scale)
++    button = rl.Rectangle(x + left * scale, y + 188 * scale, 246 * scale, height - (y + 188 * scale))
+     buttons.append(button)
+     rl.draw_rectangle_rounded(button, .15, 8, rl.DARKGRAY if busy else rl.Color(33, 104, 200, 255))
+     for text, top, size in ((ko, 192, 18), (en, 215, 11)):
+@@ -178,7 +179,7 @@
+   rl.init_window(width, height, 'Startup recovery')
+   rl.set_target_fps(20)
+   rl.set_exit_key(0)
+-  characters = ''.join(ko + en for ko, en in LABELS.values()) + AUTO_KO + BUTTON_KO + REBUILD_KO + ERROR_KO + reason + error
++  characters = ''.join(ko + en for ko, en in LABELS.values()) + AUTO_KO + BUTTON_KO + REBUILD_KO + ERROR_KO + BUSY_NOTICE_KO + reason + error
+   codepoints = sorted(set(range(32, 127)) | {ord(c) for c in characters if ord(c) >= 32})
+   glyph_buffer = rl.ffi.new('int[]', codepoints)
+   font = rl.load_font_ex(str(ROOT / 'openpilot/selfdrive/assets/fonts/Pretendard-Medium.ttf'),
+@@ -211,6 +212,7 @@
+   touch_log.record('start', sync=True, backend=RAYLIB_BACKEND, width=width, height=height, raw_touch=touch.fd is not None)
+   next_check = time.monotonic() + 5
+   was_busy = False
++  busy_notice_until = 0.0
+   wake_display()
+   start_ip_monitor()
+   try:
+@@ -223,7 +225,8 @@
+         update.start(automatic=True)
+         next_check = time.monotonic() + 30
+       rl.begin_drawing()
+-      rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page)
++      rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page,
++                                                               BUSY_NOTICE_KO if time.monotonic() < busy_notice_until else '')
+       rl.end_drawing()
+       # COMMA leaves polling to the caller; desktop EndDrawing already polls.
+       if RAYLIB_BACKEND == "comma":
+@@ -236,6 +239,8 @@
+         touch_log.record('press', sync=True, x=position.x, y=position.y, hit=hit, state=update.state[0])
+         if hit in ('rebuild', 'update'):
+           accepted = update.start_rebuild() if hit == 'rebuild' else update.start()
++          if not accepted:
++            busy_notice_until = time.monotonic() + 3
+           touch_log.record('action', sync=True, hit=hit, accepted=accepted, state=update.state[0])
+         elif hit == 'error':
+           page = (page + 1) % len(pages)

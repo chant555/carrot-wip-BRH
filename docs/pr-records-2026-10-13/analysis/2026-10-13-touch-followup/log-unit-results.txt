@@ -1,0 +1,9 @@
+test_rotation_keeps_previous_file (__main__.TouchLogTests) ... ok
+test_sync_failure_does_not_raise (__main__.TouchLogTests) ... ok
+test_sync_record_survives_reopen (__main__.TouchLogTests) ... ok
+test_unwritable_path_does_not_raise (__main__.TouchLogTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.007s
+
+OK

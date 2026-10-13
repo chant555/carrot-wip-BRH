@@ -1,0 +1,291 @@
+changed in both
+  base   100644 7c2e383682d2cb795324c294d33c53f464e07465 SConstruct
+  our    100644 07ad4466a5d28aeba6eaa208ab62e85be0b3915c SConstruct
+  their  100644 43d9df9bea29327e5a793fed8205de825ea4bedb SConstruct
+@@ -239,7 +239,11 @@
+ Export('env', 'arch', 'acados', 'ffmpeg_libs')
+ 
+ # Setup cache dir
++<<<<<<< .our
+ cache_dir = os.environ.get('SCONS_CACHE_DIR') or ('/data/scons_cache' if arch == "larch64" else '/tmp/scons_cache')
++=======
++cache_dir = '/data/scons_cache' if arch == "larch64" else '/tmp/scons_cache'
++>>>>>>> .their
+ # Hold a stable, external guard for the entire SCons process, including clean,
+ # so cooperating builds and cleanup cannot overlap. Builds wait for each other.
+ # atexit retains the handle even after this SConstruct scope is discarded.
+changed in both
+  base   100755 9ecc768f3d75ae064125949591d096360614555f launch_chffrplus.sh
+  our    100755 052125f4c2535692f2c087e9b12a12cb97991285 launch_chffrplus.sh
+  their  100755 aad413b81b9fded2916b40fea3d480fa8a8a81a8 launch_chffrplus.sh
+@@ -398,11 +398,15 @@
+ # Concurrency protection is provided separately by the common cache guard.
+ BUILD_STATE_RESET=0
+ 
++<<<<<<< .our
+ SCONS_CACHE="${SCONS_CACHE_DIR:-/tmp/scons_cache}"
+ if [ -z "${SCONS_CACHE_DIR:-}" ] && [ -f /TICI ]; then
+   SCONS_CACHE="/data/scons_cache"
+ fi
+ export SCONS_CACHE_DIR="$SCONS_CACHE"
++=======
++SCONS_CACHE="/data/scons_cache"
++>>>>>>> .their
+ SCONS_CACHE_GUARD="${SCONS_CACHE}.build.lock"
+ 
+ # Run "$@" holding the SCons cache guard, the flock SConstruct holds for a whole
+@@ -454,7 +458,11 @@
+ # no cooperating build is using the cache: remove a leftover config.lock
+ # or discard an unusable cache. Builds that bypass the guard are not protected.
+ function repair_scons_cache {
++<<<<<<< .our
+   if [ ! -L "$SCONS_CACHE" ] && [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
++=======
++  if [ -e "$SCONS_CACHE/config.lock" ] && ! rm -f "$SCONS_CACHE/config.lock"; then
++>>>>>>> .their
+     sudo -n rm -f "$SCONS_CACHE/config.lock"
+   fi
+   [ -e "$SCONS_CACHE" ] || [ -L "$SCONS_CACHE" ] || return 0
+added in both
+  our    100644 f935405a591406e78409cbe813a690ae53a24b81 openpilot/common/rebuild_request.py
+  their  100644 ee835ea7abd7e63d7a18f00f380e92c093e9820d openpilot/common/rebuild_request.py
+@@ -12,7 +12,11 @@
+   # which is exactly when a full rebuild is needed.
+   tmp = path.with_name(path.name + '.tmp')
+   with tmp.open('w') as f:
++<<<<<<< .our
+     f.write(f'{time.monotonic()}\n')
++=======
++    f.write(f'{time.time()}\n')
++>>>>>>> .their
+     f.flush()
+     os.fsync(f.fileno())
+   os.replace(tmp, path)
+changed in both
+  base   100755 28f988d6d7729bdc370faa44573571ac6ca4c13b openpilot/system/manager/build.py
+  our    100755 c8cf308a864b4998d541508080a4e0f27102963b openpilot/system/manager/build.py
+  their  100755 d3f29c54eba6e8ed6554232237f2a6b69e3e40ce openpilot/system/manager/build.py
+added in both
+  our    100644 156d39b45921df81cc11d5af278563f795350ec4 openpilot/system/tests/test_build_cache.py
+  their  100644 92571f86e1c87dc510f6053f935312dc25f23411 openpilot/system/tests/test_build_cache.py
+@@ -6,10 +6,17 @@
+ import sys
+ import tempfile
+ from types import SimpleNamespace
++<<<<<<< .our
+ import unittest  # noqa: TID251 -- preserve contributed process-lifetime cleanup fixtures
+ from unittest.mock import patch  # noqa: TID251
+ 
+ ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'SConstruct').is_file())
++=======
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++>>>>>>> .their
+ sys.path.insert(0, str(ROOT))
+ from openpilot.common.scons_cache_lock import acquire_cache_lock, CacheBusyError
+ 
+@@ -33,8 +40,12 @@
+     exec(compile(ast.Module(body=body, type_ignores=[]), '<cache>', 'exec'), self.ns)
+ 
+   def holder(self, code=None):
++<<<<<<< .our
+     code = code or ('from openpilot.common.scons_cache_lock import acquire_cache_lock; from pathlib import Path; import sys; ' +
+                     'h=acquire_cache_lock(Path(sys.argv[1])); print("ready",flush=True); sys.stdin.readline()')
++=======
++    code = code or 'from openpilot.common.scons_cache_lock import acquire_cache_lock; from pathlib import Path; import sys; h=acquire_cache_lock(Path(sys.argv[1])); print("ready",flush=True); sys.stdin.readline()'
++>>>>>>> .their
+     process = subprocess.Popen([sys.executable, '-c', code, str(self.cache)], env=self.env,
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+     self.addCleanup(self.stop, process)
+@@ -53,7 +64,11 @@
+       process.communicate(timeout=5)
+ 
+   def reset(self):
++<<<<<<< .our
+     (ROOT / 'launch_chffrplus.sh').read_text()
++=======
++    source = (ROOT / 'launch_chffrplus.sh').read_text()
++>>>>>>> .their
+     repo = self.root / 'repo'
+     repo.mkdir(exist_ok=True)
+     for name in ('prebuilt', '.sconsign.dblite'):
+@@ -63,10 +78,17 @@
+   def launcher(self, command, repo=None, mocks='sudo() { return 1; }'):
+     # Launcher cache functions on temporary paths only; sudo is never invoked.
+     source = (ROOT / 'launch_chffrplus.sh').read_text()
++<<<<<<< .our
+     function = source[source.index('BUILD_STATE_RESET=0'):source.index('function start_manager {')]
+     function = function.replace('/data/scons_cache', str(self.cache))
+     script = function + '\n' + mocks + '\nDIR="$1"\n' + command
+     return subprocess.run(['bash', '-c', script, 'test', str(repo or self.root)], env=dict(self.env, SCONS_CACHE_DIR=str(self.cache)),
++=======
++    function = source[source.index('BUILD_STATE_RESET=0'):source.index('# Written by the web UI')]
++    function = function.replace('/data/scons_cache', str(self.cache))
++    script = function + '\n' + mocks + '\nDIR="$1"\n' + command
++    return subprocess.run(['bash', '-c', script, 'test', str(repo or self.root)],
++>>>>>>> .their
+                           capture_output=True, text=True, timeout=5)
+ 
+   def test_another_process_blocks_reset(self):
+@@ -151,9 +173,15 @@
+   def test_sconstruct_keeps_guard_until_process_exit(self):
+     source = (ROOT / 'SConstruct').read_text()
+     block = source[source.index('# Hold a stable, external guard'):source.index('CacheDir(cache_dir)')]
++<<<<<<< .our
+     code = ('import sys; from types import SimpleNamespace; ' +
+             'scope={"cache_dir":sys.argv[1],"os":__import__("os"),"SCons":SimpleNamespace(Errors=SimpleNamespace(UserError=RuntimeError))}; ' +
+             'exec(' + repr(block) + ',scope); del scope; import gc; gc.collect(); ' +
++=======
++    code = ('import sys; from types import SimpleNamespace; '
++            'scope={"cache_dir":sys.argv[1],"os":__import__("os"),"SCons":SimpleNamespace(Errors=SimpleNamespace(UserError=RuntimeError))}; '
++            'exec(' + repr(block) + ',scope); del scope; import gc; gc.collect(); '
++>>>>>>> .their
+             'print("ready",flush=True); sys.stdin.readline()')
+     self.holder(code)
+     with self.assertRaises(CacheBusyError):
+@@ -163,7 +191,11 @@
+     for output in (b'SConsLockFailure: config timeout', b'SCons cache is in use: cache'):
+       with self.subTest(output=output):
+         calls, errors = [], []
++<<<<<<< .our
+         def popen(*a, calls=calls, output=output, **kw):
++=======
++        def popen(*a, **kw):
++>>>>>>> .their
+           calls.append(a)
+           return SimpleNamespace(returncode=120, poll=lambda: 120, stdout=io.BytesIO(output))
+         self.ns.update(subprocess=SimpleNamespace(Popen=popen, PIPE=-1, STDOUT=-2),
+@@ -177,8 +209,12 @@
+ 
+   def test_inherited_descriptor_reuses_lock_and_parent_keeps_it(self):
+     with acquire_cache_lock(self.cache) as parent:
++<<<<<<< .our
+       code = ('from pathlib import Path; import sys; from openpilot.common.scons_cache_lock import acquire_cache_lock; ' +
+               'h=acquire_cache_lock(Path(sys.argv[1]),sys.argv[2]); h.close()')
++=======
++      code = 'from pathlib import Path; import sys; from openpilot.common.scons_cache_lock import acquire_cache_lock; h=acquire_cache_lock(Path(sys.argv[1]),sys.argv[2]); h.close()'
++>>>>>>> .their
+       r = subprocess.run([sys.executable, '-c', code, str(self.cache), str(parent.fileno())],
+                          env=self.env, pass_fds=(parent.fileno(),), capture_output=True, text=True, timeout=5)
+       self.assertEqual(r.returncode, 0, r.stderr)
+@@ -264,6 +300,7 @@
+     self.assertNotIn('unexpected-removal', r.stdout)
+     self.assertEqual((self.cache / 'config.lock').read_text(), 'live')
+ 
++<<<<<<< .our
+   def test_heal_does_not_follow_cache_symlink_to_external_lock(self):
+     import shutil
+     external = self.root / 'external'
+@@ -289,6 +326,11 @@
+   def test_heal_drops_cache_owned_by_another_user_with_sudo(self):
+     # Simulate a root-owned cache: plain rm fails, only sudo can remove it.
+     mocks = ('rm() { if [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n' +
++=======
++  def test_heal_drops_cache_owned_by_another_user_with_sudo(self):
++    # Simulate a root-owned cache: plain rm fails, only sudo can remove it.
++    mocks = ('rm() { if [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n'
++>>>>>>> .their
+              'sudo() { [ "$1" = -n ] && shift; chmod 700 "$SCONS_CACHE"; AS_ROOT=1 "$@"; }')
+     self.cache.chmod(0o500)
+     try:
+@@ -324,8 +366,13 @@
+   def test_launcher_repairs_cache_before_consuming_request(self):
+     source = (ROOT / 'launch_chffrplus.sh').read_text()
+     block = source[source.index('  if ! heal_scons_cache;'):source.index('  # Build Params before')]
++<<<<<<< .our
+     prefix = ('heal_scons_cache() { echo repair; return "$1"; }\n' +
+               'consume_rebuild_request() { echo consume; }\n' +
++=======
++    prefix = ('heal_scons_cache() { echo repair; return "$1"; }\n'
++              'consume_rebuild_request() { echo consume; }\n'
++>>>>>>> .their
+               'show_startup_failure() { echo failure; }\n')
+     # Test both execution order and failure propagation, without actual cleanup.
+     for rc in (0, 1):
+added in both
+  our    100644 139702210499f88d874c7812ba310e7dd445d434 openpilot/system/tests/test_rebuild_cleanup.py
+  their  100644 5f0858617a85d2d1d61b4723172a165a57bf6e93 openpilot/system/tests/test_rebuild_cleanup.py
+@@ -1,10 +1,23 @@
++<<<<<<< .our
++=======
++import ast
++import io
++>>>>>>> .their
+ import os
+ from pathlib import Path
+ import subprocess
+ import tempfile
++<<<<<<< .our
+ import unittest  # noqa: TID251 -- preserve contributed process-lifetime cleanup fixtures
+ 
+ ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'SConstruct').is_file())
++=======
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[3]
++>>>>>>> .their
+ 
+ 
+ class RebuildCleanupTests(unittest.TestCase):
+@@ -35,8 +48,12 @@
+ timeout() { echo simulated-clean; return 2; }
+ git() { echo test-head; }
+ ''' + mocks + '\n' + command
++<<<<<<< .our
+     return subprocess.run(['bash', '-c', script], env=dict(os.environ, SCONS_CACHE_DIR=str(self.cache)),
+                           capture_output=True, text=True, timeout=5)
++=======
++    return subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
++>>>>>>> .their
+ 
+   def test_cleanup_success_despite_scons_failure(self):
+     r = self.shell('consume_rebuild_request')
+@@ -98,7 +115,11 @@
+ 
+   def test_unremovable_cache_falls_back_to_sudo(self):
+     # The cache may belong to root after a `sudo scons`; only sudo can drop it.
++<<<<<<< .our
+     mocks = ('rm() { if [[ "$*" == *scons_cache* ]] && [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n' +
++=======
++    mocks = ('rm() { if [[ "$*" == *scons_cache* ]] && [ -z "$AS_ROOT" ]; then return 1; fi; command rm "$@"; }\n'
++>>>>>>> .their
+              'sudo() { [ "$1" = -n ] && shift; AS_ROOT=1 "$@"; }')
+     r = self.shell('consume_rebuild_request', mocks)
+     self.assertEqual(r.returncode, 0, r.stderr + self.log.read_text())
+@@ -119,8 +140,12 @@
+ 
+   def test_launch_stops_before_params_on_cleanup_failure(self):
+     block = self.source[self.source.index('  if ! consume_rebuild_request;'):self.source.index('  # Build Params before')]
++<<<<<<< .our
+     script = ('consume_rebuild_request() { return 1; }\nshow_startup_failure() { echo "$*"; }\nlaunch_test() {\n' +
+               block + '\necho unexpected-params;\n}\nlaunch_test')
++=======
++    script = 'consume_rebuild_request() { return 1; }\nshow_startup_failure() { echo "$*"; }\nlaunch_test() {\n' + block + '\necho unexpected-params;\n}\nlaunch_test'
++>>>>>>> .their
+     r = subprocess.run(['bash', '-c', script], capture_output=True, text=True, timeout=5)
+     self.assertNotEqual(r.returncode, 0)
+     self.assertNotIn('unexpected', r.stdout)
+changed in both
+  base   100644 786b019b1ae8b781fd8a2ba957a482455c9793df scripts/ensure_params_build.sh
+  our    100644 f17fff8b7a3f260ce1c4708cc29cdaec34a0343e scripts/ensure_params_build.sh
+  their  100644 0987fc475f0d44020f84a873c062989f0c9d1847 scripts/ensure_params_build.sh
+@@ -33,8 +33,15 @@
+   fi
+   export SCONS_CACHE_LOCK_FD=8
+ }
++<<<<<<< .our
++=======
++lock_params_cache || exit 1
++
++>>>>>>> .their
+ if ! mkdir -p "$CACHE_DIR" 2>/dev/null; then
++  exec 8>&-
+   CACHE_DIR="/tmp/scons_cache"
++  lock_params_cache || exit 1
+   mkdir -p "$CACHE_DIR"
+ fi
+ export SCONS_CACHE_DIR="$CACHE_DIR"

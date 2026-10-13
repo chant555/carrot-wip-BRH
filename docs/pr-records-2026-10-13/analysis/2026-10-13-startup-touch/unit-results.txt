@@ -1,0 +1,10 @@
+test_desktop_preserves_click_already_polled_by_end_drawing (__main__.InputDispatchTests) ... ok
+test_fixed_comma_dispatches_both_buttons (__main__.InputDispatchTests) ... ok
+test_fixed_error_area_and_outside (__main__.InputDispatchTests) ... ok
+test_no_press_does_not_dispatch (__main__.InputDispatchTests) ... ok
+test_original_comma_misses_a_valid_button (__main__.InputDispatchTests) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.011s
+
+OK

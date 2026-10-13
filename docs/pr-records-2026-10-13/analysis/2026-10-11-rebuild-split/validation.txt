@@ -1,0 +1,13 @@
+최종 검증 결과입니다.
+기준 커밋은 910bd82f이며 A → B → C 순서로 적용합니다.
+base: 28 failed, 323 passed, 17 skipped, 8 warnings, 56 errors in 15.58s
+A: 28 failed, 338 passed, 17 skipped, 8 warnings, 56 errors in 15.63s
+AB: 28 failed, 362 passed, 17 skipped, 8 warnings, 56 errors, 2 subtests passed in 17.15s
+ABC: 28 failed, 369 passed, 17 skipped, 8 warnings, 56 errors, 2 subtests passed in 17.38s
+기준 코드에 없던 실패는 없습니다. 공통 실패와 오류가 있으므로 전체 시험 통과는 아닙니다.
+새 회귀 시험은 A 12개, B 24개, C 7개입니다.
+현재 패치 파일의 해시가 results.json의 최종 검증 해시와 일치합니다.
+기기 시험을 이번에 수행하지 않았습니다. 이전 시험 보고와 일부 스크립트를 보존했고 원출력은 찾지 못했습니다.
+6141f670은 로컬에 없어 이번에 재검증하지 못했습니다.
+초기 A+B 시험에서 C의 주석에 의존한 시험 경계가 깨졌으나 수정한 뒤 새 실패가 사라졌습니다.
+기기 변경, 이슈 등록, 외부 제출은 하지 않았습니다.

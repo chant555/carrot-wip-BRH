@@ -1,0 +1,44 @@
+added in both
+  our    100644 ab688763d4b92a1ea76a3cbfac66becb653dca88 openpilot/common/startup_touch_log.py
+  their  100644 207040290e398e8154afcbcbc23d18399e620516 openpilot/common/startup_touch_log.py
+@@ -25,7 +25,11 @@
+       if self.path.exists() and self.path.stat().st_size >= self.max_bytes:
+         os.replace(self.path, self.path.with_suffix(self.path.suffix + '.1'))
+       with self.path.open('a') as output:
++<<<<<<< .our
+         output.write(json.dumps(dict(event=event, time=time.time(), monotonic=time.monotonic(), boot_id=self.boot_id, **fields)) + '\n')  # noqa: TID251 -- wall time correlates diagnostics across boots
++=======
++        output.write(json.dumps(dict(event=event, time=time.time(), monotonic=time.monotonic(), boot_id=self.boot_id, **fields)) + '\n')
++>>>>>>> .their
+         if sync:
+           output.flush()
+           os.fsync(output.fileno())
+changed in both
+  base   100644 1b92555971c980bb7aced8343e17d2fca9442eea openpilot/system/ui/startup_recovery.py
+  our    100644 0db7e1c64f54e57dfe174a6875534266ca05e619 openpilot/system/ui/startup_recovery.py
+  their  100644 eefb44cb41063f73320ac7a9b7161c1e58123195 openpilot/system/ui/startup_recovery.py
+@@ -8,7 +8,11 @@
+ import time
+ 
+ import pyray as rl
++<<<<<<< .our
+ import raylib
++=======
++from raylib import _BACKEND as RAYLIB_BACKEND
++>>>>>>> .their
+ 
+ from openpilot.common.reboot import reboot_device
+ from openpilot.common.startup_touch_log import TouchLog
+@@ -233,7 +237,12 @@
+       rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page)
+       rl.end_drawing()
+       # Poll the loaded COMMA backend even if evdev is unavailable; desktop already polls.
++<<<<<<< .our
+       poll_recovery_input()
++=======
++      if RAYLIB_BACKEND == "comma":
++        rl.poll_input_events()
++>>>>>>> .their
+       if touch.pressed():
+         position = rl.get_touch_position(0) if touch.fd is not None else rl.get_mouse_position()
+         hit = next((name for name, area in (('rebuild', rebuild_button), ('update', update_button), ('error', error_area))

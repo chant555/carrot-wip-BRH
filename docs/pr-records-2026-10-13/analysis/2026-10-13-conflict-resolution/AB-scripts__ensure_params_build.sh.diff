@@ -1,0 +1,33 @@
+diff --git a/scripts/ensure_params_build.sh b/scripts/ensure_params_build.sh
+index 0987fc4..f17fff8 100644
+--- a/scripts/ensure_params_build.sh
++++ b/scripts/ensure_params_build.sh
+@@ -4,7 +4,10 @@ set -e
+ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ HEADER="$ROOT/openpilot/common/params_keys.h"
+ MODULE="$ROOT/openpilot/common/params_pyx.so"
+-CACHE_DIR="${SCONS_CACHE_DIR:-/data/scons_cache}"
++CACHE_DIR="${SCONS_CACHE_DIR:-/tmp/scons_cache}"
++if [ -z "${SCONS_CACHE_DIR:-}" ] && [ -f /TICI ]; then
++  CACHE_DIR="/data/scons_cache"
++fi
+ 
+ # Hold the cache guard across output removal, SCons, validation and stamp writes.
+ # SConstruct validates and reuses this inherited descriptor instead of relocking.
+@@ -30,14 +33,12 @@ function lock_params_cache {
+   fi
+   export SCONS_CACHE_LOCK_FD=8
+ }
+-lock_params_cache || exit 1
+-
+ if ! mkdir -p "$CACHE_DIR" 2>/dev/null; then
+-  exec 8>&-
+   CACHE_DIR="/tmp/scons_cache"
+-  lock_params_cache || exit 1
+   mkdir -p "$CACHE_DIR"
+ fi
++export SCONS_CACHE_DIR="$CACHE_DIR"
++lock_params_cache || exit 1
+ 
+ STAMP="$CACHE_DIR/carrot_params_keys.sha256"
+ HEADER_HASH="$(sha256sum "$HEADER" | awk '{print $1}')"

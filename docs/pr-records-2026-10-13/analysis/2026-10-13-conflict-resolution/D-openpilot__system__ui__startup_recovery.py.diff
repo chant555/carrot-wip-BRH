@@ -1,0 +1,44 @@
+diff --git a/openpilot/system/ui/startup_recovery.py b/openpilot/system/ui/startup_recovery.py
+index eefb44c..0db7e1c 100644
+--- a/openpilot/system/ui/startup_recovery.py
++++ b/openpilot/system/ui/startup_recovery.py
+@@ -8,7 +8,7 @@ import struct
+ import time
+ 
+ import pyray as rl
+-from raylib import _BACKEND as RAYLIB_BACKEND
++import raylib
+ 
+ from openpilot.common.reboot import reboot_device
+ from openpilot.common.startup_touch_log import TouchLog
+@@ -16,6 +16,7 @@ from openpilot.common.network_info import label_with_port, start_ip_monitor
+ from openpilot.common.startup_recovery import BUSY_STATES, RecoveryUpdate, read_startup_error
+ 
+ ROOT = Path(__file__).resolve().parents[3]
++RAYLIB_BACKEND = getattr(raylib, '_BACKEND', '')
+ EVENT = struct.Struct('llHHi')
+ TOUCH_DEVICE = '/dev/input/by-path/platform-894000.i2c-event'
+ LABELS = {
+@@ -160,6 +161,12 @@ def draw_screen(font, width, height, state, reason, address, pages, page=0):
+   return *buttons, rl.Rectangle(x + 16 * scale, y + 63 * scale, 504 * scale, 79 * scale)
+ 
+ 
++def poll_recovery_input():
++  # The COMMA backend does not update input in end_drawing; desktop does.
++  if RAYLIB_BACKEND == "comma":
++    rl.poll_input_events()
++
++
+ def main():
+   parser = argparse.ArgumentParser()
+   parser.add_argument('--reason', default='Startup failed')
+@@ -226,8 +233,7 @@ def main():
+       rebuild_button, update_button, error_area = draw_screen(font, width, height, update.state, reason, label_with_port(6999), pages, page)
+       rl.end_drawing()
+       # Poll the loaded COMMA backend even if evdev is unavailable; desktop already polls.
+-      if RAYLIB_BACKEND == "comma":
+-        rl.poll_input_events()
++      poll_recovery_input()
+       if touch.pressed():
+         position = rl.get_touch_position(0) if touch.fd is not None else rl.get_mouse_position()
+         hit = next((name for name, area in (('rebuild', rebuild_button), ('update', update_button), ('error', error_area))
