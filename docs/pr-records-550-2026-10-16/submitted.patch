@@ -1,0 +1,74 @@
+From 49fc4f6c0378026e3dbd49d81b19ab683bd2e9bf Mon Sep 17 00:00:00 2001
+From: chant555 <186367192+chant555@users.noreply.github.com>
+Date: Thu, 15 Oct 2026 18:41:10 +0900
+Subject: [PATCH 1/2] Smooth laneless curvature more in slow traffic
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+In the laneless path controlsd smooths modelV2.action.desiredCurvature with a fixed
+0.1 s time constant (LatSmoothSec only applies to the lane-line path), and the ISO
+curvature-rate limit is loose at low speed. In 7-25 km/h traffic this passes short
+0.5-2 Hz left-right model jitter straight to the wheel (about 3.5 deg peak-to-peak;
+the desired curvature explains ~91 % of the output swing).
+
+Use 0.3 s up to 25 km/h, ramping back to 0.1 s at 35 km/h.
+A 100 Hz rlog replay of two C4 drives (tau=0.1 reproduces the logged
+desiredCurvature, correlation 1.0) gives 25 % lower high-passed curvature in the
+7-25 km/h band, about 0.2 s extra delay and 93-95 % peak curvature on deliberate
+low-speed turns.
+
+An earlier version kept 0.1 s below 4 km/h (ramping up to 7 km/h) for tight
+manoeuvres. Drives with it showed straight-road command-angle jitter of 1.3-2.3 deg
+(high-passed RMS) below 4 km/h against 0.4 deg in the smoothed band, while the extra
+0.2 s there is under 0.2 m of travel at 3 km/h, so the low-speed exception is dropped.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+Docs-Not-Needed: 일반 레인리스 경로의 내부 평활화 계수만 변경하며, 설정 항목과 기존 설정의 의미·적용 경로는 변경하지 않습니다.
+---
+ openpilot/selfdrive/controls/controlsd.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/openpilot/selfdrive/controls/controlsd.py b/openpilot/selfdrive/controls/controlsd.py
+index 623f9548f8..349d87d93b 100644
+--- a/openpilot/selfdrive/controls/controlsd.py
++++ b/openpilot/selfdrive/controls/controlsd.py
+@@ -220,7 +220,10 @@ def smooth_value(val, prev_val, tau):
+         curvature = get_lag_adjusted_curvature(self.CP, CS.vEgo, lat_plan.psis, lat_plan.curvatures, steer_actuator_delay + lat_smooth_seconds, lat_plan.distances)
+         new_desired_curvature = smooth_value(curvature, self.desired_curvature, lat_smooth_seconds)
+     else:      
+-      new_desired_curvature = smooth_value(model_v2.action.desiredCurvature, self.desired_curvature, 0.1)
++      # Damp short left-right model curvature jitter in slow traffic (up to 25 km/h); return to
++      # 0.1 s above 35 km/h so highway response is unchanged.
++      laneless_tau = float(np.interp(CS.vEgo * 3.6, [25., 35.], [0.3, 0.1]))
++      new_desired_curvature = smooth_value(model_v2.action.desiredCurvature, self.desired_curvature, laneless_tau)
+ 
+     self.desired_curvature, curvature_limited = clip_curvature(CS.vEgo, self.desired_curvature, new_desired_curvature, lp.roll)
+ 
+
+From e58f2c49b38acaeb75cb574165dfb9e930b98eb1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=EB=B4=89=EC=A0=95=EB=A0=B9?= <myer.oh@gmail.com>
+Date: Thu, 15 Oct 2026 18:57:12 +0900
+Subject: [PATCH 2/2] Use CV.MS_TO_KPH for the laneless smoothing speed
+
+Match the existing km/h conversion in controlsd; no behavior change.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ openpilot/selfdrive/controls/controlsd.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/openpilot/selfdrive/controls/controlsd.py b/openpilot/selfdrive/controls/controlsd.py
+index 349d87d93b..e97c7f2f39 100644
+--- a/openpilot/selfdrive/controls/controlsd.py
++++ b/openpilot/selfdrive/controls/controlsd.py
+@@ -222,7 +222,7 @@ def smooth_value(val, prev_val, tau):
+     else:      
+       # Damp short left-right model curvature jitter in slow traffic (up to 25 km/h); return to
+       # 0.1 s above 35 km/h so highway response is unchanged.
+-      laneless_tau = float(np.interp(CS.vEgo * 3.6, [25., 35.], [0.3, 0.1]))
++      laneless_tau = float(np.interp(CS.vEgo * CV.MS_TO_KPH, [25., 35.], [0.3, 0.1]))
+       new_desired_curvature = smooth_value(model_v2.action.desiredCurvature, self.desired_curvature, laneless_tau)
+ 
+     self.desired_curvature, curvature_limited = clip_curvature(CS.vEgo, self.desired_curvature, new_desired_curvature, lp.roll)

@@ -1,0 +1,37 @@
+{
+  "captured_at_utc": "2026-10-16T05:35:04.113516+00:00",
+  "url": "https://github.com/ajouatom/openpilot/pull/550",
+  "state_before": "open",
+  "head_sha": "e58f2c49b38acaeb75cb574165dfb9e930b98eb1",
+  "counts": {
+    "comments": 1,
+    "reviews": 0,
+    "review-comments": 0,
+    "commits": 2,
+    "files": 1,
+    "timeline": 4
+  },
+  "sha256": {
+    "reviews-pages.json": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05",
+    "comments.json": "0d3439f83859188c6fee5e778e00f8952a48be21ef6c344f3d463b49ba3682d4",
+    "PR-body.md": "6b1d0e039b181dcddd9daf28dc102662fa59a1148f963ecb6d9f5e90adeded18",
+    "files-pages.json": "129b1114e550ae074fd741d435201fd797cdecd80a353763f438bf6b961c1d46",
+    "commits-pages.json": "0c0e89c50479243097fc71d2ed143ae8dca1539aa8854eae34223a423ab0c754",
+    "comments-pages.json": "f89496601ab840c78c9a397b1662d2c094ab4197a0df3dbf99eefb0d2e34c5ae",
+    "review-comments.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "submitted.diff": "3b0ff7e84ba191c1c1657331730a993d7fb8e9d1ef01635e8fef41e5e73daa39",
+    "submitted.patch": "68e9a1be14062cb2fa353efb7d7e3dbfaec588e00e715a6e1dd350f0698672d7",
+    "review-comments-pages.json": "cf1cbb66a638b4860a516671fb74850e6ccf787fe6c4c8d29e9c04efe880bd05",
+    "timeline-pages.json": "5aaeaf9dc7ec5423f2faa9be55ad99056f5b1a5982419945c099de9eae483b90",
+    "reviews.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "timeline.json": "05252739a92467f18f1bcf3003d44597cc8dd1183075afdceb63879fd3f33486",
+    "pull-before-close.json": "aa279b5599418e718da69c3db3a8f07aaa6f86c033ee0dd531dcec0ed0a3aaa8",
+    "commits.json": "4c5e307dcd8dde0d60308f62f9b3ee186bc5b07a912597c118c9c4602ac7a56a",
+    "conversation.md": "ae272c6c114b18761ce5362471182575e5fe5bdfde476d7c8e51d28f028c2de7",
+    "files.json": "7ebd9b754a320359b64965cb652f9fd01c551da476e8fb713bae819871389270",
+    "pull-after-close.json": "5e62aa6d08ef087e756df469e7b476a0ac37b6e90b3d41d6b3d73e11752995f6"
+  },
+  "closed_at": "2026-10-16T05:35:34Z",
+  "state_after": "closed",
+  "merged": false
+}
