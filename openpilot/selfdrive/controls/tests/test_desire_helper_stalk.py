@@ -43,11 +43,14 @@ class TestDesireHelperStalkRequest:
     self.carrot_man = SimpleNamespace(atcType="", carrotCmdIndex=0, carrotCmd="", carrotArg="")
     self.left_count = 0
 
-  def update(self, left_blinker=True, lane_change_prob=0.5, press=False, counters=True, lever=0, v_kph=90.0, lines=None):
+  def update(self, left_blinker=True, lane_change_prob=0.5, press=False, counters=True, lever=0, v_kph=90.0, lines=None,
+             lamp=None, torque=0.0, steering_pressed=False):
     if press:
       self.left_count = (self.left_count + 1) % 256
     car = SimpleNamespace(canValid=True, leftBlinker=left_blinker, rightBlinker=False, vEgo=v_kph / 3.6, aEgo=0.0,
-                          trailerConnected=False, steeringTorque=0.0, steeringPressed=False, blinkerLever=lever)
+                          trailerConnected=False, steeringTorque=torque, steeringPressed=steering_pressed, blinkerLever=lever)
+    if lamp is not None:
+      car.blinkerLamp = lamp
     if counters:
       car.leftBlinkerStalkCount, car.rightBlinkerStalkCount = self.left_count, 0
     model = SimpleNamespace(laneLines=[SimpleNamespace(y=[y]) for y in (-5.0, *lines, 5.0)]) if lines else SimpleNamespace()
@@ -134,7 +137,7 @@ class TestDesireHelperStalkRequest:
     self.update()
     assert self.helper.blinker_hold_direction == LCD.none
 
-  def test_blocked_queued_request_is_dropped_after_five_flashes(self):
+  def test_blocked_queued_request_is_dropped_after_four_flashes(self):
     self.start_and_cross()
     self.cross(press_after_s=0.5)
     side = self.helper.left
@@ -274,7 +277,7 @@ class TestBlinkerLatchedTurn:
 
 
 class TestLaneChangeLeverWait:
-  """LaneChangeLeverWait: a blocked one-touch request holds the lamp for 5 flashes from the press, then gives up."""
+  """LaneChangeLeverWait: a blocked request waits for four nominal flash periods."""
   update = TestDesireHelperStalkRequest.update
 
   def setup_method(self):
@@ -301,7 +304,7 @@ class TestLaneChangeLeverWait:
     assert self.helper.blinker_hold_direction == LCD.left
     assert self.wait(LEVER_REQUEST_WAIT_S - 0.2) == LCS.preLaneChange
     assert self.helper.blinker_hold_direction == LCD.left
-    assert self.wait(0.3) == LCS.off                        # 5 flashes after the press: dropped
+    assert self.wait(0.3) == LCS.off                        # four nominal flash periods: dropped
     assert self.helper.blinker_hold_direction == LCD.none
     self.block(False)
     assert self.wait(1.0) == LCS.off                        # lamp still flashing: no restart from it
@@ -329,14 +332,81 @@ class TestLaneChangeLeverWait:
     assert self.helper.blinker_hold_direction == LCD.none
 
   def test_lane_change_delay_extends_the_wait(self):
-    self.helper.laneChangeDelay = 5.0                       # longer than the 5 flashes: must not give up first
+    self.helper.laneChangeDelay = 5.0                       # legacy car without physical lamp feedback
     self.block(False)
     self.press()
     assert self.wait(LEVER_REQUEST_WAIT_S + 0.5) == LCS.preLaneChange
-    assert self.wait(1.0) == LCS.laneChangeStarting
+    assert self.wait(1.6) == LCS.laneChangeStarting
 
   def test_off_keeps_waiting_on_the_lamp(self):
     self.helper.laneChangeLeverWait = False
     self.press()
     assert self.wait(LEVER_REQUEST_WAIT_S + 1.0) == LCS.preLaneChange
+    assert self.helper.blinker_hold_direction == LCD.none
+
+
+class TestOneTouchExpiry:
+  setup_method = TestDesireHelperStalkRequest.setup_method
+  update = TestDesireHelperStalkRequest.update
+  finish = TestDesireHelperStalkRequest.finish
+
+  def test_fresh_press_at_the_old_queue_deadline_gets_a_new_budget(self):
+    self.update(left_blinker=False)
+    self.helper.lane_change_state = LCS.preLaneChange
+    self.helper.queued_lane_change = 1
+    self.helper.queued_wait = LEVER_REQUEST_WAIT_S - DT_MDL
+    self.helper.next_lane_change = False
+    self.helper.prev_desire_enabled = True
+    assert self.update(press=True) == LCS.laneChangeStarting
+
+  def test_queue_deadline_revokes_start_even_when_obstacle_clears_on_that_frame(self):
+    self.update(left_blinker=False)
+    self.helper.lane_change_state = LCS.preLaneChange
+    self.helper.queued_lane_change = 1
+    self.helper.queued_wait = LEVER_REQUEST_WAIT_S - DT_MDL
+    self.helper.next_lane_change = False
+    self.helper.prev_desire_enabled = True
+    assert self.update() == LCS.off  # side is available, but the queued permission expired
+    assert self.helper.queued_lane_change == 0
+    assert self.helper.next_lane_change
+    assert self.helper.blinker_hold_direction == LCD.none
+    for _ in range(100):
+      assert self.update() == LCS.off  # residual stock flashes cannot rearm it
+    assert self.update(press=True) == LCS.preLaneChange
+    assert self.update() == LCS.laneChangeStarting
+
+  def test_four_lights_release_hold_without_cancelling_the_current_change(self):
+    self.update(left_blinker=False, lamp=0)
+    assert self.update(press=True, lever=1, lamp=1) == LCS.preLaneChange
+    assert self.update(lamp=1) == LCS.laneChangeStarting
+    self.helper.queued_lane_change = 1
+    for _ in range(3):
+      self.update(lamp=0)
+      assert self.update(lamp=1) == LCS.laneChangeStarting
+    assert self.helper.queued_lane_change == 0
+    assert self.helper.blinker_hold_direction == LCD.none
+    assert self.helper.desire == log.Desire.laneChangeLeft
+    for _ in range(15):
+      assert self.update(lamp=0) == LCS.laneChangeStarting
+    self.finish()
+    for _ in range(30):
+      assert self.update(lamp=1) == LCS.off  # no next change on the remaining signal
+
+  def test_expired_active_change_still_allows_opposite_torque_cancellation(self):
+    self.update(left_blinker=False, lamp=0)
+    self.update(press=True, lever=1, lamp=1)
+    self.update(lamp=1)
+    for _ in range(3):
+      self.update(lamp=0)
+      self.update(lamp=1)
+    assert self.update(lamp=1, torque=-1000, steering_pressed=True) == LCS.off
+
+  def test_maximum_also_applies_with_lever_wait_off_and_long_start_delay(self):
+    self.helper.laneChangeLeverWait = False
+    self.helper.laneChangeDelay = 5.0
+    self.update(left_blinker=False, lamp=0)
+    self.update(press=True, lever=1, lamp=1)
+    for _ in range(100):
+      self.update(lamp=0)
+    assert self.helper.lane_change_state == LCS.off
     assert self.helper.blinker_hold_direction == LCD.none
