@@ -10,6 +10,7 @@ from opendbc.car.hyundai.stopping import MOVING_SPEED
 from openpilot.common.params import Params
 from openpilot.common.filter_simple import FirstOrderFilter
 from opendbc.car.common.conversions import Conversions as CV
+from opendbc.car.common.blinker import OneTouchBlinkerLimit
 from openpilot.cereal import log
 
 LaneChangeState = log.LaneChangeState
@@ -779,7 +780,7 @@ BLINK_HOLD_CROSS_JUMP_M = 1.5     # ... then moved this far away again: the mode
 BLINK_HOLD_RELEASE_PROGRESS = 0.6  # release once the car centre has moved this fraction of a lane width into the new lane
 
 
-def _blink_hold_side(md, desire, state):
+def _blink_hold_side(md, desire, state, one_touch_limit=None):
   """Turn-signal hold for ADRV_0x1ea: 3 (left), 4 (right) or 0.
 
   DesireHelper's request (modelV2.meta.laneChangeBlinkerHold) wins: it holds the lamp while a lever-requested
@@ -789,7 +790,10 @@ def _blink_hold_side(md, desire, state):
   change_hold = _blink_hold_change(md, desire, state)
   meta = getattr(md, "meta", None) if md is not None else None
   requested = str(getattr(meta, "laneChangeBlinkerHold", "none"))
-  return 3 if requested == "left" else 4 if requested == "right" else change_hold
+  hold = 3 if requested == "left" else 4 if requested == "right" else change_hold
+  if one_touch_limit is not None and not one_touch_limit.allows({3: 1, 4: 2}.get(hold, 0)):
+    return 0
+  return hold
 
 
 def _blink_hold_change(md, desire, state):
@@ -960,6 +964,11 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
                          disp_angle, left_lane_warning, right_lane_warning,
                          enable_corner_radar, stopping, canfd_debug, paddle_mode, hud_lateral=None):
   ret = []
+  # Update at the controller rate, including frames without a cluster transmission.
+  # Per-car state prevents a previous controller instance from leaking a press budget.
+  if not hasattr(CS, "one_touch_blinker_limit"):
+    CS.one_touch_blinker_limit = OneTouchBlinkerLimit()
+  CS.one_touch_blinker_limit.update(CS.out, DT_CTRL)
   interlock_active = longitudinal_interlock_active(CS)
   display_lead = _display_lead(getattr(CS, "radarState", None))
   lead_visible = display_lead is not None
@@ -1138,10 +1147,14 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
         values = copy.copy(CS.adrv_0x1ea)
         rx_counter = values.pop("COUNTER", None)
         # blinker hold: the confirmed lane change until the body is across (see _blink_hold_side)
-        hold = _blink_hold_side(md, desire, create_ccnc_messages.__dict__.setdefault("_blink_hold", {}))
+        hold = _blink_hold_side(md, desire, create_ccnc_messages.__dict__.setdefault("_blink_hold", {}),
+                                CS.one_touch_blinker_limit)
         external_hold = getattr(hud_control, "physicalBlinkerHold", 0)
         if external_hold in (1, 2, 3):
-          hold = {1:0, 2:3, 3:4}[external_hold]
+          hold = {1: 0, 2: 3, 3: 4}[external_hold]
+        # Apply the physical one-touch budget after every hold source.
+        if not CS.one_touch_blinker_limit.allows({3: 1, 4: 2}.get(hold, 0)):
+          hold = 0
         values['LEFT_BLINK_HOLD'] = 1 if hold == 3 else 0
         values['RIGHT_BLINK_HOLD'] = 1 if hold == 4 else 0
 
