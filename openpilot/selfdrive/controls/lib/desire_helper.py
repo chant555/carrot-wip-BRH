@@ -3,6 +3,7 @@ from openpilot.common.constants import CV
 from openpilot.common.realtime import DT_MDL
 from openpilot.common.params import Params
 from openpilot.selfdrive.carrot.bluetooth.model import CommandReader
+from opendbc.car.common.blinker import OneTouchBlinkerLimit
 
 from openpilot.selfdrive.controls.lib.desire_lib.constants import (
   LaneChangeState, LaneChangeDirection, TurnDirection,
@@ -63,6 +64,8 @@ class DesireHelper:
     self.finishing_timer = 0.0
     self.queued_wait = 0.0
     self.lever_wait = LeverRequestWait()
+    self.one_touch_limit = OneTouchBlinkerLimit()
+    self.expired_queued_side = BLINKER_NONE
     self.lever_forced_turn = LeverForcedTurn()
     self.crossing = LaneCrossing()
     self.blinker_hold_direction = LaneChangeDirection.none  # modelV2.meta.laneChangeBlinkerHold
@@ -286,6 +289,26 @@ class DesireHelper:
     driver_st, driver_changed, driver_enabled = self._update_driver_blinker(carstate)
     stalk_press = self._update_stalk(carstate)
     lever = getattr(carstate, "blinkerLever", 0)
+    self.one_touch_limit.update(carstate, DT_MDL)
+    if stalk_press != BLINKER_NONE or driver_st != self.expired_queued_side or lever == 2:
+      self.expired_queued_side = BLINKER_NONE
+    # Expire BEFORE evaluating the start gate: an obstacle clearing on the deadline
+    # frame must not resurrect a queued request. Leave an ongoing change alone.
+    if self.lane_change_state == LaneChangeState.preLaneChange and self.queued_lane_change != BLINKER_NONE:
+      if stalk_press == self.queued_lane_change:
+        self.queued_wait = 0.0  # a fresh press owns a new budget, including on the old deadline
+      self.queued_wait += DT_MDL
+      if self.queued_wait >= LEVER_REQUEST_WAIT_S - 1e-9:
+        self.expired_queued_side = self.queued_lane_change
+    request_expired = (not self.one_touch_limit.allows(driver_st) or
+                       (driver_st != BLINKER_NONE and driver_st == self.expired_queued_side))
+    if request_expired:
+      self.queued_lane_change = BLINKER_NONE
+      self.next_lane_change = True  # revoke the queued request's torque-confirmation exemption
+      self.lever_wait.side = BLINKER_NONE
+      stalk_press = BLINKER_NONE
+      if self.lane_change_state in (LaneChangeState.off, LaneChangeState.preLaneChange):
+        driver_enabled = driver_changed = False
     forced_turn = self.lever_forced_turn.update(lever, getattr(carstate, "blinkerLamp", 0))
     if self.lever_wait.update(self.laneChangeLeverWait, stalk_press, lever, driver_st, self.lane_change_state,
                               self.laneChangeDelay):
@@ -341,7 +364,8 @@ class DesireHelper:
       )
     else:
       self.auto_lane_change_enable = False
-      self.next_lane_change = False
+      if not request_expired:
+        self.next_lane_change = False
 
     # ───────────────────────── FSM ─────────────────────────
     if not lateral_active or self.lane_change_timer > LANE_CHANGE_TIME_MAX or trailer_maneuver_blocked:
@@ -542,9 +566,7 @@ class DesireHelper:
     if self.lane_change_state in (LaneChangeState.off, LaneChangeState.preLaneChange):
       self.crossing = LaneCrossing()
     # A queued request lives until the next change starts; waiting in preLaneChange (blocked) it gets the same
-    # 5 flashes as a one-touch press, and it ends if the lamp side changes or everything goes off.
-    if self.lane_change_state == LaneChangeState.preLaneChange and self.queued_lane_change != BLINKER_NONE:
-      self.queued_wait += DT_MDL
+    # bounded wait as a one-touch press, and it ends if the lamp side changes or everything goes off.
     if self.lane_change_state == LaneChangeState.off or        (self.lane_change_state == LaneChangeState.laneChangeStarting and
         prev_lane_change_state == LaneChangeState.preLaneChange) or        (self.lane_change_state == LaneChangeState.preLaneChange and
         (self.queued_wait >= LEVER_REQUEST_WAIT_S or self.queued_lane_change != blinker_state)):
@@ -555,6 +577,8 @@ class DesireHelper:
       # The lamp of a press made during a change may stop before that change ends (2026-10-05: ~2.5 s after the
       # press), which would drop the request just as it becomes due: keep it lit until the queued change starts.
       hold = self.queued_lane_change
+    if request_expired:
+      hold = BLINKER_NONE
     self.blinker_hold_direction = {BLINKER_LEFT: LaneChangeDirection.left,
                                    BLINKER_RIGHT: LaneChangeDirection.right}.get(hold, LaneChangeDirection.none)
 

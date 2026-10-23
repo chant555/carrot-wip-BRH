@@ -6,13 +6,14 @@ Both rules are opt-in and live here so the lane-change FSM only asks two questio
 - LaneCrossing: when the car centre crossed the line, so a press after it can ask for the next lane change.
 """
 from openpilot.common.realtime import DT_MDL
+from opendbc.car.common.blinker import ONE_TOUCH_MAX_FLASHES, ONE_TOUCH_MAX_S
 from openpilot.selfdrive.controls.lib.desire_lib.constants import BLINKER_NONE, LaneChangeState
 
 LEVER_RELEASED, LEVER_ONE_TOUCH, LEVER_LATCHED = 0, 1, 2
 
 TURN_SIGNAL_FLASH_S = 0.8   # one lamp on/off cycle (2026-10-04 lever test, BLINKERS LAMP_ALT edges 0.79-0.81 s)
-LEVER_REQUEST_FLASHES = 5
-LEVER_REQUEST_WAIT_S = LEVER_REQUEST_FLASHES * TURN_SIGNAL_FLASH_S
+LEVER_REQUEST_FLASHES = ONE_TOUCH_MAX_FLASHES
+LEVER_REQUEST_WAIT_S = ONE_TOUCH_MAX_S
 
 
 def lever_maneuver(lever: int, v_ego: float, turn_speed_max: float, forced_turn: bool = False):
