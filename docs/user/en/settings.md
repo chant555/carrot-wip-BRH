@@ -130,7 +130,7 @@ These 124 settings can affect driving behavior. Change one item at a time.
 - Always Lateral waits for the first confirmation of valid model, vehicle-parameter, pose, and other required inputs after system startup. Once confirmed, this startup check ends; later input interruptions or disengagement/reengagement do not rearm it. Existing runtime safety handling remains unchanged. Expiry of the startup waiting period alone does not pass this check.
 - `AutoEngage`: `0` off, `1` lateral on, `2` lateral on with cruise ready.
 - `TeslaAutoTurnSignals`: default OFF, reboot required. Uses existing ATC requests on supported Model 3/Y with vehicle CAN and valid physical stalk input. It does not authorize steering or departure. See [Tesla automatic turn signals](tesla.md#automatic-turn-signals) for prerequisites and closed-course validation.
-- `AutoCruiseControl` covers Hyundai/Kia auto-cruise and soft-hold behavior.
+- `AutoCruiseControl` covers Hyundai/Kia auto-cruise and soft-hold behavior. On IONIQ 5 PE with openpilot longitudinal control, soft hold stays independent without automatically engaging cruise. See [Independent soft hold](cruise-gap.md#independent-soft-hold).
 - `DisableMinSteerSpeed` is vehicle-specific and relates to low-speed steering restrictions on SMDPS-equipped cars.
 
 ### Buttons and presets — 15 settings
