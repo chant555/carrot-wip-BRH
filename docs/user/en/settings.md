@@ -129,7 +129,7 @@ These 123 settings can affect vehicle motion. Change one item at a time.
 - `AlwaysLateral` permits lateral control even when cruise is not engaged. On supported Tesla vehicles it can also steer at true standstill in a forward-driving gear; moving below the minimum steering speed remains restricted. See [Tesla engagement](tesla.md#engagement-and-standstill).
 - Always Lateral waits for the first confirmation of valid model, vehicle-parameter, pose, and other required inputs after system startup. Once confirmed, this startup check ends; later input interruptions or disengagement/reengagement do not rearm it. Existing runtime safety handling remains unchanged. Expiry of the startup waiting period alone does not pass this check.
 - `AutoEngage`: `0` off, `1` lateral on, `2` lateral on with cruise ready.
-- `AutoCruiseControl` covers Hyundai/Kia auto-cruise and soft-hold behavior.
+- `AutoCruiseControl` covers Hyundai/Kia auto-cruise and soft-hold behavior. On IONIQ 5 PE with openpilot longitudinal control, soft hold stays independent without automatically engaging cruise. See [Independent soft hold](cruise-gap.md#independent-soft-hold).
 - `DisableMinSteerSpeed` is vehicle-specific and relates to low-speed steering restrictions on SMDPS-equipped cars.
 
 ### Buttons and presets — 15 settings

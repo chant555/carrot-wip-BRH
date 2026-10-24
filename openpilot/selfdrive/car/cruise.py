@@ -8,6 +8,7 @@ from openpilot.selfdrive.carrot.cruise_gap import cruise_gap_levels, next_gap_pe
 from openpilot.selfdrive.carrot.bluetooth.model import BLUETOOTH_CANCEL, CommandReader, REMOTE_BUTTONS
 from openpilot.selfdrive.car.toyota_pcm_speed import ToyotaPcmSetSpeedSync
 
+from opendbc.car.hyundai.values import CAR as HyundaiCar
 from opendbc.car import structs
 GearShifter = structs.CarState.GearShifter
 
@@ -848,11 +849,28 @@ class VCruiseCarrot:
     else:
       return False, d_final
 
+  def _independent_soft_hold(self):
+    cp = getattr(self, "CP", None)
+    return (getattr(cp, "carFingerprint", None) == HyundaiCar.HYUNDAI_IONIQ_5_PE
+            and getattr(cp, "openpilotLongitudinalControl", False) and not cp.pcmCruise)
+
   def _engage_soft_hold(self):
     self._soft_hold_active = 2
+    if self._independent_soft_hold():
+      # Retain manual control after release too: gas/lead automatic resume must
+      # not turn an independently held stop into a cruise engagement.
+      self._cruise_cancel_state = True
+      self._cruise_ready = False
+      self.carrot_cruise_active = False
+      return
     self._cruise_control(1, -1, "Cruise on (soft hold)", allow_cancel_state=self.soft_hold_on_cancel)
 
   def _update_cruise_state(self, CS, CC, v_cruise_kph):
+    if self._independent_soft_hold() and self._soft_hold_active > 0:
+      if not CC.enabled and self._brake_pressed_count == -1:
+        self._engage_soft_hold()
+      # Do not run automatic gas/lead/speed engagement while a hold owns the stop.
+      return v_cruise_kph
     if not CC.enabled:
       #self._pause_auto_speed_up = False
       if self._brake_pressed_count == -1 and self._soft_hold_active > 0:
@@ -990,7 +1008,10 @@ class VCruiseCarrot:
         self._add_log(f"{self.v_cruise_kph} Cruise speed at brake")
       soft_hold_available = CS.cruiseState.available and self.autoCruiseControl != 0 and not self.CP.pcmCruise and \
                             self.autoCruiseControl_cancel_timer == 0 and \
-                            (not self._cruise_cancel_state or self.soft_hold_on_cancel)
+                            (not self._cruise_cancel_state or self.soft_hold_on_cancel or self._independent_soft_hold())
+      if self._independent_soft_hold():
+        soft_hold_available = (soft_hold_available and CS.canValid and not CS.gasPressed
+                               and not is_hold_interlock_active(CS) and not self._steering_interlock_active)
       self._soft_hold_count = self._soft_hold_count + 1 if soft_hold_available and CS.vEgo < 0.1 and CS.gearShifter == GearShifter.drive else 0
       if not soft_hold_available:
         self._soft_hold_active = 0
