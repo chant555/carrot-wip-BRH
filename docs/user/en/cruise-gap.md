@@ -429,3 +429,15 @@ With ample measured and predicted clearance, ACC may temporarily relax the comfo
 When a previously confirmed moving front vehicle is leaving your path and vision has switched to a farther vehicle, ACC can gradually reduce the following-distance demand for the future period after its predicted departure. The radar track and its measured distance and speed remain available.
 
 The adjustment requires continuous measured outward motion and sufficient separation until the vehicle body clears the path. It affects only predictions after clearance plus 0.30 seconds, and is limited to half the selected time gap, at most 0.50 seconds or 8 m. Closer leadTwo vehicles, traffic stops, cruise limits, and the original collision-warning trajectory remain in the calculation. Loss of evidence cancels the adjustment; it does not operate during pedal override, in blended mode, or for stationary or strongly braking leads. See [radar behavior](radar.md).
+
+
+<a id="independent-soft-hold"></a>
+## Independent soft hold on IONIQ 5 PE
+
+This user-branch behavior applies only to `HYUNDAI_IONIQ_5_PE` with openpilot longitudinal control. Other vehicles and stock-cruise paths keep their existing behavior.
+
+With nonzero `AutoCruiseControl`, cruise available, drive selected, and speed below 0.1 m/s, holding the brake for about 0.61 seconds arms the hold after the existing post-shift delay. Canceled cruise and `SoftHoldOnCancel` do not prevent arming. Gas input, invalid vehicle communication, stock auto hold, parking brake, and the large-steering-angle interlock prevent new arming.
+
+Releasing the brake with cruise off maintains only the hold without requesting cruise engagement. The vehicle brake controller still needs its stop-control request. Pressing the accelerator releases the hold and leaves automatic cruise resume canceled until an explicit existing cruise-button action. This feature does not forcibly disengage cruise that is already active.
+
+Desktop state-transition and control-message checks do not establish physical brake-holding performance. Vehicle validation remains separate.
