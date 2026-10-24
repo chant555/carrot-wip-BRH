@@ -441,3 +441,5 @@ With nonzero `AutoCruiseControl`, cruise available, drive selected, and speed be
 Releasing the brake with cruise off maintains only the hold without requesting cruise engagement. The vehicle brake controller still needs its stop-control request. Pressing the accelerator releases the hold and leaves automatic cruise resume canceled until an explicit existing cruise-button action. This feature does not forcibly disengage cruise that is already active.
 
 Desktop state-transition and control-message checks do not establish physical brake-holding performance. Vehicle validation remains separate.
+
+A brief second brake press and release still cancels soft hold without automatically engaging cruise. Holding the brake beyond the existing 60-cycle threshold arms the hold again. This uses the brake-pressed signal and duration, not pedal pressure magnitude.
