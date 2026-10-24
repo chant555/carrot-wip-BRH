@@ -120,3 +120,43 @@ def test_independent_state_drives_existing_zero_accel_stop_request():
     assert values['StopReq'] == values['ACCMode'] == 1
     assert values['aReqRaw'] == values['aReqValue'] == 0.
     assert h._activate_cruise == 0
+
+
+@pytest.mark.parametrize('press_frames,expected_hold', [(1, 0), (30, 0), (60, 0), (61, 2)])
+def test_second_brake_tap_releases_hold_but_long_press_rearms(press_frames, expected_hold):
+  from opendbc.car.hyundai.tests.test_stopping import make_cs, send
+  from opendbc.car.hyundai.stopping import CanfdStopping
+  h, cs = setup_hold()
+  h.params = NS(get_bool=lambda key: False)
+  h.v_cruise_kph = 30
+  h.v_ego_kph_set = 0
+  h.autoGasTokSpeed = 10
+  h.xState = 0
+  h.d_rel = 0
+  h.desiredSpeed = 30
+  h._auto_speed_up = lambda speed: speed
+  cc = car.CarControl(enabled=False)
+  for _ in range(61): h._prepare_brake_gas(cs, cc)
+  cs.brakePressed = False
+  h._prepare_brake_gas(cs, cc)
+  h._update_cruise_state(cs, cc, 30)
+  assert h._soft_hold_active == 2
+
+  cs.brakePressed = True
+  for _ in range(press_frames):
+    h._prepare_brake_gas(cs, cc)
+    h._update_cruise_state(cs, cc, 30)
+  cs.brakePressed = False
+  for _ in range(3):
+    h._prepare_brake_gas(cs, cc)
+    h._update_cruise_state(cs, cc, 30)
+    assert h._soft_hold_active == expected_hold
+    assert h._activate_cruise == 0
+
+  vehicle = make_cs()
+  vehicle.softHoldActive = h._soft_hold_active
+  vehicle.out.brakePressed = False
+  vehicle.out.vEgo = vehicle.out.vEgoRaw = 0.
+  vehicle.out.wheelSpeeds = NS(fl=0., fr=0., rl=0., rr=0.)
+  values = send(True, CanfdStopping(), vehicle, enabled=False, stopping=False, accel=0.)
+  assert values['StopReq'] == int(expected_hold > 0)
