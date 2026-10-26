@@ -327,7 +327,7 @@ class VCruiseCarrot:
     self.update_params(is_metric)
     self.frame += 1
     if CS.gearShifter != GearShifter.drive:
-      self.autoCruiseControl_cancel_timer = 20 * 100  # 20 sec
+      self.autoCruiseControl_cancel_timer = 15 * 100  # 15 sec
     else:
       self.autoCruiseControl_cancel_timer = max(0, self.autoCruiseControl_cancel_timer - 1)
 
@@ -358,6 +358,7 @@ class VCruiseCarrot:
     if not self._cruise_available:
       self._cruise_ready = False
       self._paddle_decel_active = False
+    if not self._soft_hold_available(CS):
       self._soft_hold_count = 0
       self._soft_hold_active = 0
     self._hold_interlock_active = is_hold_interlock_active(CS)
@@ -854,6 +855,11 @@ class VCruiseCarrot:
     return (getattr(cp, "carFingerprint", None) == HyundaiCar.HYUNDAI_IONIQ_5_PE
             and getattr(cp, "openpilotLongitudinalControl", False) and not cp.pcmCruise)
 
+  def _soft_hold_available(self, CS):
+    if self._independent_soft_hold():
+      return bool(CS.independentSoftHoldReady and CS.canValid)
+    return CS.cruiseState.available
+
   def _engage_soft_hold(self):
     self._soft_hold_active = 2
     if self._independent_soft_hold():
@@ -1006,7 +1012,7 @@ class VCruiseCarrot:
       if self._brake_pressed_count == 1 and self.enabled_last:
         self._v_cruise_kph_at_brake = self.v_cruise_kph
         self._add_log(f"{self.v_cruise_kph} Cruise speed at brake")
-      soft_hold_available = CS.cruiseState.available and self.autoCruiseControl != 0 and not self.CP.pcmCruise and \
+      soft_hold_available = self._soft_hold_available(CS) and self.autoCruiseControl != 0 and not self.CP.pcmCruise and \
                             self.autoCruiseControl_cancel_timer == 0 and \
                             (not self._cruise_cancel_state or self.soft_hold_on_cancel or self._independent_soft_hold())
       if self._independent_soft_hold():

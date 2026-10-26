@@ -346,6 +346,11 @@ class CarState(CarStateBase):
       return cp.vl_all["CRUISE_BUTTON_ALT"]["CruiseSwMain"]
     return cp.vl_all["CLU11"]["CF_Clu_CruiseSwMain"]
 
+  def _independent_soft_hold_ready(self):
+    return (self.CP.carFingerprint == CAR.HYUNDAI_IONIQ_5_PE
+            and self.CP.openpilotLongitudinalControl and not self.CP.pcmCruise
+            and self.controls_ready_count >= READY_COUNT_OK)
+
   def _update_canfd_main_enabled(self, cruise_button, main_button_released):
     if cruise_button in (Buttons.RES_ACCEL, Buttons.SET_DECEL) and self.CP.openpilotLongitudinalControl:
       self.main_enabled = True
@@ -1441,6 +1446,7 @@ class CarState(CarStateBase):
     self._update_canfd_main_enabled(cruise_button, main_button_released)
     # CAN FD cars enable on main button press, set available if no TCS faults preventing engagement
     ret.cruiseState.available = self.main_enabled and self.controls_ready_count >= READY_COUNT_OK #cp.vl["TCS"]["ACCEnable"] == 0
+    ret.independentSoftHoldReady = self._independent_soft_hold_ready()
 
     avh_state = cp.vl["ESP_STATUS"]["AVH_Sta"]
     self.canfdSccHoldActive = avh_state == 1
