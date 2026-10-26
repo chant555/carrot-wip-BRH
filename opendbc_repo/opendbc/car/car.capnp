@@ -283,6 +283,7 @@ struct CarState {
   blinkerLever @102 :UInt8;           # turn-signal lever position: 0 released, 1 one-touch (half) detent, 2 latched
   blinkerLamp @103 :UInt8;            # turn-signal lamp right now (no hold): 0 dark, 1 left lit, 2 right lit
 
+  independentSoftHoldReady @113 :Bool; # vehicle control startup complete; independent of cruise main/button state
   vehicleGps @104 :VehicleGps;
   autoTurnSignalDirection @105 :UInt8; # automatic ownership, including an unconfirmed cancellation tail
   autoTurnSignalStatus @106 :Text;
