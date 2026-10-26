@@ -170,11 +170,14 @@ def test_launcher_bootstraps_from_local_wheels_first() -> None:
   assert "ensure_python_package usb pyusb 0" in launcher
   assert "ensure_python_package \"cv2; assert cv2.__version__ == '4.13.0'" in launcher
   assert '"opencv-python-headless==4.13.0.92" 0' in launcher
-  assert "ensure_python_package eigen eigen 1" in launcher
-  assert "ensure_python_package libjpeg libjpeg 1" in launcher
+  assert "validate_native_package(eigen, 'eigen3/Eigen/Dense')" in launcher
+  assert "validate_native_package(libjpeg, 'jpeglib.h', 'libjpeg.a')" in launcher
   assert '"comma-deps-acados==0.2.2.post103" 1' in launcher
-  assert 'ensure_python_package json11 "comma-deps-json11==20170411.0.post103" 1' in launcher
-  assert 'if [ -f "$DIR/.gitattributes" ] && ! ensure_python_package catch2 "comma-deps-catch2==2.13.10.post96" 1' in launcher
+  assert "validate_native_package(json11, 'json11/json11.hpp', 'libjson11.a')" in launcher
+  assert '"comma-deps-json11==20170411.0.post103" 1' in launcher
+  assert 'if [ -f "$DIR/.gitattributes" ] && ! ensure_python_package "catch2;' in launcher
+  assert "validate_native_package(catch2, 'catch2/catch.hpp')" in launcher
+  assert '"comma-deps-catch2==2.13.10.post96" 1' in launcher
   assert "[ -f /TICI ] || [ -f /AGNOS ]" in launcher
   assert "ensure_python_package shapely shapely 0" in launcher
   assert "pip install shapely" not in launcher

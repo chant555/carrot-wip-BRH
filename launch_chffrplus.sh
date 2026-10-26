@@ -51,7 +51,7 @@ function install_runtime_python_package {
     python3 -m pip install --disable-pip-version-check --no-input --timeout 15 --retries 2 \
       --target "$PYDEPS" --upgrade "$@"
   elif command -v uv > /dev/null 2>&1; then
-    UV_HTTP_TIMEOUT=15 UV_HTTP_RETRIES=2 uv pip install --python "$(command -v python3)" --no-python-downloads \
+    UV_HTTP_TIMEOUT=15 UV_HTTP_RETRIES=2 uv pip install --reinstall --python "$(command -v python3)" --no-python-downloads \
       --target "$PYDEPS" --upgrade "$@"
   else
     echo "pip is missing; attempting to bootstrap it with ensurepip."
@@ -77,6 +77,8 @@ function ensure_python_package {
     return 0
   fi
 
+  # Preserve the initial failure (including module origin) before repair.
+  python3 -c "import ${import_name}" >&2
   echo "${package_name} installing from local wheel."
   if [ "$install_dependencies" = "1" ]; then
     install_runtime_python_package --no-index --find-links "$wheel_dir" "$package_name"
@@ -137,7 +139,7 @@ function bootstrap_runtime_dependencies {
   # and libjpeg wrappers used by this branch's rednose and JPEG encoder. Keep
   # those native headers/libraries available from official offline wheels.
   if { [ -f /TICI ] || [ -f /AGNOS ]; } && \
-     { ! ensure_python_package eigen eigen 1 || ! ensure_python_package libjpeg libjpeg 1; }; then
+     { ! ensure_python_package "eigen; from openpilot.common.build_preflight import validate_native_package; validate_native_package(eigen, 'eigen3/Eigen/Dense')" eigen 1 || ! ensure_python_package "libjpeg; from openpilot.common.build_preflight import validate_native_package; validate_native_package(libjpeg, 'jpeglib.h', 'libjpeg.a')" libjpeg 1; }; then
     return 1
   fi
 
@@ -147,12 +149,12 @@ function bootstrap_runtime_dependencies {
     return 1
   fi
 
-  if ! ensure_python_package json11 "comma-deps-json11==20170411.0.post103" 1; then
+  if ! ensure_python_package "json11; from openpilot.common.build_preflight import validate_native_package; validate_native_package(json11, 'json11/json11.hpp', 'libjson11.a')" "comma-deps-json11==20170411.0.post103" 1; then
     return 1
   fi
 
   # Development checkouts build C++ tests by default, matching SConstruct extras.
-  if [ -f "$DIR/.gitattributes" ] && ! ensure_python_package catch2 "comma-deps-catch2==2.13.10.post96" 1; then
+  if [ -f "$DIR/.gitattributes" ] && ! ensure_python_package "catch2; from openpilot.common.build_preflight import validate_native_package; validate_native_package(catch2, 'catch2/catch.hpp')" "comma-deps-catch2==2.13.10.post96" 1; then
     return 1
   fi
 
@@ -531,6 +533,10 @@ function run_startup_command {
 
 function show_startup_failure {
   local reason="$1"
+  # Record once per launcher failure, not on every redraw or network retry.
+  export CARROT_RECOVERY_HINT="$(python3 -m openpilot.common.startup_failure \
+    --repo "$DIR" --reason "$reason" --log /tmp/carrot_startup_failure.log)"
+  [ -z "$CARROT_RECOVERY_HINT" ] || printf '%s\n' "$CARROT_RECOVERY_HINT"
   # No build/manager can still hold the checkout when the update button runs.
   flock -u 9
   exec 9>&-
@@ -629,11 +635,15 @@ function launch {
     fi
   fi
 
+  # Remember the user's request even if dependency repair blocks its cleanup.
+  export CARROT_REBUILD_REQUESTED=0
+  [ ! -f "$REBUILD_REQUEST" ] || export CARROT_REBUILD_REQUESTED=1
+
   # AGNOS must be current before installing its matching offline wheels. SCons
   # imports native dependency modules while building Params, so bootstrap them
   # before the first SCons invocation.
   if ! run_startup_command bootstrap_runtime_dependencies; then
-    show_startup_failure "Runtime dependency installation failed"
+    show_startup_failure "Build dependency repair failed; rebuilding cache cannot fix this"
   fi
 
   # A Rebuild All request and an unusable SCons cache must be handled before the
@@ -699,6 +709,8 @@ function launch {
     echo "Native Params still do not match this checkout; not starting manager."
     show_startup_failure "Native Params do not match this checkout"
   fi
+  # A validated build ends the previous build-failure streak.
+  python3 -m openpilot.common.startup_failure --resolved || true
   start_big_model_update
   if ! run_startup_command start_manager; then
     show_startup_failure "Manager failed to start"

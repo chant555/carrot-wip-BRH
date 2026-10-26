@@ -179,6 +179,8 @@ def main():
     raise SystemExit('Recovery actions are available only from the failed-startup launcher.')
   reason = args.reason
   error = read_startup_error(args.log) or reason
+  if not args.preview and (hint := os.environ.get('CARROT_RECOVERY_HINT')):
+    error = hint + '\n' + error
   width, height = (2160, 1080) if args.big else device_size()
   if args.preview:
     rl.set_config_flags(rl.ConfigFlags.FLAG_WINDOW_HIDDEN)
