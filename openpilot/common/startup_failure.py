@@ -82,7 +82,7 @@ def record_failure(repo, reason, log, path=STATE, boot_id=None):
   error = read_text(log) if log else ''
   error = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', error)
   diagnostic = next((line for line in error.splitlines()
-                     if re.search(r'\b(?:\w*Error:|fatal error:|DEPENDENCY_INVALID:)', line)), reason)
+                     if re.match(r'(?:[\w.]*Error:|fatal error:|DEPENDENCY_INVALID:)', line.strip())), reason)
   head = git_value(repo, 'rev-parse', 'HEAD')
   fingerprint = hashlib.sha256((head + '\n' + reason + '\n' + diagnostic).encode()).hexdigest()
   boot_id = boot_id or read_text('/proc/sys/kernel/random/boot_id', 128)

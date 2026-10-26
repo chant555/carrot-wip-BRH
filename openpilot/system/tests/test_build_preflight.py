@@ -158,3 +158,14 @@ consume_rebuild_request() { echo CLEAN; rm "$REBUILD_REQUEST"; }
     assert 'BLOCKED:1:Build dependency repair failed' in result.stdout
     assert 'CACHE' not in result.stdout and 'CLEAN' not in result.stdout
     assert request.exists()
+
+
+def test_fingerprint_uses_exception_not_traceback_source(tmp_path, monkeypatch):
+  monkeypatch.setattr(startup_failure, 'git_value', lambda *args: 'commit')
+  path, log = tmp_path / 'state', tmp_path / 'log'
+  source_line = "    raise RuntimeError(f'DEPENDENCY_INVALID: {module.__name__}')\n"
+  log.write_text(source_line + 'RuntimeError: DEPENDENCY_INVALID: catch2 invalid INCLUDE_DIR\n')
+  startup_failure.record_failure(tmp_path, 'dependency failed', log, path, 'boot-a')
+  assert json.loads(path.read_text())['diagnostic'] == 'RuntimeError: DEPENDENCY_INVALID: catch2 invalid INCLUDE_DIR'
+  log.write_text(source_line + 'RuntimeError: DEPENDENCY_INVALID: json11 missing header\n')
+  assert '반복' not in startup_failure.record_failure(tmp_path, 'dependency failed', log, path, 'boot-b')
