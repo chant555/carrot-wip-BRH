@@ -146,7 +146,7 @@ Carrot Web 설정 화면에서는 다음 기능을 사용할 수 있습니다.
 - `TeslaAutoTurnSignals`: 기본 꺼짐이며 재부팅 후 적용됩니다. 차량 CAN과 실제 스토크가 있는 Model 3/Y에서 회전 desire 시작 시 점등하며 준비나 거리만으로 켜지지 않습니다. 실측 방위·핸들 복귀로 완료하고 확인된 회전만 신선한 횡방향 허용 아래 정차 대기합니다. 차로변경 준비 점등은 유지하며 조향·출발 권한은 늘리지 않습니다. 조건과 폐쇄 시험장 검증은 [Tesla 자동 방향지시등](tesla.md#자동-방향지시등)을 참고하세요.
 - `TeslaCanTrafficStop`: 독립적인 기본 꺼짐 Tesla CAN 빨간불 정지이며 재시작이 필요합니다. 순정 TACC가 아닌 실제 openpilot 종제어와 지원 8바이트 비전 APP 프로필이 필요합니다. 126m 미만에서 확인된 빨간불 제약을 추가하고 초록불은 이 제약만 해제합니다. 신호 고장은 인계·soft-disable을 요청하고 다른 차종은 무시합니다. 프로토콜·페달 개입·폐쇄 시험장 한계는 [Tesla CAN 정지](tesla.md#can-빨간불-정지)를 참고하세요.
 - `TeslaManualLaneSignals`, `TeslaModelDesireSignals`, `TeslaModelPathSignals`: 독립적인 기본 꺼짐 Tesla 램프 관찰 옵션이며 재부팅이 필요합니다. 모두 `TeslaAutoTurnSignals`·`ShareData`와 30km/h 이상에서 신선한 ONNX 연속 점선·인접 차로 형상이 필요합니다. 수동 토크·접근은 크루즈 없이 가능하고 모델 의도·경로 예측은 횡제어 활성이 필요하며 오점등할 수 있습니다. 점선은 색상·진행 방향 증거가 아닙니다. 조향 권한·내비 회전 사전점등·유턴 기능은 추가하지 않습니다. 완료·시각·실차 검증 한계는 [Tesla 안내](tesla.md#선택형-차로변경-램프-관찰)를 참고하세요.
-- `AutoCruiseControl`: 현대·기아 차량용 오토크루즈와 소프트홀드 관련 설정입니다. 아이오닉 5 PE의 오픈파일럿 종방향 제어에서는 소프트홀드를 독립 유지하고 크루즈를 자동 활성화하지 않습니다. [독립 정지 유지](cruise-gap.md#independent-soft-hold)를 참고하십시오.
+- `AutoCruiseControl`: 현대·기아 차량용 오토크루즈와 소프트홀드 관련 설정입니다. 아이오닉 5 PE의 오픈파일럿 종방향 제어에서는 최초 크루즈 버튼 조작 전에도 소프트홀드를 독립 유지하고 크루즈를 자동 활성화하지 않습니다. [독립 정지 유지](cruise-gap.md#independent-soft-hold)를 참고하십시오.
 - `TeslaAutoSpeedLimit`: 기본 꺼짐, 전체 재시작 필요. 켜면 추가 차량 CAN·alpha 종제어 조건에서 차량 DAS 제한속도에 맞춰 자동 휠 조절을 허용합니다. 끄면 자동 송신만 중지하며 수동 휠은 유지합니다. 기존 자동 활성화도 이제 직접 켜야 하며 내비·Carrot 속도 제어 중 일시 중지는 그대로입니다. [자동 설정속도 안내](tesla.md#automatic-cruise-speed)를 참고하세요.
 - `DisableMinSteerSpeed`: SMDPS 장착 차량의 저속 조향 제한과 관련된 차량별 설정입니다.
 
