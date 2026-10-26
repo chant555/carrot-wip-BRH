@@ -24,6 +24,18 @@ def longitudinal_interlock_active(CS) -> bool:
   return CS.out.brakeHoldActive or CS.out.parkingBrake
 
 
+def independent_soft_hold_active(CS) -> bool:
+  # This flag is produced only by the supported vehicle after startup readiness.
+  # Missing fields (old recordings) fail closed. Never grant normal acceleration.
+  return (CS.softHoldActive > 0 and getattr(CS.out, "independentSoftHoldReady", False)
+          and CS.out.canValid and not CS.out.gasPressed
+          and str(CS.out.gearShifter) == "drive" and not longitudinal_interlock_active(CS))
+
+
+def soft_hold_active(CS) -> bool:
+  return (CS.softHoldActive > 0 and CS.out.cruiseState.available) or independent_soft_hold_active(CS)
+
+
 def apply_accel_jerk_limit(a_raw: float, a_value_last: float, jerk_u: float, jerk_l: float,
                            dt: float = ACC_CONTROL_DT) -> float:
   """Ramp aReqValue toward aReqRaw using the asymmetric stock SCC jerk limits."""
@@ -41,7 +53,7 @@ def apply_canfd_stopping(values, CS, controller, accel, previous_value, jerk_u, 
   speeds = [CS.out.vEgo, CS.out.vEgoRaw, wheels.fl, wheels.fr, wheels.rl, wheels.rr]
   finite = all(math.isfinite(v) for v in (*speeds, CS.out.aEgo, accel, values["aReqValue"], previous_value, jerk_u, jerk_l))
   speed = max(abs(v) for v in speeds) if finite else 0.0
-  soft_hold = CS.softHoldActive > 0 and CS.out.cruiseState.available
+  soft_hold = soft_hold_active(CS)
   # Only an armed, stationary soft hold may remain active while the driver brakes.
   # Ordinary braking and pedal input while moving keep their existing interlock.
   brake_blocked = CS.out.brakePressed and not (soft_hold and speed <= MOVING_SPEED)
@@ -495,22 +507,25 @@ def create_acc_control_scc2(packer, CAN, enabled, accel_value_last, accel, stopp
       stop_controller.reset()
     return None, accel_value_last
   interlock_active = longitudinal_interlock_active(CS)
-  soft_hold_active = CS.softHoldActive > 0 and CS.out.cruiseState.available
-  acc_control_enabled = (enabled or soft_hold_active) and CS.out.cruiseState.available and CS.paddle_button_prev == 0 and not interlock_active
+  independent_hold = independent_soft_hold_active(CS) and stop_controller is not None
+  hold_active = (CS.softHoldActive > 0 and CS.out.cruiseState.available) or independent_hold
+  acc_control_enabled = ((enabled and CS.out.cruiseState.available) or hold_active) and CS.paddle_button_prev == 0 and not interlock_active
   enabled = acc_control_enabled
+  if independent_hold:
+    accel = 0.0
 
   acc_mode = 0 if not enabled else (2 if gas_override else 1)
   previous_value = accel_value_last
 
-  if hyundai_jerk.carrot_cruise == 1:
+  if hyundai_jerk.carrot_cruise == 1 and not independent_hold:
     acc_mode = 4 if enabled else 0
     enabled = False
     accel = accel_value_last = 0.5
 
-  elif hyundai_jerk.carrot_cruise == 2:
+  elif hyundai_jerk.carrot_cruise == 2 and not independent_hold:
     accel = accel_value_last = hyundai_jerk.carrot_cruise_accel
 
-  jerk_u = 2.0 if stopping or soft_hold_active else hyundai_jerk.jerk_u
+  jerk_u = 2.0 if stopping or hold_active else hyundai_jerk.jerk_u
   jerk_l = hyundai_jerk.jerk_l
   if not enabled or gas_override:
     a_val, a_raw = 0, 0
@@ -522,7 +537,7 @@ def create_acc_control_scc2(packer, CAN, enabled, accel_value_last, accel, stopp
   rx_counter = values.pop("COUNTER", None)
   values["ACCMode"] = acc_mode
   values["MainMode_ACC"] = 1
-  values["StopReq"] = 1 if acc_control_enabled and (stopping or soft_hold_active) else 0  # 1: Stop control is required, 2: Not used, 3: Error Indicator
+  values["StopReq"] = 1 if acc_control_enabled and (stopping or hold_active) else 0  # 1: Stop control is required, 2: Not used, 3: Error Indicator
   values["aReqValue"] = a_val
   values["aReqRaw"] = a_raw
   values["VSetDis"] = set_speed
@@ -561,6 +576,8 @@ def create_acc_control_scc2(packer, CAN, enabled, accel_value_last, accel, stopp
 
   values["ZEROS_7"] = 0 if stop_controller is not None else 1
   apply_canfd_stopping(values, CS, stop_controller, accel, previous_value, jerk_u, jerk_l)
+  if independent_hold:
+    values.update(aReqRaw=0.0, aReqValue=0.0)
 
   # Trial for no-lead stops: OEM SCC_ObjSta is named HUD_LEAD_INFO in this DBC.
   # Change only the state after the final StopReq/interlocks; do not fabricate
@@ -574,9 +591,12 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
                        stop_controller=None, accel_value_last=None):
 
   interlock_active = longitudinal_interlock_active(CS)
-  soft_hold_active = CS.softHoldActive > 0 and CS.out.cruiseState.available
-  acc_control_enabled = (enabled or soft_hold_active) and CS.out.cruiseState.available and not interlock_active
+  independent_hold = independent_soft_hold_active(CS) and stop_controller is not None
+  hold_active = (CS.softHoldActive > 0 and CS.out.cruiseState.available) or independent_hold
+  acc_control_enabled = ((enabled and CS.out.cruiseState.available) or hold_active) and not interlock_active
   enabled = acc_control_enabled
+  if independent_hold:
+    accel = 0.0
   jerk = 5
   jn = jerk / 50
   if not enabled or gas_override:
@@ -588,7 +608,7 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
   values = {
     "ACCMode": 0 if not enabled else (2 if gas_override else 1),
     "MainMode_ACC": 1,
-    "StopReq": 1 if acc_control_enabled and (stopping or soft_hold_active) else 0,
+    "StopReq": 1 if acc_control_enabled and (stopping or hold_active) else 0,
     "aReqValue": a_val,
     "aReqRaw": a_raw,
     "VSetDis": set_speed,
@@ -615,6 +635,8 @@ def create_acc_control(packer, CAN, enabled, accel_last, accel, stopping, gas_ov
   # output. Keep ordinary packet limiting; anchor recovery to the returned value.
   previous_value = accel_last if accel_value_last is None else accel_value_last
   apply_canfd_stopping(values, CS, stop_controller, accel, previous_value, jerk_u, jerk_l)
+  if independent_hold:
+    values.update(aReqRaw=0.0, aReqValue=0.0)
   return packer.make_can_msg("SCC_CONTROL", CAN.ECAN, values), values["aReqValue"]
 
 
