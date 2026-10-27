@@ -22,15 +22,21 @@ TRACEBACK_FRAME = re.compile(r'\s*File ".*", line \d+')
 
 
 def diagnostic_line(error, fallback):
-  source_line = False
+  frame_indent = None
   for line in error.splitlines():
     stripped = line.strip()
-    if source_line:
-      source_line = False
-      continue
+    expanded = line.expandtabs()
+    indent = len(expanded) - len(expanded.lstrip())
+    # Frames can be consecutive when Python cannot retrieve source text.
     if TRACEBACK_FRAME.match(line):
-      source_line = True
+      frame_indent = indent
       continue
+    if frame_indent is not None:
+      previous_indent, frame_indent = frame_indent, None
+      # Python indents source text further than its frame header. An exception
+      # immediately after a source-less frame must still be examined below.
+      if stripped and indent > previous_indent:
+        continue
     if EXCEPTION.match(stripped) or (line[:1].strip() and COMPILER.match(line)):
       return stripped
   return fallback

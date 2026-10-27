@@ -211,3 +211,27 @@ def test_traceback_source_line_is_never_the_representative_error():
          '    ValueError: looks like an exception but is source text\n'
          'RuntimeError: DEPENDENCY_INVALID: json11 missing json11/json11.hpp\n')
   assert startup_failure.diagnostic_line(log, 'fallback') == 'RuntimeError: DEPENDENCY_INVALID: json11 missing json11/json11.hpp'
+
+
+@pytest.mark.parametrize('frames', [1, 2, 3, 4])
+def test_traceback_without_source_keeps_exception(frames):
+  log = 'Traceback (most recent call last):\n' + ''.join(
+    f'  File "<frame-{i}>", line 1, in <module>\n' for i in range(frames))
+  error = 'RuntimeError: DEPENDENCY_INVALID: catch2 missing header'
+  assert startup_failure.diagnostic_line(log + error, 'fallback') == error
+
+
+def test_traceback_consecutive_frames_still_skip_actual_source():
+  log = ('Traceback (most recent call last):\n'
+         '  File "<string>", line 1, in <module>\n'
+         '  File "/data/openpilot/x.py", line 3, in check\n'
+         '    ValueError: source annotation, not the failure\n'
+         'RuntimeError: actual failure\n')
+  assert startup_failure.diagnostic_line(log, 'fallback') == 'RuntimeError: actual failure'
+
+
+def test_real_python_command_exception_is_identified():
+  result = subprocess.run([sys.executable, '-c', 'raise RuntimeError("missing package")'],
+                          capture_output=True, text=True, timeout=10)
+  assert result.returncode != 0
+  assert startup_failure.diagnostic_line(result.stderr, 'fallback') == 'RuntimeError: missing package'
