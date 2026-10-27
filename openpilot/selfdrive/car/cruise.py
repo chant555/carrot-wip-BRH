@@ -199,6 +199,7 @@ class VCruiseCarrot:
     self._brake_pressed_count = 0
     self._soft_hold_count = 0
     self._soft_hold_active = 0
+    self._independent_soft_hold_driven = False
     self.soft_hold_on_cancel = self.params.get_bool("SoftHoldOnCancel")
     self._cruise_ready = False
     self._cruise_cancel_state = False
@@ -328,8 +329,11 @@ class VCruiseCarrot:
     self.frame += 1
     if CS.gearShifter != GearShifter.drive:
       self.autoCruiseControl_cancel_timer = 10 * 100  # 10 sec
+      self._independent_soft_hold_driven = False
     else:
       self.autoCruiseControl_cancel_timer = max(0, self.autoCruiseControl_cancel_timer - 1)
+      if CS.canValid and not CS.canTimeout and math.isfinite(CS.vEgo) and CS.vEgo >= 16 / 3.6:
+        self._independent_soft_hold_driven = True
 
     CC = sm['carControl']
     self._update_carrot_man(sm)
@@ -857,7 +861,7 @@ class VCruiseCarrot:
 
   def _soft_hold_available(self, CS):
     if self._independent_soft_hold():
-      return bool(CS.independentSoftHoldReady and CS.canValid)
+      return bool(CS.independentSoftHoldReady and CS.canValid and self._independent_soft_hold_driven)
     return CS.cruiseState.available
 
   def _engage_soft_hold(self):
@@ -1012,8 +1016,10 @@ class VCruiseCarrot:
       if self._brake_pressed_count == 1 and self.enabled_last:
         self._v_cruise_kph_at_brake = self.v_cruise_kph
         self._add_log(f"{self.v_cruise_kph} Cruise speed at brake")
+      # Independent hold uses drive-speed history; automatic cruise keeps its timer.
+      hold_entry_ready = self._independent_soft_hold_driven if self._independent_soft_hold() else self.autoCruiseControl_cancel_timer == 0
       soft_hold_available = self._soft_hold_available(CS) and self.autoCruiseControl != 0 and not self.CP.pcmCruise and \
-                            self.autoCruiseControl_cancel_timer == 0 and \
+                            hold_entry_ready and \
                             (not self._cruise_cancel_state or self.soft_hold_on_cancel or self._independent_soft_hold())
       if self._independent_soft_hold():
         soft_hold_available = (soft_hold_available and CS.canValid and not CS.gasPressed
