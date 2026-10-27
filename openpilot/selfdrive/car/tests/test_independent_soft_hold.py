@@ -208,7 +208,7 @@ def test_pre_button_hold_output_and_interlocks(camera, block):
   assert values['aReqRaw'] == values['aReqValue'] == 0.
 
 
-def test_full_cruise_update_preserves_pre_button_hold_and_clears_readiness_loss():
+def setup_full_cruise_update():
   from collections import defaultdict
   h, cs = setup_hold()
   cs.cruiseState.available = False
@@ -232,6 +232,11 @@ def test_full_cruise_update_preserves_pre_button_hold_and_clears_readiness_loss(
   class SM(dict):
     alive = defaultdict(bool)
   sm = SM(carControl=car.CarControl(enabled=False))
+  return h, cs, sm
+
+
+def test_full_cruise_update_preserves_pre_button_hold_and_clears_readiness_loss():
+  h, cs, sm = setup_full_cruise_update()
   for _ in range(61): h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 1
   cs.brakePressed = False
@@ -242,3 +247,44 @@ def test_full_cruise_update_preserves_pre_button_hold_and_clears_readiness_loss(
   cs.independentSoftHoldReady = False
   h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == h._soft_hold_count == 0
+
+
+@pytest.mark.parametrize('previous_gear', ['park', 'reverse', 'neutral'])
+def test_forward_gear_wait_is_ten_seconds_and_restarts_after_leaving_drive(previous_gear):
+  h, cs, sm = setup_full_cruise_update()
+  for _ in range(2):
+    cs.gearShifter = previous_gear
+    h.update_v_cruise(cs, sm, True)
+    assert h.autoCruiseControl_cancel_timer == 1000
+    assert h._soft_hold_active == 0
+    cs.gearShifter = 'drive'
+    for _ in range(999):
+      h.update_v_cruise(cs, sm, True)
+      assert h._soft_hold_count == h._soft_hold_active == 0
+      assert h._activate_cruise == 0
+    assert h.autoCruiseControl_cancel_timer == 1
+    h.update_v_cruise(cs, sm, True)
+    assert h.autoCruiseControl_cancel_timer == 0
+    assert h._soft_hold_count == 1
+  for _ in range(60): h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 1
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 2 and h._activate_cruise == 0
+  assert not cs.cruiseState.available
+
+
+@pytest.mark.parametrize('ready', [False, True])
+@pytest.mark.parametrize('direction', [0, 1, 2])
+def test_independent_hold_schema_roundtrip_does_not_alias_auto_indicator(ready, direction):
+  state = car.CarState(independentSoftHoldReady=ready, autoTurnSignalDirection=direction,
+                       tbtRightRearBlocked=True, laneLineInfoMonoTime=123456789)
+  with car.CarState.from_bytes(state.to_bytes()) as decoded:
+    assert decoded.independentSoftHoldReady == ready
+    assert decoded.autoTurnSignalDirection == direction
+    assert decoded.tbtRightRearBlocked
+    assert decoded.laneLineInfoMonoTime == 123456789
+  # Upstream owns @112 (laneLineInfoMonoTime) since 7e88bb72; the user field moved to @113.
+  assert car.CarState.schema.fields['independentSoftHoldReady'].proto.ordinal.explicit == 113
+  assert car.CarState.schema.fields['laneLineInfoMonoTime'].proto.ordinal.explicit == 112
+  assert car.CarState.schema.fields['autoTurnSignalDirection'].proto.ordinal.explicit == 105
