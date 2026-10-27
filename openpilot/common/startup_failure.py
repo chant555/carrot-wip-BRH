@@ -12,16 +12,26 @@ import sys
 import tempfile
 
 STATE = Path('/data/startup_failure.json')
-# An exception or failure statement at the start of a line (not a traceback source line such as
-# "raise RuntimeError(...)"), or a compiler diagnostic with a source location ("file.cc:3:10: fatal error:").
+# Representative error: an exception/failure statement ("ModuleNotFoundError: …", "SConsLockFailure: …"),
+# or an unindented compiler/linker diagnostic with or without a location ("foo.cc:3:10: fatal error: …",
+# "fatal error: …", "collect2: error: …"). Python traceback source lines are skipped, so code such as
+# raise RuntimeError("foo.cc:1:2: error: …") is never mistaken for the failure itself.
 EXCEPTION = re.compile(r'(?:[\w.]*(?:Error|Exception|Failure):|DEPENDENCY_INVALID:)')
-COMPILER = re.compile(r':\d+(?::\d+)?: (?:fatal )?error: ')
+COMPILER = re.compile(r'(?:\S+?:\d+(?::\d+)?: |[\w.+-]+: )?(?:fatal )?error: ')
+TRACEBACK_FRAME = re.compile(r'\s*File ".*", line \d+')
 
 
 def diagnostic_line(error, fallback):
+  source_line = False
   for line in error.splitlines():
     stripped = line.strip()
-    if EXCEPTION.match(stripped) or COMPILER.search(stripped):
+    if source_line:
+      source_line = False
+      continue
+    if TRACEBACK_FRAME.match(line):
+      source_line = True
+      continue
+    if EXCEPTION.match(stripped) or (line[:1].strip() and COMPILER.match(line)):
       return stripped
   return fallback
 

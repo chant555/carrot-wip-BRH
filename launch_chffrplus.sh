@@ -49,7 +49,7 @@ function install_runtime_python_package {
   # the launcher's interpreter and pydeps target with either installer.
   if python3 -m pip --version > /dev/null 2>&1; then
     python3 -m pip install --disable-pip-version-check --no-input --timeout 15 --retries 2 \
-      --target "$PYDEPS" --upgrade --force-reinstall "$@"
+      --target "$PYDEPS" --upgrade "$@"
   elif command -v uv > /dev/null 2>&1; then
     UV_HTTP_TIMEOUT=15 UV_HTTP_RETRIES=2 uv pip install --reinstall --python "$(command -v python3)" --no-python-downloads \
       --target "$PYDEPS" --upgrade "$@"
@@ -57,7 +57,7 @@ function install_runtime_python_package {
     echo "pip is missing; attempting to bootstrap it with ensurepip."
     if python3 -m ensurepip --upgrade && python3 -m pip --version > /dev/null 2>&1; then
       python3 -m pip install --disable-pip-version-check --no-input --timeout 15 --retries 2 \
-        --target "$PYDEPS" --upgrade --force-reinstall "$@"
+        --target "$PYDEPS" --upgrade "$@"
     else
       echo "No Python package installer is available. Run tools/setup.sh to prepare the Ubuntu environment."
       return 1

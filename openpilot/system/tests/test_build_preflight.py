@@ -181,6 +181,11 @@ def test_fingerprint_uses_exception_not_traceback_source(tmp_path, monkeypatch):
   ("    raise RuntimeError(f'DEPENDENCY_INVALID: {module.__name__}')", False),
   ('  File "/data/openpilot/SConstruct", line 52, in <module>', False),
   ("scons: *** [openpilot/x.o] Error 1", False),
+  ("fatal error: no input files", True),
+  ("cc1plus: fatal error: bar.h: No such file or directory", True),
+  ("collect2: error: ld returned 1 exit status", True),
+  ('    raise RuntimeError("foo.cc:3:10: fatal error: bar.h not found")', False),
+  ("    fatal error: indented text inside a source or message block", False),
 ])
 def test_diagnostic_line_covers_compiler_and_build_failures(line, expected):
   # Compiler diagnostics start with a source location; traceback source lines must stay ignored.
@@ -198,3 +203,11 @@ def test_healthy_boot_does_not_rewrite_validated_record(tmp_path, monkeypatch):
   startup_failure.resolve(path)
   assert writes == ['build_validated']
   assert json.loads(path.read_text())['status'] == 'build_validated'
+
+
+def test_traceback_source_line_is_never_the_representative_error():
+  log = ('Traceback (most recent call last):\n'
+         '  File "/data/openpilot/x.py", line 3, in <module>\n'
+         '    ValueError: looks like an exception but is source text\n'
+         'RuntimeError: DEPENDENCY_INVALID: json11 missing json11/json11.hpp\n')
+  assert startup_failure.diagnostic_line(log, 'fallback') == 'RuntimeError: DEPENDENCY_INVALID: json11 missing json11/json11.hpp'

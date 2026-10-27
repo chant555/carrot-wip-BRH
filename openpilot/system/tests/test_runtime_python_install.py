@@ -88,12 +88,9 @@ def test_missing_package_installs_from_wheel(tmp_path, installer):
   assert "<--no-deps>" in result.stdout
   assert "project with spaces/pydeps>" in result.stdout
   assert "pyserial installed." in result.stdout
-  # A same-version but incomplete install must be replaced, not kept as "up to date".
   if installer == "uv":
     assert "<--reinstall>" in result.stdout
     assert "<--python> <python3> <--no-python-downloads>" in result.stdout
-  else:
-    assert "<--force-reinstall>" in result.stdout
   if installer == "ensurepip":
     assert "ENSUREPIP" in result.stdout
 
