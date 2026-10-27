@@ -436,10 +436,12 @@ The adjustment requires continuous measured outward motion and sufficient separa
 
 This user-branch behavior applies only to `HYUNDAI_IONIQ_5_PE` with openpilot longitudinal control. Other vehicles and stock-cruise paths keep their existing behavior.
 
-With nonzero `AutoCruiseControl`, vehicle communication and control startup ready, drive selected, and speed below 0.1 m/s, holding the brake for about 0.61 seconds arms the hold after the 10-second delay following selection of drive. No initial cruise-button press is required. Canceled cruise and `SoftHoldOnCancel` do not prevent arming. Gas input, invalid vehicle communication, stock auto hold, parking brake, and the large-steering-angle interlock prevent new arming.
+With nonzero `AutoCruiseControl`, vehicle communication and control startup ready, drive selected, and speed below 0.1 m/s, holding the brake for about 0.61 seconds arms the hold after the vehicle has reached at least 16 km/h with valid vehicle communication since selecting drive. Independent hold no longer uses the 10-second delay. No initial cruise-button press is required. Canceled cruise and `SoftHoldOnCancel` do not prevent arming. Gas input, invalid vehicle communication, stock auto hold, parking brake, and the large-steering-angle interlock prevent new arming.
 
 Releasing the brake with cruise off maintains only the hold without requesting cruise engagement. The vehicle brake controller still needs its stop-control request. Pressing the accelerator releases the hold and leaves automatic cruise resume canceled until an explicit existing cruise-button action. This feature does not forcibly disengage cruise that is already active.
 
 Desktop state-transition and control-message checks do not establish physical brake-holding performance. Vehicle validation remains separate.
 
 A brief second brake press and release still cancels soft hold without automatically engaging cruise. Holding the brake beyond the existing 60-cycle threshold arms the hold again. This uses the brake-pressed signal and duration, not pedal pressure magnitude.
+
+Selecting park, reverse, neutral, or any other non-drive gear resets this driving history. Slowing down, stopping, or releasing the hold with a short brake reinput preserves it while drive remains selected. Remaining below 16 km/h after departure never arms independent hold, regardless of elapsed time. Entering a parking area in drive after reaching the threshold retains eligibility; this is not a detector for every parking situation. Automatic cruise retains its existing 10-second delay and explicit cruise-button timer reset.
