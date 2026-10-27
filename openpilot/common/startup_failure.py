@@ -12,6 +12,18 @@ import sys
 import tempfile
 
 STATE = Path('/data/startup_failure.json')
+# An exception or failure statement at the start of a line (not a traceback source line such as
+# "raise RuntimeError(...)"), or a compiler diagnostic with a source location ("file.cc:3:10: fatal error:").
+EXCEPTION = re.compile(r'(?:[\w.]*(?:Error|Exception|Failure):|DEPENDENCY_INVALID:)')
+COMPILER = re.compile(r':\d+(?::\d+)?: (?:fatal )?error: ')
+
+
+def diagnostic_line(error, fallback):
+  for line in error.splitlines():
+    stripped = line.strip()
+    if EXCEPTION.match(stripped) or COMPILER.search(stripped):
+      return stripped
+  return fallback
 
 
 def read_text(path, limit=16384):
@@ -81,8 +93,7 @@ def package_info():
 def record_failure(repo, reason, log, path=STATE, boot_id=None):
   error = read_text(log) if log else ''
   error = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', error)
-  diagnostic = next((line for line in error.splitlines()
-                     if re.match(r'(?:[\w.]*Error:|fatal error:|DEPENDENCY_INVALID:)', line.strip())), reason)
+  diagnostic = diagnostic_line(error, reason)
   head = git_value(repo, 'rev-parse', 'HEAD')
   fingerprint = hashlib.sha256((head + '\n' + reason + '\n' + diagnostic).encode()).hexdigest()
   boot_id = boot_id or read_text('/proc/sys/kernel/random/boot_id', 128)
@@ -113,7 +124,8 @@ def record_failure(repo, reason, log, path=STATE, boot_id=None):
 
 def resolve(path=STATE):
   previous = load_state(path)
-  if previous:
+  # Runs on every healthy boot; only write when a failure streak actually ends.
+  if previous and previous.get('status') != 'build_validated':
     previous['status'] = 'build_validated'
     save_state(path, previous)
 

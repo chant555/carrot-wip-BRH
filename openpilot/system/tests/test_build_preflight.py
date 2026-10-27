@@ -131,7 +131,7 @@ def test_bootstrap_precedes_cleanup_and_build():
   source = (ROOT / 'launch_chffrplus.sh').read_text().split('function launch {', 1)[1]
   assert source.index('run_startup_command bootstrap_runtime_dependencies') < source.index('if ! consume_rebuild_request')
   assert source.index('if ! consume_rebuild_request') < source.index('run_startup_command bash')
-  assert 'show_startup_failure "Build dependency repair failed' in source
+  assert 'show_startup_failure "Dependency repair failed' in source
   assert source.index('startup_failure --resolved') > source.index('run_startup_command python3 "$DIR/openpilot/system/manager/params_check.py"')
 
 
@@ -155,7 +155,7 @@ consume_rebuild_request() { echo CLEAN; rm "$REBUILD_REQUEST"; }
     assert 'CLEAN' in result.stdout and not request.exists()
   else:
     assert result.returncode == 42
-    assert 'BLOCKED:1:Build dependency repair failed' in result.stdout
+    assert 'BLOCKED:1:Dependency repair failed' in result.stdout
     assert 'CACHE' not in result.stdout and 'CLEAN' not in result.stdout
     assert request.exists()
 
@@ -169,3 +169,32 @@ def test_fingerprint_uses_exception_not_traceback_source(tmp_path, monkeypatch):
   assert json.loads(path.read_text())['diagnostic'] == 'RuntimeError: DEPENDENCY_INVALID: catch2 invalid INCLUDE_DIR'
   log.write_text(source_line + 'RuntimeError: DEPENDENCY_INVALID: json11 missing header\n')
   assert '반복' not in startup_failure.record_failure(tmp_path, 'dependency failed', log, path, 'boot-b')
+
+
+@pytest.mark.parametrize('line, expected', [
+  ("selfdrive/foo.cc:3:10: fatal error: 'bar.h' file not found", True),
+  ("openpilot/x/acados_ocp_solver_pyx.c:1:2: error: C4_COMPILE_TEST", True),
+  ("SConsLockFailure: Timeout waiting for lock on '/data/scons_cache/config'.:", True),
+  ("ModuleNotFoundError: No module named 'libjpeg'", True),
+  ("subprocess.CalledProcessError: Command 'scons' returned non-zero exit status 2.", True),
+  ("RuntimeError: DEPENDENCY_INVALID: catch2 missing catch2/catch.hpp", True),
+  ("    raise RuntimeError(f'DEPENDENCY_INVALID: {module.__name__}')", False),
+  ('  File "/data/openpilot/SConstruct", line 52, in <module>', False),
+  ("scons: *** [openpilot/x.o] Error 1", False),
+])
+def test_diagnostic_line_covers_compiler_and_build_failures(line, expected):
+  # Compiler diagnostics start with a source location; traceback source lines must stay ignored.
+  assert (startup_failure.diagnostic_line(line + '\n', 'fallback') == line.strip()) is expected
+
+
+def test_healthy_boot_does_not_rewrite_validated_record(tmp_path, monkeypatch):
+  monkeypatch.setattr(startup_failure, 'git_value', lambda *args: 'commit')
+  path = tmp_path / 'state'
+  startup_failure.record_failure(tmp_path, 'build failed', None, path, 'boot')
+  writes = []
+  real_save = startup_failure.save_state
+  monkeypatch.setattr(startup_failure, 'save_state', lambda p, d: (writes.append(d['status']), real_save(p, d)))
+  startup_failure.resolve(path)
+  startup_failure.resolve(path)
+  assert writes == ['build_validated']
+  assert json.loads(path.read_text())['status'] == 'build_validated'
