@@ -327,7 +327,7 @@ class VCruiseCarrot:
     self.update_params(is_metric)
     self.frame += 1
     if CS.gearShifter != GearShifter.drive:
-      self.autoCruiseControl_cancel_timer = 15 * 100  # 15 sec
+      self.autoCruiseControl_cancel_timer = 10 * 100  # 10 sec
     else:
       self.autoCruiseControl_cancel_timer = max(0, self.autoCruiseControl_cancel_timer - 1)
 
