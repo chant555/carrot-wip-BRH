@@ -1,4 +1,5 @@
 from types import SimpleNamespace as NS
+import pytest
 
 from opendbc.car.hyundai.hyundaicanfd import _blink_hold_side, _select_cluster_background
 
@@ -72,7 +73,7 @@ def test_turn_model_flashes_the_cluster_red_like_a_held_paddle():
   assert _select_cluster_background(False, False, False, 0) == 7                   # gray
 
 
-def test_external_hold_changes_only_existing_1ea_fields():
+def external_hold_messages():
   from unittest.mock import patch
   from opendbc.can import CANPacker
   from opendbc.can.parser import get_raw_value
@@ -91,9 +92,46 @@ def test_external_hold_changes_only_existing_1ea_fields():
                NS(ECAN=0,CAM=2),5,structs.CarControl(),state,NS(physicalBlinkerHold=value),0,False,False,0,False,0,0)
     assert len(result)==1 and result[0][0]==0x1ea
     return {key:get_raw_value(result[0][1],sig) for key,sig in definition.sigs.items()}
+  return state, message
+
+
+def test_external_hold_changes_only_existing_1ea_fields():
+  _, message = external_hold_messages()
   baseline=message(0)
   for value,left,right in ((1,0,0),(2,1,0),(3,0,1)):
     actual=message(value)
     assert (actual['LEFT_BLINK_HOLD'],actual['RIGHT_BLINK_HOLD'])==(left,right)
     assert {k:v for k,v in actual.items() if k not in ('LEFT_BLINK_HOLD','RIGHT_BLINK_HOLD','CHECKSUM')} == {
       k:v for k,v in baseline.items() if k not in ('LEFT_BLINK_HOLD','RIGHT_BLINK_HOLD','CHECKSUM')}
+
+
+@pytest.mark.parametrize('side,external', [(1, 2), (2, 3)])
+def test_external_hold_cannot_bypass_four_flashes_or_deadline(side, external):
+  state, message = external_hold_messages()
+  counter = 'leftBlinkerStalkCount' if side == 1 else 'rightBlinkerStalkCount'
+  field = 'LEFT_BLINK_HOLD' if side == 1 else 'RIGHT_BLINK_HOLD'
+  message(0)  # Establish the physical-counter baseline.
+  setattr(state.out, counter, 1)
+  state.out.blinkerLever = 1
+  state.out.blinkerLamp = side
+  assert message(external)[field] == 1
+  state.out.blinkerLever = 0
+  for flash in range(2, 5):
+    state.out.blinkerLamp = 0
+    message(external)
+    state.out.blinkerLamp = side
+    assert message(external)[field] == int(flash < 4)
+  for _ in range(10):
+    assert message(external)[field] == 0
+  # A new physical press renews the budget, including the maximum-time fallback.
+  setattr(state.out, counter, 2)
+  state.out.blinkerLever = 1
+  assert message(external)[field] == 1
+  state.out.blinkerLever = 0
+  for _ in range(321): message(external)
+  assert message(external)[field] == 0
+  # A latched lever is deliberately outside the one-touch limit.
+  setattr(state.out, counter, 3)
+  state.out.blinkerLever = 2
+  assert message(external)[field] == 1
+  assert message(1)[field] == 0  # Upstream explicit release still wins.
