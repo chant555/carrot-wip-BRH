@@ -26,9 +26,10 @@ IMPERIAL_INCREMENT = round(CV.MPH_TO_KPH, 1)  # round here to avoid rounding err
 ButtonEvent = car.CarState.ButtonEvent
 ButtonType = car.CarState.ButtonEvent.Type
 CRUISE_LONG_PRESS = 50
-# Steering-angle admission for cruise engagement and waiting resume.
-# Independent stationary hold does not use this admission limit.
-AUTO_CRUISE_MAX_STEERING_ANGLE = 180.0
+# Keep automatic re-engagement out of parking/full-lock turns. Hyundai EPS
+# fault avoidance begins at 85 degrees, so leave margin below that boundary.
+AUTO_CRUISE_MAX_STEERING_ANGLE = 70.0
+INDEPENDENT_SOFT_HOLD_MAX_STEERING_ANGLE = 180.0
 CRUISE_NEAREST_FUNC = {
   ButtonType.accelCruise: math.ceil,
   ButtonType.decelCruise: math.floor,
@@ -928,7 +929,7 @@ class VCruiseCarrot:
       elif self.v_ego_kph_set > self.autoGasTokSpeed:
         v_cruise_kph = self.v_ego_kph_set
         self._cruise_control(1, -1 if self.aTarget > 0.0 else 0, "Cruise on (speed)")
-      elif abs(CS.steeringAngleDeg) < AUTO_CRUISE_MAX_STEERING_ANGLE:
+      elif abs(CS.steeringAngleDeg) < 20:
         if self.xState in [3, 5]:
           if self.xState == 3:  # 감속중
             v_cruise_kph = self.v_ego_kph_set
@@ -941,7 +942,7 @@ class VCruiseCarrot:
       if not CC.enabled:
         if self.d_rel > 0 and CS.vEgo > 0.02:
           safe_state, safe_dist = self._check_safe_stop(CS, 4)
-          if abs(CS.steeringAngleDeg) >= AUTO_CRUISE_MAX_STEERING_ANGLE:
+          if abs(CS.steeringAngleDeg) > 70:
             pass
           elif not safe_state:
             self._cruise_control(1, -1, "Cruise on (fcw)")
@@ -1024,7 +1025,8 @@ class VCruiseCarrot:
       # An independent stopped hold must also arm at a turned crosswalk stop.
       if self._independent_soft_hold():
         soft_hold_available = (soft_hold_available and CS.canValid and not CS.gasPressed
-                               and not is_hold_interlock_active(CS))
+                               and not is_hold_interlock_active(CS)
+                               and abs(CS.steeringAngleDeg) < INDEPENDENT_SOFT_HOLD_MAX_STEERING_ANGLE)
       self._soft_hold_count = self._soft_hold_count + 1 if soft_hold_available and CS.vEgo < 0.1 and CS.gearShifter == GearShifter.drive else 0
       if not soft_hold_available:
         self._soft_hold_active = 0
