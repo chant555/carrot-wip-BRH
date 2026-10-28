@@ -354,7 +354,7 @@ def test_independent_hold_schema_roundtrip_does_not_alias_auto_indicator(ready, 
   assert car.CarState.schema.fields['autoTurnSignalDirection'].proto.ordinal.explicit == 105
 
 
-@pytest.mark.parametrize('angle', [-200., -180., -164., -129., -70., 70., 129., 164., 180., 200.])
+@pytest.mark.parametrize('angle', [-179.9, -164., -129., -70., 70., 129., 164., 179.9])
 @pytest.mark.parametrize('available', [False, True])
 def test_turn_crosswalk_hold_rearms_at_large_angle_without_cruise(available, angle):
   h, cs, sm = setup_full_cruise_update()
@@ -369,7 +369,7 @@ def test_turn_crosswalk_hold_rearms_at_large_angle_without_cruise(available, ang
   cs.brakePressed = False
   h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 2 and h._activate_cruise == 0
-  assert h._steering_interlock_active == (abs(angle) >= 180.)
+  assert h._steering_interlock_active == (abs(angle) >= 70.)
   cs.gasPressed, cs.gas = True, .2
   h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 0 and h._independent_soft_hold_driven
@@ -389,8 +389,8 @@ def test_turn_crosswalk_hold_rearms_at_large_angle_without_cruise(available, ang
   assert h._soft_hold_active == 0 and h._activate_cruise == 0
 
 
-@pytest.mark.parametrize('angle,blocked', [(70., False), (129., False), (-164., False), (179.9, False), (180., True), (-180., True), (200., True)])
-def test_automatic_cruise_uses_one_eighty_degree_gate(angle, blocked):
+@pytest.mark.parametrize('angle,blocked', [(69.9, False), (70., True), (-70., True), (129., True), (-164., True), (180., True)])
+def test_automatic_cruise_retains_original_seventy_degree_gate(angle, blocked):
   h, cs, sm = setup_full_cruise_update()
   cs.cruiseState.available, cs.brakePressed = True, False
   cs.steeringAngleDeg = angle
@@ -401,8 +401,8 @@ def test_automatic_cruise_uses_one_eighty_degree_gate(angle, blocked):
 
 
 @pytest.mark.parametrize('path', ['brake_release', 'waiting_close_lead'])
-@pytest.mark.parametrize('angle,allowed', [(129., True), (179.9, True), (180., False), (-180., False)])
-def test_waiting_cruise_angle_limit_matches_activation_gate(path, angle, allowed):
+@pytest.mark.parametrize('angle', [19.9, 20., 69.9, 70., 129., 179.9, 180., -180.])
+def test_waiting_cruise_retains_original_path_limits(path, angle):
   h, cs, sm = setup_full_cruise_update()
   cs.cruiseState.available, cs.brakePressed = True, False
   cs.vEgo, cs.steeringAngleDeg = 1., angle
@@ -413,4 +413,23 @@ def test_waiting_cruise_angle_limit_matches_activation_gate(path, angle, allowed
   else:
     h._brake_pressed_count, h._gas_pressed_count, h.d_rel = -2, -2, .5
   h.update_v_cruise(cs, sm, True)
+  allowed = abs(angle) < (20. if path == 'brake_release' else 70.)
   assert h._activate_cruise == int(allowed)
+
+
+@pytest.mark.parametrize('angle', [-200., -180., -179.9, 179.9, 180., 200.])
+@pytest.mark.parametrize('enabled', [False, True])
+@pytest.mark.parametrize('available', [False, True])
+def test_soft_hold_180_degree_entry_limit_in_cruise_pause_states(angle, enabled, available):
+  h, cs, sm = setup_full_cruise_update()
+  cs.cruiseState.available = available
+  sm['carControl'].enabled = enabled
+  sm['carControl'].longActive = False
+  cs.steeringAngleDeg = angle
+  for _ in range(61): h.update_v_cruise(cs, sm, True)
+  allowed = abs(angle) < 180.
+  assert h._soft_hold_active == int(allowed)
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == ((1 if enabled else 2) if allowed else 0)
+  assert h._activate_cruise == 0
