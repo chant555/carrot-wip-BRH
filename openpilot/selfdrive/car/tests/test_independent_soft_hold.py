@@ -65,7 +65,7 @@ def test_brake_release_holds_without_engaging_and_gas_stays_cancelled(cancel, av
   assert h._activate_cruise <= 0
 
 
-@pytest.mark.parametrize('block', ['not_ready', 'auto_off', 'not_driven', 'gear', 'speed', 'can', 'gas', 'avh', 'parking', 'steering'])
+@pytest.mark.parametrize('block', ['not_ready', 'auto_off', 'not_driven', 'gear', 'speed', 'can', 'gas', 'avh', 'parking'])
 def test_standalone_hold_keeps_entry_interlocks(block):
   h, cs = setup_hold()
   if block == 'not_ready': cs.independentSoftHoldReady = False
@@ -77,7 +77,6 @@ def test_standalone_hold_keeps_entry_interlocks(block):
   if block == 'gas': cs.gasPressed, cs.gas = True, .2
   if block == 'avh': cs.brakeHoldActive = True
   if block == 'parking': cs.parkingBrake = True
-  if block == 'steering': h._steering_interlock_active = True
   for _ in range(100): h._prepare_brake_gas(cs, car.CarControl(enabled=False))
   assert h._soft_hold_count == h._soft_hold_active == 0
 
@@ -263,7 +262,7 @@ def test_drive_history_resets_and_elapsed_time_cannot_arm_independent_hold(previ
 
 
 @pytest.mark.parametrize('speed,can_valid,timeout,expected', [
-  (15.99, True, False, False), (16., True, False, True), (20., True, False, True),
+  (16., True, False, False), (17.99, True, False, False), (18., True, False, True), (20., True, False, True),
   (20., False, False, False), (20., True, True, False),
   (float('nan'), True, False, False), (float('inf'), True, False, False),
 ])
@@ -294,7 +293,7 @@ def test_gear_change_drops_active_hold_and_requires_new_driving(gear):
   cs.gearShifter, cs.brakePressed = 'drive', True
   for _ in range(1200): h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 0
-  cs.vEgo, cs.brakePressed = 16 / 3.6, False
+  cs.vEgo, cs.brakePressed = 18 / 3.6, False
   h.update_v_cruise(cs, sm, True)
   cs.vEgo, cs.brakePressed = 0., True
   for _ in range(61): h.update_v_cruise(cs, sm, True)
@@ -353,3 +352,65 @@ def test_independent_hold_schema_roundtrip_does_not_alias_auto_indicator(ready, 
   assert car.CarState.schema.fields['independentSoftHoldReady'].proto.ordinal.explicit == 113
   assert car.CarState.schema.fields['laneLineInfoMonoTime'].proto.ordinal.explicit == 112
   assert car.CarState.schema.fields['autoTurnSignalDirection'].proto.ordinal.explicit == 105
+
+
+@pytest.mark.parametrize('angle', [-200., -180., -164., -129., -70., 70., 129., 164., 180., 200.])
+@pytest.mark.parametrize('available', [False, True])
+def test_turn_crosswalk_hold_rearms_at_large_angle_without_cruise(available, angle):
+  h, cs, sm = setup_full_cruise_update()
+  cs.cruiseState.available = available
+  h.autoGasCancelSpeed = 0
+  h.speedcam_gas_tok_consumed = False
+  h._independent_soft_hold_driven = False
+  cs.brakePressed, cs.vEgo = False, 18 / 3.6
+  h.update_v_cruise(cs, sm, True)
+  cs.brakePressed, cs.vEgo, cs.steeringAngleDeg = True, 0., angle
+  for _ in range(61): h.update_v_cruise(cs, sm, True)
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 2 and h._activate_cruise == 0
+  assert h._steering_interlock_active == (abs(angle) >= 180.)
+  cs.gasPressed, cs.gas = True, .2
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 0 and h._independent_soft_hold_driven
+  # Creep and stop again without reaching the driving-history threshold again.
+  cs.gasPressed, cs.gas, cs.vEgo = False, 0., 1.
+  h.update_v_cruise(cs, sm, True)
+  cs.vEgo, cs.brakePressed = 0., True
+  for _ in range(61): h.update_v_cruise(cs, sm, True)
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 2 and h._activate_cruise == 0
+  # A short reinput must still release the independent hold at this angle.
+  cs.brakePressed = True
+  for _ in range(30): h.update_v_cruise(cs, sm, True)
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == 0 and h._activate_cruise == 0
+
+
+@pytest.mark.parametrize('angle,blocked', [(70., False), (129., False), (-164., False), (179.9, False), (180., True), (-180., True), (200., True)])
+def test_automatic_cruise_uses_one_eighty_degree_gate(angle, blocked):
+  h, cs, sm = setup_full_cruise_update()
+  cs.cruiseState.available, cs.brakePressed = True, False
+  cs.steeringAngleDeg = angle
+  h.update_v_cruise(cs, sm, True)
+  h._cruise_cancel_state = False
+  h._cruise_control(1, -1, 'automatic request')
+  assert h._activate_cruise == (0 if blocked else 1)
+
+
+@pytest.mark.parametrize('path', ['brake_release', 'waiting_close_lead'])
+@pytest.mark.parametrize('angle,allowed', [(129., True), (179.9, True), (180., False), (-180., False)])
+def test_waiting_cruise_angle_limit_matches_activation_gate(path, angle, allowed):
+  h, cs, sm = setup_full_cruise_update()
+  cs.cruiseState.available, cs.brakePressed = True, False
+  cs.vEgo, cs.steeringAngleDeg = 1., angle
+  h._cruise_cancel_state = False
+  h.aTarget = h.v_rel = 0.
+  if path == 'brake_release':
+    h._brake_pressed_count, h.xState = 1, 3
+  else:
+    h._brake_pressed_count, h._gas_pressed_count, h.d_rel = -2, -2, .5
+  h.update_v_cruise(cs, sm, True)
+  assert h._activate_cruise == int(allowed)
