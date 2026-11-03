@@ -5,7 +5,7 @@ from opendbc.car.hyundai.scalar import clip_float
 from opendbc.car import CanBusBase, DT_CTRL
 from opendbc.car.carlog import carlog
 from opendbc.car.crc import CRC16_XMODEM
-from opendbc.car.hyundai.values import HyundaiFlags, HyundaiExtFlags
+from opendbc.car.hyundai.values import CAR, HyundaiFlags, HyundaiExtFlags
 from opendbc.car.hyundai.stopping import MOVING_SPEED
 from openpilot.common.params import Params
 from openpilot.common.filter_simple import FirstOrderFilter
@@ -436,6 +436,17 @@ def create_lfa_icon_non_camera_scc(packer, CS, CAN, CC):
     _apply_driver_monitoring_alert(values, getattr(CC, "hudControl", None), CS.adrv_0x161)
     ret.append(packer.make_can_msg("ADRV_0x161", CAN.ECAN, values, rx_counter=rx_counter))
   return ret
+
+def _c4_stock_main_cluster(CP, CS):
+  # C4 (IONIQ 5 PE): Carrot cruise standby follows only the driver's buttons
+  # (carstate), but the cluster and HUD draw lead and corner objects only while
+  # 0x161 reports cruise main on. Show the gray standby view for stock MAIN,
+  # unless the driver switched MAIN off.
+  return (getattr(CP, "carFingerprint", None) == CAR.HYUNDAI_IONIQ_5_PE
+          and getattr(CP, "openpilotLongitudinalControl", False)
+          and bool(getattr(CS, "MainMode_ACC", False))
+          and not getattr(CS, "manual_main_off_latched", False))
+
 
 def _display_lead(radar_state):
   # Vehicle displays show the nearest valid control lead, including leadTwo.
@@ -1062,7 +1073,7 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
       lat_active = CC.latActive
 
       if CS.adrv_0x161 is not None:
-        main_enabled = CS.out.cruiseState.available
+        main_enabled = CS.out.cruiseState.available or _c4_stock_main_cluster(CP, CS)
         cruise_enabled = CC.enabled
         lat_enabled = CS.out.latEnabled
         nav_active = hud_control.activeCarrot > 1
