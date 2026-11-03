@@ -5,7 +5,7 @@ from opendbc.car.hyundai.scalar import clip_float
 from opendbc.car import CanBusBase, DT_CTRL
 from opendbc.car.carlog import carlog
 from opendbc.car.crc import CRC16_XMODEM
-from opendbc.car.hyundai.values import CAR, HyundaiFlags, HyundaiExtFlags
+from opendbc.car.hyundai.values import HyundaiFlags, HyundaiExtFlags
 from opendbc.car.hyundai.stopping import MOVING_SPEED
 from openpilot.common.params import Params
 from openpilot.common.filter_simple import FirstOrderFilter
@@ -1005,11 +1005,8 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
   if CP.flags & HyundaiFlags.CAMERA_SCC.value:
     # The camera's SCC output is replaced only with openpilot longitudinal control.
     # Keep its MAIN available for OEM display objects independently of engagement.
-    # C4 (IONIQ 5 PE): stock MAIN turning on also makes Carrot cruise available,
-    # so AutoCruiseControl could engage without a driver button. Keep it driver-only.
     keep_stock_scc_main = (
-      getattr(CP, "carFingerprint", None) != CAR.HYUNDAI_IONIQ_5_PE
-      and getattr(CP, "openpilotLongitudinalControl", False) and enable_corner_radar > 0
+      getattr(CP, "openpilotLongitudinalControl", False) and enable_corner_radar > 0
       and CS.scc_control is not None and CS.lfahda_cluster is not None
       and CS.out.canValid and CS.out.gearShifter == "drive"
       and math.isfinite(CS.out.vEgo) and CS.out.vEgo > 3. and not CS.out.brakePressed and not interlock_active
