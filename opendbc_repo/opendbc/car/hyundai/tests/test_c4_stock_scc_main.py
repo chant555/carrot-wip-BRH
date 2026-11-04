@@ -49,9 +49,9 @@ def test_c4_driver_buttons_still_take_precedence(monkeypatch):
   assert frames and _main_frames(frames) == []
 
 
-def carstate(fingerprint, *, main_enabled=False, manual_off=False, main_mode_acc=True):
+def carstate(fingerprint, *, main_enabled=False, manual_off=False, main_mode_acc=True, flags=HyundaiFlags.CAMERA_SCC):
   cs = CarState.__new__(CarState)
-  cs.CP = SimpleNamespace(openpilotLongitudinalControl=True, carFingerprint=fingerprint)
+  cs.CP = SimpleNamespace(openpilotLongitudinalControl=True, carFingerprint=fingerprint, flags=flags)
   cs.main_enabled = main_enabled
   cs.manual_main_off_latched = manual_off
   cs.MainMode_ACC = main_mode_acc
@@ -65,8 +65,8 @@ def test_c4_stock_main_on_does_not_make_cruise_standby():
   assert not cs.main_enabled
 
 
-def test_other_cars_keep_following_stock_main():
-  cs = carstate(CAR.KIA_EV9)
+def test_other_non_camera_cars_keep_following_stock_main():
+  cs = carstate(CAR.KIA_EV9, flags=0)
   cs._update_canfd_main_enabled(Buttons.NONE, main_button_released=False)
   assert cs.main_enabled
 
@@ -150,3 +150,15 @@ def test_cluster_main_off_when_not_c4_stock_main(monkeypatch, case):
 def test_c4_cluster_lead_needs_a_lead(monkeypatch):
   values = cluster_161(monkeypatch, lead=False)
   assert values["DISTANCE_LEAD"] == 0 and values["DISTANCE_CAR"] == 1
+
+
+@pytest.mark.parametrize("fingerprint", (CAR.HYUNDAI_IONIQ_5_PE, CAR.KIA_EV9))
+@pytest.mark.parametrize("flags", (0, HyundaiFlags.CAMERA_SCC))
+@pytest.mark.parametrize("longitudinal", (False, True))
+@pytest.mark.parametrize("manual_off", (False, True))
+def test_stock_main_feedback_combines_upstream_and_c4_guards(fingerprint, flags, longitudinal, manual_off):
+  cs = carstate(fingerprint, flags=flags, manual_off=manual_off)
+  cs.CP.openpilotLongitudinalControl = longitudinal
+  cs._update_canfd_main_enabled(Buttons.NONE, main_button_released=False)
+  assert cs.main_enabled == (longitudinal and not manual_off and not flags
+                            and fingerprint != CAR.HYUNDAI_IONIQ_5_PE)
