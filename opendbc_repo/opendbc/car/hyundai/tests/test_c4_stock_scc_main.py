@@ -4,7 +4,7 @@ Upstream 8d055419 turns stock SCC MAIN on while Carrot is disengaged so the clus
 shows corner-radar objects. On C4, stock MainMode_ACC used to set Carrot main_enabled,
 which would make cruise available and let AutoCruiseControl engage without a button.
 C4 keeps the request but Carrot standby follows only the driver's MAIN/SET/RES buttons.
-The cluster/HUD (0x161) still shows the gray standby view for stock MAIN, because it
+For all vehicles using this message path, the cluster/HUD (0x161) shows the gray standby view for stock MAIN, because it
 draws lead and corner objects only while 0x161 reports cruise main on.
 """
 from types import SimpleNamespace
@@ -125,25 +125,29 @@ def cluster_161(monkeypatch, fingerprint=CAR.HYUNDAI_IONIQ_5_PE, *, standby=Fals
   messages = hyundaicanfd.create_ccnc_messages(cp, packer, SimpleNamespace(ECAN=0, CAM=2), 5, control, state,
                                                control.hudControl, 0, False, False, 0, False, 0, 0)
   assert [(address, bus) for address, _, bus in messages] == [(0x161, 0)]
+  assert state.out.cruiseState.available == standby
+  assert not control.enabled and not control.latActive and not control.longActive
   values = {key: get_raw_value(messages[0][1], sig) for key, sig in definition.sigs.items()}
   values.pop("CHECKSUM"), values.pop("COUNTER")
   return values
 
 
-def test_c4_cluster_shows_standby_view_for_stock_main(monkeypatch):
-  values = cluster_161(monkeypatch)
+@pytest.mark.parametrize("fingerprint", tuple(CAR))
+def test_cluster_shows_standby_view_for_stock_main(monkeypatch, fingerprint):
+  values = cluster_161(monkeypatch, fingerprint)
   assert {key: values[key] for key in CLUSTER_MAIN} == dict.fromkeys(CLUSTER_MAIN, 1)
 
 
-def test_c4_cluster_for_stock_main_matches_driver_standby(monkeypatch):
+@pytest.mark.parametrize("fingerprint", tuple(CAR))
+def test_cluster_for_stock_main_matches_driver_standby(monkeypatch, fingerprint):
   # Same 0x161 as "cruise on and paused" (gray icon), where the driver saw lead and side cars.
-  assert cluster_161(monkeypatch) == cluster_161(monkeypatch, standby=True, stock_main=False)
+  assert cluster_161(monkeypatch, fingerprint) == cluster_161(monkeypatch, fingerprint, standby=True, stock_main=False)
 
 
-@pytest.mark.parametrize("case", ({"stock_main": False}, {"manual_off": True}, {"longitudinal": False},
-                                  {"fingerprint": CAR.KIA_EV9}))
-def test_cluster_main_off_when_not_c4_stock_main(monkeypatch, case):
-  values = cluster_161(monkeypatch, **case)
+@pytest.mark.parametrize("fingerprint", tuple(CAR))
+@pytest.mark.parametrize("case", ({"stock_main": False}, {"manual_off": True}, {"longitudinal": False}))
+def test_cluster_main_off_without_stock_main_permission(monkeypatch, fingerprint, case):
+  values = cluster_161(monkeypatch, fingerprint, **case)
   assert {key: values[key] for key in CLUSTER_MAIN} == dict.fromkeys(CLUSTER_MAIN, 0)
 
 
