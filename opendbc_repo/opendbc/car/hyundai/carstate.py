@@ -367,12 +367,11 @@ class CarState(CarStateBase):
       self.manual_main_off_latched = not self.main_enabled
       print(f"main_enabled = {self.main_enabled}")
 
-    # CameraSCC MAIN may be requested automatically for cluster objects; it must
-    # not create driver steering intent. Keep the C4 fingerprint guard as well:
-    # its Carrot standby follows driver MAIN/SET/RES, not stock MAIN feedback.
-    stock_main_sets_standby = getattr(self.CP, "carFingerprint", None) != CAR.HYUNDAI_IONIQ_5_PE
+    # CameraSCC MAIN can be requested automatically for cluster objects. Driver
+    # intent comes from AutoEngage initialization and the physical buttons above.
+    # Importing that OEM state would raise cruiseState.available and arm steering.
     if (self.CP.openpilotLongitudinalControl and not self.CP.flags & HyundaiFlags.CAMERA_SCC
-        and self.MainMode_ACC and not self.manual_main_off_latched and stock_main_sets_standby):
+        and self.MainMode_ACC and not self.manual_main_off_latched):
       self.main_enabled = True
 
   def _update_camera_scc_hint(self, cp_cam, canfd):
