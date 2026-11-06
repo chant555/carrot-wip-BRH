@@ -3,7 +3,8 @@
 Upstream 8d055419 turns stock SCC MAIN on while Carrot is disengaged so the cluster
 shows corner-radar objects. On C4, stock MainMode_ACC used to set Carrot main_enabled,
 which would make cruise available and let AutoCruiseControl engage without a button.
-C4 keeps the request but Carrot standby follows only the driver's MAIN/SET/RES buttons.
+C4 keeps the request and uses the upstream CameraSCC standby separation, including
+AutoEngage initialization and the driver's MAIN/SET/RES buttons, without a fingerprint override.
 For all vehicles using this message path, the cluster/HUD (0x161) shows the gray standby view for stock MAIN, because it
 draws lead and corner objects only while 0x161 reports cruise main on.
 """
@@ -160,9 +161,8 @@ def test_c4_cluster_lead_needs_a_lead(monkeypatch):
 @pytest.mark.parametrize("flags", (0, HyundaiFlags.CAMERA_SCC))
 @pytest.mark.parametrize("longitudinal", (False, True))
 @pytest.mark.parametrize("manual_off", (False, True))
-def test_stock_main_feedback_combines_upstream_and_c4_guards(fingerprint, flags, longitudinal, manual_off):
+def test_stock_main_feedback_uses_upstream_camera_guard_for_all_fingerprints(fingerprint, flags, longitudinal, manual_off):
   cs = carstate(fingerprint, flags=flags, manual_off=manual_off)
   cs.CP.openpilotLongitudinalControl = longitudinal
   cs._update_canfd_main_enabled(Buttons.NONE, main_button_released=False)
-  assert cs.main_enabled == (longitudinal and not manual_off and not flags
-                            and fingerprint != CAR.HYUNDAI_IONIQ_5_PE)
+  assert cs.main_enabled == (longitudinal and not manual_off and not flags & HyundaiFlags.CAMERA_SCC)
