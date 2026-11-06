@@ -222,6 +222,8 @@ def setup_full_cruise_update():
   h.toyota_pcm_speed_sync = NS(update=lambda *args, **kwargs: None)
   # Preserve real state transitions; only unrelated button parsing is isolated.
   h.bluetooth_commands = NS(read=lambda **kwargs: None)
+  h._lat_enabled = False
+  h.assistant_speed = NS(active=None, read=lambda **kwargs: None, finish=lambda speed: None)
   h.button_cnt = 0
   h._paddle_mode = 0
   h._prepare_buttons = lambda cs, speed, remote: (speed, 0, False)
