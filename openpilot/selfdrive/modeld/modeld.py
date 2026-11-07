@@ -90,6 +90,9 @@ def get_lat_smooth_seconds_dynamic(model_output: dict[str, np.ndarray],
   return dynamic_lat_smooth_seconds, y_std_1s, extra_smooth_seconds
 
 
+ACTION_CURVATURE_MIN_SPEED = 1.0  # m/s; upstream a47fd16e uses 2.5
+
+
 def get_action_from_model(model_output: dict[str, np.ndarray], prev_action: log.ModelDataV2.Action,
                           lat_action_t: float, long_action_t: float, v_ego: float, lat_smooth_seconds: float, vEgoStopping: float) -> log.ModelDataV2.Action:
   plan = model_output['plan'][0]
@@ -111,7 +114,9 @@ def get_action_from_model(model_output: dict[str, np.ndarray], prev_action: log.
                                                 lat_action_t)
   else:
     desired_accel = model_output['action'][0,1]
-    desired_curvature = model_output['action'][0,0] / (max(2.5, v_ego))**2
+    # C4 local: keep the pre-a47fd16e 1.0 m/s floor. Upstream's 2.5 m/s floor reduces
+    # action curvature below 9 km/h, which stacks with the slow-traffic smoothing in controlsd.
+    desired_curvature = model_output['action'][0,0] / (max(ACTION_CURVATURE_MIN_SPEED, v_ego))**2
     #should_stop = (v_ego < 0.3 and desired_accel < 0.1)
   desired_accel = smooth_value(desired_accel, prev_action.desiredAcceleration, LONG_SMOOTH_SECONDS)
   desired_velocity_now = smooth_value(desired_velocity_now, prev_action.desiredVelocity, LONG_SMOOTH_SECONDS)
