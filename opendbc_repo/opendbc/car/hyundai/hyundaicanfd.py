@@ -437,15 +437,6 @@ def create_lfa_icon_non_camera_scc(packer, CS, CAN, CC):
     ret.append(packer.make_can_msg("ADRV_0x161", CAN.ECAN, values, rx_counter=rx_counter))
   return ret
 
-def _stock_main_cluster(CP, CS):
-  # Keep the 0x161 standby display independent of actual Carrot cruise standby.
-  # Stock MAIN permits the gray view for every vehicle using this message path,
-  # unless the driver explicitly switched MAIN off. This never enables control.
-  return (getattr(CP, "openpilotLongitudinalControl", False)
-          and bool(getattr(CS, "MainMode_ACC", False))
-          and not getattr(CS, "manual_main_off_latched", False))
-
-
 def _display_lead(radar_state):
   # Vehicle displays show the nearest valid control lead, including leadTwo.
   # Equal distances retain leadOne; this does not change radar/control roles.
@@ -1071,7 +1062,7 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
       lat_active = CC.latActive
 
       if CS.adrv_0x161 is not None:
-        main_enabled = CS.out.cruiseState.available or _stock_main_cluster(CP, CS)
+        main_enabled = CS.out.cruiseState.available
         cruise_enabled = CC.enabled
         lat_enabled = CS.out.latEnabled
         nav_active = hud_control.activeCarrot > 1
