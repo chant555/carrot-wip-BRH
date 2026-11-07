@@ -14,6 +14,7 @@ from openpilot.selfdrive.controls.radar_constants import LEAD_ACCEL_TAU
 from openpilot.selfdrive.carrot.traffic_stop import get_traffic_stop_distance_adjust, get_traffic_stop_obstacle_distance
 from openpilot.selfdrive.controls.lib.longitudinal_preview import LEAD_ACCEL_MIN_TRACK_FRAMES, LeadAccelResponseState, get_lead_accel_mpc_request
 from openpilot.selfdrive.controls.lib.longitudinal_cutout import cutout_obstacle_relief
+from openpilot.selfdrive.controls.lib.longitudinal_decel_pulse import LeadDecelPulse
 from openpilot.selfdrive.controls.lib.longitudinal_gap_recovery import LeadGapState, displayed_follow_distance
 from openpilot.selfdrive.controls.lib.longitudinal_braking_gap import LeadComfortState, braking_gap_reference, comfort_path_has_reserve
 from openpilot.selfdrive.carrot.radar_motion.lane_change_gap import LaneChangeGapPlan
@@ -34,10 +35,10 @@ SOURCES = ['lead0', 'lead1', 'cruise', 'e2e']
 
 X_DIM = 3
 U_DIM = 1
-PARAM_DIM = 8
+PARAM_DIM = 9
 COST_E_DIM = 5
 COST_DIM = COST_E_DIM + 1
-CONSTR_DIM = 4
+CONSTR_DIM = 5
 
 X_EGO_OBSTACLE_COST = 5.
 X_EGO_COST = 0.
@@ -50,6 +51,7 @@ DANGER_ZONE_COST = 100.
 CRASH_DISTANCE = .25
 LEAD_DANGER_FACTOR = 0.8 # 0.75
 LIMIT_COST = 1e6
+DECEL_PULSE_COST = 200.
 ACADOS_SOLVER_TYPE = 'SQP_RTI'
 
 
@@ -141,7 +143,9 @@ def gen_long_model():
   lead_danger_factor = SX.sym('lead_danger_factor')
   comfort_brake = SX.sym('comfort_brake')
   stop_distance = SX.sym('stop_distance')
-  model.p = vertcat(a_min, a_max, x_obstacle, prev_a, lead_t_follow, lead_danger_factor, comfort_brake, stop_distance)
+  pulse_max_accel = SX.sym('pulse_max_accel')
+  model.p = vertcat(a_min, a_max, x_obstacle, prev_a, lead_t_follow,
+                    lead_danger_factor, comfort_brake, stop_distance, pulse_max_accel)
 
   # dynamics model
   f_expl = vertcat(v_ego, a_ego, j_ego)
@@ -179,6 +183,7 @@ def gen_long_ocp():
   lead_danger_factor = ocp.model.p[5]
   comfort_brake = ocp.model.p[6]
   stop_distance = ocp.model.p[7]
+  pulse_max_accel = ocp.model.p[8]
 
   ocp.cost.yref = np.zeros((COST_DIM, ))
   ocp.cost.yref_e = np.zeros((COST_E_DIM, ))
@@ -204,12 +209,14 @@ def gen_long_ocp():
   constraints = vertcat(v_ego,
                         (a_ego - a_min),
                         (a_max - a_ego),
-                        ((x_obstacle - x_ego) - lead_danger_factor * (desired_dist_comfort)) / (v_ego + 10.))
+                        ((x_obstacle - x_ego) - lead_danger_factor * (desired_dist_comfort)) / (v_ego + 10.),
+                        pulse_max_accel - a_ego)
   ocp.model.con_h_expr = constraints
 
   x0 = np.zeros(X_DIM)
   ocp.constraints.x0 = x0
-  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0, lead_t_follow, LEAD_DANGER_FACTOR, comfort_brake, stop_distance])
+  # Code generation needs numeric defaults; live values are set before every solve.
+  ocp.parameter_values = np.array([-1.2, 1.2, 0.0, 0.0, 1.45, LEAD_DANGER_FACTOR, COMFORT_BRAKE, STOP_DISTANCE, 1.2])
 
 
   # We put all constraint cost weights to 0 and only set them at runtime
@@ -235,7 +242,8 @@ def gen_long_ocp():
 
   # More iterations take too much time and less lead to inaccurate convergence in
   # some situations. Ideally we would run just 1 iteration to ensure fixed runtime.
-  ocp.solver_options.qp_solver_iter_max = 10
+  # The additional soft constraint needs more iterations in cold-start cases.
+  ocp.solver_options.qp_solver_iter_max = 20
   ocp.solver_options.qp_tol = 1e-3
 
   # set prediction horizon
@@ -295,6 +303,7 @@ class LongitudinalMpc:
     self.lead_accel_response_level = 0
     # timers
     self.lead_response_state = LeadAccelResponseState()
+    self.lead_decel_pulse = LeadDecelPulse()
     self.lead_gap_states = (LeadGapState(), LeadGapState())
     self.lead_comfort_states = (LeadComfortState(), LeadComfortState())
     self.lead_gap_margins = np.zeros((N+1, 2))
@@ -309,7 +318,7 @@ class LongitudinalMpc:
     # Compare the actual double values (including signed zero), not a rounded
     # tuning key. Reset and solver replacement must always resend the costs.
     values = (*cost_weights, *constraint_cost_weights)
-    key = (self.mode, struct.pack('10d', *values)) if all(map(math.isfinite, values)) else None
+    key = (self.mode, struct.pack(f'{len(values)}d', *values)) if all(map(math.isfinite, values)) else None
     if key is not None and key == self._cost_key and self.solver is self._cost_solver:
       return
     self._cost_key = None
@@ -335,7 +344,8 @@ class LongitudinalMpc:
                   jerk_factor=1.0,
                   a_change_cost_starting=A_CHANGE_COST_STARTING,
                   a_change_cost_factor=1.0,
-                  jerk_cost_factor=1.0):
+                  jerk_cost_factor=1.0,
+                  decel_pulse_cost=0.0):
     #jerk_factor = get_jerk_factor(personality)
     if self.mode == 'acc':
       a_change_cost = get_a_change_cost(
@@ -344,11 +354,11 @@ class LongitudinalMpc:
       applied_jerk_cost_factor = float(np.clip(jerk_cost_factor, 0.0, 1.0))
       cost_weights = [X_EGO_OBSTACLE_COST, X_EGO_COST, V_EGO_COST, A_EGO_COST,
                       a_change_cost, jerk_factor * applied_jerk_cost_factor * J_EGO_COST]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST, decel_pulse_cost]
     elif self.mode == 'blended':
       a_change_cost = 40.0 if prev_accel_constraint else 0
       cost_weights = [0., 0.1, 0.2, 5.0, a_change_cost, 1.0]
-      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST]
+      constraint_cost_weights = [LIMIT_COST, LIMIT_COST, LIMIT_COST, DANGER_ZONE_COST, 0.0]
     else:
       raise NotImplementedError(f'Planner mode {self.mode} not recognized in planner cost set')
     self.a_change_cost = float(a_change_cost)
@@ -417,7 +427,8 @@ class LongitudinalMpc:
              lead_gap_enabled=False,
              lead_track_frames=(0, 0),
              measured_a_ego=0.0,
-             cutout_relief_enabled=False):
+             cutout_relief_enabled=False,
+             lead_decel_enabled=False):
     v_ego = self.x0[1]
     a_ego = self.x0[2]
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
@@ -548,6 +559,20 @@ class LongitudinalMpc:
     response_request = self.lead_response_state.update(response_request, self.dt, response_lead.radarTrackId)
     self.lead_accel_response_active = response_request.active
     self.lead_accel_response_level = response_request.level if response_request.active else 0
+    # The short initial-deceleration request penalizes the same trajectory used
+    # for every speed/acceleration/jerk output. It never adds a following gap.
+    decel_index = 1 if self.source == 'lead1' else 0
+    decel_lead = (radarstate.leadOne, radarstate.leadTwo)[decel_index]
+    self.params[:,8] = self.lead_decel_pulse.acceleration_limits(
+      enabled=(lead_decel_enabled and mode == 'acc' and not reset_state
+               and not getattr(carrot, 'lane_change_active', False)),
+      lead=decel_lead, track_frames=(lead_track_frames[decel_index] if len(lead_track_frames) > decel_index else 0), dt=self.dt,
+      ego_speed=v_ego, measured_accel=measured_a_ego, planned_accel=a_ego,
+      base_distance=self.base_desired_distances[decel_index], t_follow=t_follow,
+      comfort_brake=comfort_brake, times=T_IDXS,
+      minimum_accel=self.params[0,0], maximum_accel=self.params[0,1],
+    )
+
     self.set_weights(
       prev_accel_constraint,
       personality=personality,
@@ -555,6 +580,7 @@ class LongitudinalMpc:
       a_change_cost_starting=a_change_cost_starting,
       a_change_cost_factor=response_request.a_change_cost_factor,
       jerk_cost_factor=response_request.jerk_cost_factor,
+      decel_pulse_cost=DECEL_PULSE_COST * self.lead_decel_pulse.cost_weight,
     )
 
     # Extra TF is a comfort preference, not a change to physical lead obstacles,

@@ -37,7 +37,7 @@ def test_cost_cache_tracks_exact_values_solver_and_mode(lateral):
   fn = cost_method(lateral)
   obj = NS(solver=Solver(), mode='acc', _cost_key=None, _cost_solver=None)
   w = [1., .1, 0., .04, 700.] if lateral else [5., 0., 0., 0., 200., 20.]
-  cw = [1e6, 1e6, 1e6, 100.]
+  cw = [1e6, 1e6, 1e6, 100., 0.]
   def call():
     fn(obj, *w) if lateral else fn(obj, w, cw)
   count = 33 if lateral else 25
@@ -76,7 +76,7 @@ def test_partial_cost_write_failure_never_leaves_old_cache_valid(lateral):
   solver = Solver()
   obj = NS(solver=solver, mode='acc', _cost_key=None, _cost_solver=None)
   w = [1., .1, 0., .04, 700.] if lateral else [5., 0., 0., 0., 200., 20.]
-  cw = [1e6, 1e6, 1e6, 100.]
+  cw = [1e6, 1e6, 1e6, 100., 0.]
   def call():
     fn(obj, *w) if lateral else fn(obj, w, cw)
   call()

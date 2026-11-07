@@ -17,6 +17,7 @@ from openpilot.selfdrive.controls.lib.longitudinal_braking_gap import LeadComfor
 def load_mpc_update(path):
   """Run production wiring with a recording solver; this is not a solver test."""
   from openpilot.selfdrive.controls.lib import longitudinal_preview as preview
+  from openpilot.selfdrive.controls.lib.longitudinal_decel_pulse import LeadDecelPulse
   from openpilot.selfdrive.carrot.traffic_stop import get_traffic_stop_distance_adjust, get_traffic_stop_obstacle_distance
   from openpilot.selfdrive.carrot.radar_motion.lane_change_gap import LaneChangeGapPlan
   from openpilot.selfdrive.controls.lib.longitudinal_cutout import cutout_obstacle_relief
@@ -30,12 +31,12 @@ def load_mpc_update(path):
 
   ns = {'np': np, 'math': math, 'struct': struct, 'log': SimpleNamespace(LongitudinalPersonality=SimpleNamespace(standard=1, aggressive=0)),
             'DT_MDL': .05, 'N': 12, 'COMFORT_BRAKE': 2.5, 'STOP_DISTANCE': 6., 'ACCEL_MIN': -3.5, 'LEAD_ACCEL_TAU': 1.5,
-            'MODEL_NAME': 'long', 'ACADOS_SOLVER_TYPE': 'SQP_RTI', 'COST_DIM': 6, 'COST_E_DIM': 5, 'X_DIM': 3, 'PARAM_DIM': 8,
+            'MODEL_NAME': 'long', 'ACADOS_SOLVER_TYPE': 'SQP_RTI', 'COST_DIM': 6, 'COST_E_DIM': 5, 'X_DIM': 3, 'PARAM_DIM': 9,
             'A_CHANGE_COST': 200., 'A_CHANGE_COST_STARTING': 10., 'LEAD_DANGER_FACTOR': .8, 'LIMIT_COST': 1e6,
-            'DANGER_ZONE_COST': 100., 'CRASH_DISTANCE': .25, 'X_EGO_OBSTACLE_COST': 5., 'X_EGO_COST': 0.,
+            'DECEL_PULSE_COST': 200., 'DANGER_ZONE_COST': 100., 'CRASH_DISTANCE': .25, 'X_EGO_OBSTACLE_COST': 5., 'X_EGO_COST': 0.,
             'V_EGO_COST': 0., 'A_EGO_COST': 0., 'SOURCES': ['lead0','lead1','cruise','e2e'],
             'AcadosOcpSolverCython': RecordingSolver, 'LEAD_ACCEL_MIN_TRACK_FRAMES': 3,
-            'LeadAccelResponseState': preview.LeadAccelResponseState, 'get_lead_accel_mpc_request': preview.get_lead_accel_mpc_request,
+            'LeadDecelPulse': LeadDecelPulse, 'LeadAccelResponseState': preview.LeadAccelResponseState, 'get_lead_accel_mpc_request': preview.get_lead_accel_mpc_request,
             'LeadGapState': LeadGapState, 'gap_reference': gap_reference, 'displayed_follow_distance': displayed_follow_distance,
             'LeadComfortState': LeadComfortState, 'braking_gap_reference': braking_gap_reference,
             'comfort_path_has_reserve': comfort_path_has_reserve,
@@ -59,7 +60,7 @@ def load_mpc_update(path):
 
 def run_update(cls, level=1, *, distance=45.15, speed=79.04/3.6, lead_speed=None,
                frames=10, status=True, radar=True, enabled=True, reset=False, lane_change=False, mode='acc', lead_index=0,
-               lead_accel=0., driving_mode=3, ego_accel=0., gap_enabled=True, relative_speed=None, stop_distance=6.):
+               lead_accel=0., driving_mode=3, ego_accel=0., gap_enabled=True, relative_speed=None, stop_distance=6., decel_enabled=False):
   if lead_speed is None:
     lead_speed = speed-1.96
   lead = SimpleNamespace(status=status, radar=radar, radarTrackId=49, dRel=distance, vLead=lead_speed,
@@ -75,7 +76,7 @@ def run_update(cls, level=1, *, distance=45.15, speed=79.04/3.6, lead_speed=None
   mpc.set_accel_limits(-1.2, 2.)
   for _ in range(20):
     mpc.update(carrot, reset, rs, 30., *(np.zeros(13) for _ in range(4)), lead_accel_response_enabled=enabled, lead_gap_enabled=gap_enabled and enabled,
-               lead_track_frames=(frames, frames))
+               lead_track_frames=(frames, frames), lead_decel_enabled=decel_enabled, measured_a_ego=ego_accel)
   return mpc
 
 
