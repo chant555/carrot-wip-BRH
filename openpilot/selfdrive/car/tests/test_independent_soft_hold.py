@@ -257,7 +257,7 @@ def test_drive_history_resets_and_elapsed_time_cannot_arm_independent_hold(previ
   cs.gearShifter = previous_gear
   h.update_v_cruise(cs, sm, True)
   cs.gearShifter = 'drive'
-  for _ in range(1200): h.update_v_cruise(cs, sm, True)
+  for _ in range(2200): h.update_v_cruise(cs, sm, True)
   assert h.autoCruiseControl_cancel_timer == 0
   assert h._soft_hold_count == h._soft_hold_active == 0
   assert not h._independent_soft_hold_driven
@@ -268,17 +268,22 @@ def test_drive_history_resets_and_elapsed_time_cannot_arm_independent_hold(previ
   (20., False, False, False), (20., True, True, False),
   (float('nan'), True, False, False), (float('inf'), True, False, False),
 ])
-def test_speed_history_boundary_and_validity(speed, can_valid, timeout, expected):
+@pytest.mark.parametrize("timer", [0, 1000, 2000])
+def test_speed_history_boundary_and_validity(speed, can_valid, timeout, expected, timer):
   h, cs, sm = setup_full_cruise_update()
   h._independent_soft_hold_driven = False
-  h.autoCruiseControl_cancel_timer = 1000
+  h.autoCruiseControl_cancel_timer = timer
   cs.vEgo, cs.canValid, cs.canTimeout = speed / 3.6, can_valid, timeout
   cs.brakePressed = False
   h.update_v_cruise(cs, sm, True)
   cs.vEgo, cs.canValid, cs.canTimeout, cs.brakePressed = 0., True, False, True
   for _ in range(61): h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == int(expected)
-  assert h.autoCruiseControl_cancel_timer > 0  # Hold no longer waits for this timer.
+  assert h.autoCruiseControl_cancel_timer == max(0, timer - 62)
+  cs.brakePressed = False
+  h.update_v_cruise(cs, sm, True)
+  assert h._soft_hold_active == (2 if expected else 0)
+  assert not cs.cruiseState.available
   assert h._activate_cruise == 0
 
 
@@ -293,7 +298,7 @@ def test_gear_change_drops_active_hold_and_requires_new_driving(gear):
   h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 0 and not h._independent_soft_hold_driven
   cs.gearShifter, cs.brakePressed = 'drive', True
-  for _ in range(1200): h.update_v_cruise(cs, sm, True)
+  for _ in range(2200): h.update_v_cruise(cs, sm, True)
   assert h._soft_hold_active == 0
   cs.vEgo, cs.brakePressed = 18 / 3.6, False
   h.update_v_cruise(cs, sm, True)
@@ -322,15 +327,15 @@ def test_brake_tap_keeps_drive_history_and_can_rearm_without_accelerating():
 
 
 @pytest.mark.parametrize('speed', [0., 20.])
-def test_automatic_cruise_keeps_ten_second_timer_independent_of_speed_history(speed):
+def test_automatic_cruise_keeps_upstream_twenty_second_timer_independent_of_speed_history(speed):
   h, cs, sm = setup_full_cruise_update()
   cs.cruiseState.available = True
   cs.gearShifter = 'park'
   h.update_v_cruise(cs, sm, True)
-  assert h.autoCruiseControl_cancel_timer == 1000
+  assert h.autoCruiseControl_cancel_timer == 2000
   cs.gearShifter, cs.brakePressed, cs.vEgo = 'drive', False, speed / 3.6
-  for _ in range(999): h.update_v_cruise(cs, sm, True)
-  assert h._independent_soft_hold_driven == (speed >= 16)
+  for _ in range(1999): h.update_v_cruise(cs, sm, True)
+  assert h._independent_soft_hold_driven == (speed >= 18)
   assert h.autoCruiseControl_cancel_timer == 1
   h._cruise_cancel_state = False
   h._cruise_control(1, -1, 'automatic request')
