@@ -19,7 +19,8 @@ def action_functions():
     'DT_MDL': .05,
   }
   names = {'get_action_from_model', 'get_accel_from_plan', 'get_curvature_from_plan',
-           'curv_from_psis', 'smooth_value', 'MIN_SPEED', 'LONG_SMOOTH_SECONDS', 'MIN_LAT_CONTROL_SPEED'}
+           'curv_from_psis', 'smooth_value', 'MIN_SPEED', 'LONG_SMOOTH_SECONDS', 'MIN_LAT_CONTROL_SPEED',
+           'ACTION_CURVATURE_MIN_SPEED'}
   for source in (helpers, modeld):
     tree = ast.parse(source.read_text(encoding='utf8'))
     body = [node for node in tree.body if
@@ -41,12 +42,13 @@ def run_action(functions, speed, lateral_accel, smoothing=0.):
   return functions.get_action_from_model(output, previous, .3, .4, speed, smoothing, .05)
 
 
-@pytest.mark.parametrize('speed', [.301, .5, 1., 1.5, 2., 2.499, 2.5, 3., 10., 30.])
+@pytest.mark.parametrize('speed', [.301, .5, .999, 1., 1.5, 2., 2.499, 2.5, 3., 10., 30.])
 @pytest.mark.parametrize('lateral_accel', [-.1, 0., .1])
 @pytest.mark.parametrize('smoothing', [0., .3])
 def test_action_curvature_speed_floor(action_functions, speed, lateral_accel, smoothing):
   result = run_action(action_functions, speed, lateral_accel, smoothing)
-  target = lateral_accel / max(2.5, speed)**2
+  # C4 local floor (1.0 m/s): curvature is not reduced between 1.0 and 2.5 m/s (3.6-9 km/h).
+  target = lateral_accel / max(1.0, speed)**2
   expected = action_functions.smooth_value(target, .007, smoothing)
   assert result.desiredCurvature == pytest.approx(expected)
   assert result.desiredAcceleration == pytest.approx(action_functions.smooth_value(-.2, .1, .3))
@@ -70,6 +72,16 @@ def test_plan_only_model_keeps_existing_conversion(action_functions, speed):
 
 
 def test_curvature_is_continuous_at_floor(action_functions):
-  before = run_action(action_functions, 2.5 - 1e-8, .1).desiredCurvature
-  after = run_action(action_functions, 2.5 + 1e-8, .1).desiredCurvature
-  assert abs(after - before) < 1e-9
+  before = run_action(action_functions, 1.0 - 1e-8, .1).desiredCurvature
+  after = run_action(action_functions, 1.0 + 1e-8, .1).desiredCurvature
+  # The slope is 0.2 per m/s at 1.0 m/s, so a 2e-8 m/s step moves curvature by about 4e-9; a jump would be far larger.
+  assert abs(after - before) < 1e-7
+
+
+def test_c4_floor_keeps_low_speed_curvature(action_functions):
+  # Below 9 km/h the C4 floor returns the unattenuated model curvature (upstream 2.5 m/s would scale it down).
+  for speed in (1.0, 1.5, 2.0, 2.4):
+    result = run_action(action_functions, speed, .1).desiredCurvature
+    assert result == pytest.approx(.1 / speed**2)
+    assert result > .1 / 2.5**2
+  assert action_functions.ACTION_CURVATURE_MIN_SPEED == 1.0
