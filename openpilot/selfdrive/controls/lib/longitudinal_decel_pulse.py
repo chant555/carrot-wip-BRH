@@ -10,6 +10,12 @@ import numpy as np
 
 PULSE_SECONDS = 1.8
 ATTACK_JERK = 1.0
+# C4 2026-11-08: the 0000012b drive felt a slight bump 0.25-0.45 s into the pulse.
+# The entry slope dips below ATTACK_JERK early and rises above it later, with the
+# same total descent by ONSET_SHAPE_SECONDS, so the bump softens without spending
+# less braking than the original entry.
+ONSET_SHAPE_AMPLITUDE = 0.20
+ONSET_SHAPE_SECONDS = 1.6
 RELEASE_JERK = 0.8
 CLEAR_RELEASE_JERK = 1.5
 EXTRA_DECEL_MAX = 0.6
@@ -18,6 +24,21 @@ EXTRA_DECEL_MAX = 0.6
 def smoothstep(value):
   value = min(1.0, max(0.0, value))
   return value * value * (3.0 - 2.0 * value)
+
+
+def onset_descent(start, duration):
+  """Ceiling descent allowed between pulse ages start and start + duration.
+
+  The slope multiplier is 1 - A*sin(2*pi*age/T) for age < T and 1 afterwards. It
+  is continuous, never below 1 - A, and integrates to exactly T over [0, T].
+  """
+  def cumulative(age):
+    age = max(0.0, age)
+    if age >= ONSET_SHAPE_SECONDS:
+      return age
+    period = ONSET_SHAPE_SECONDS
+    return age + ONSET_SHAPE_AMPLITUDE * period / (2.0 * math.pi) * (math.cos(2.0 * math.pi * age / period) - 1.0)
+  return ATTACK_JERK * (cumulative(start + max(0.0, duration)) - cumulative(start))
 
 
 def closing_request(distance, relative_speed, ego_speed, ego_accel, lead_speed,
@@ -105,7 +126,7 @@ class LeadDecelPulse:
     clear = closing <= 0.1 or self.shortfall <= 0.0 or lead.aLeadK >= 0.05
     release_jerk = CLEAR_RELEASE_JERK if clear else RELEASE_JERK
     if self.phase == 'pulse':
-      self.ceiling += np.clip(target - self.ceiling, -ATTACK_JERK * dt, release_jerk * dt)
+      self.ceiling += np.clip(target - self.ceiling, -onset_descent(self.elapsed - dt, dt), release_jerk * dt)
     else:
       self.ceiling = min(maximum_accel, self.ceiling + release_jerk * dt)
       if self.ceiling >= maximum_accel:
@@ -120,7 +141,7 @@ class LeadDecelPulse:
     speed_weight = smoothstep((ego_speed - 2.0) / 3.0)
     for index, horizon in enumerate(times):
       attack_time = min(horizon, remaining)
-      ceiling = self.ceiling + np.clip(target - self.ceiling, -ATTACK_JERK * attack_time,
+      ceiling = self.ceiling + np.clip(target - self.ceiling, -onset_descent(self.elapsed, attack_time),
                                       release_jerk * attack_time)
       ceiling += release_jerk * max(0.0, horizon - remaining)
       ceiling = min(maximum_accel, max(minimum_accel, ceiling))

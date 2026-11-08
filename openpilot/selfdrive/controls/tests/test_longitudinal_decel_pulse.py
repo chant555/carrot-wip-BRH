@@ -3,7 +3,10 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from openpilot.selfdrive.controls.lib.longitudinal_decel_pulse import LeadDecelPulse, closing_request, PULSE_SECONDS
+import openpilot.selfdrive.controls.lib.longitudinal_decel_pulse as decel_pulse
+from openpilot.selfdrive.controls.lib.longitudinal_decel_pulse import (
+  ATTACK_JERK, ONSET_SHAPE_AMPLITUDE, ONSET_SHAPE_SECONDS, LeadDecelPulse, closing_request, onset_descent, PULSE_SECONDS,
+)
 
 TIMES = 10.0 * (np.arange(13) / 12.0) ** 2
 
@@ -177,3 +180,50 @@ def test_planner_only_enables_pulse_with_fresh_valid_active_inputs(block):
     'time': NS(monotonic=lambda: 10.0),
   }
   assert eval(compile(ast.Expression(expression), str(path), 'eval'), scope) == (block == 'none')
+
+
+def test_onset_shape_keeps_total_descent_of_original_entry():
+  assert onset_descent(0.0, ONSET_SHAPE_SECONDS) == pytest.approx(ATTACK_JERK * ONSET_SHAPE_SECONDS)
+  assert onset_descent(ONSET_SHAPE_SECONDS, 0.5) == pytest.approx(ATTACK_JERK * 0.5)
+  assert onset_descent(0.0, 3.0) == pytest.approx(ATTACK_JERK * 3.0)
+
+
+def test_onset_shape_is_softer_early_and_catches_up_later():
+  half = ONSET_SHAPE_SECONDS / 2
+  assert onset_descent(0.0, half) < ATTACK_JERK * half
+  assert onset_descent(half, half) > ATTACK_JERK * half
+  # Largest temporary shortfall of the ceiling descent stays small.
+  assert ATTACK_JERK * half - onset_descent(0.0, half) == pytest.approx(ATTACK_JERK * ONSET_SHAPE_AMPLITUDE * ONSET_SHAPE_SECONDS / np.pi)
+
+
+def test_onset_slope_is_continuous_and_bounded():
+  ages = np.arange(0.0, ONSET_SHAPE_SECONDS + 0.5, 0.01)
+  slopes = np.array([onset_descent(age, 1e-4) / 1e-4 for age in ages])
+  assert np.all(slopes >= ATTACK_JERK * (1 - ONSET_SHAPE_AMPLITUDE) - 1e-3)
+  assert np.all(slopes <= ATTACK_JERK * (1 + ONSET_SHAPE_AMPLITUDE) + 1e-3)
+  assert np.max(np.abs(np.diff(slopes))) < 0.01
+
+
+def test_zero_amplitude_matches_original_linear_entry(monkeypatch):
+  monkeypatch.setattr(decel_pulse, 'ONSET_SHAPE_AMPLITUDE', 0.0)
+  for start, duration in [(0.0, 0.05), (0.3, 0.05), (0.0, 1.0), (0.7, 2.0)]:
+    assert onset_descent(start, duration) == pytest.approx(ATTACK_JERK * duration)
+
+
+def test_live_ceiling_matches_original_entry_after_shape_period():
+  shaped, linear = [], []
+  for amplitude, out in ((ONSET_SHAPE_AMPLITUDE, shaped), (0.0, linear)):
+    decel_pulse.ONSET_SHAPE_AMPLITUDE = amplitude
+    try:
+      state = LeadDecelPulse()
+      args = inputs()
+      args['lead'].aLeadK = -1.2
+      for _ in range(int(round((ONSET_SHAPE_SECONDS + 0.1) / 0.05))):
+        state.acceleration_limits(**args)
+        out.append(state.ceiling)
+        args['planned_accel'] = state.ceiling  # the plan follows the ceiling, so the live floor moves too
+    finally:
+      decel_pulse.ONSET_SHAPE_AMPLITUDE = ONSET_SHAPE_AMPLITUDE
+  assert shaped[5] > linear[5]  # softer early
+  assert linear[-1] > -1.8  # still descending, so the comparison is not a saturated floor
+  assert shaped[-1] == pytest.approx(linear[-1], abs=1e-9)
