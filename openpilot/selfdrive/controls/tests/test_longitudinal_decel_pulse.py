@@ -5,20 +5,22 @@ import pytest
 
 import openpilot.selfdrive.controls.lib.longitudinal_decel_pulse as decel_pulse
 from openpilot.selfdrive.controls.lib.longitudinal_decel_pulse import (
-  ATTACK_JERK, ONSET_SHAPE_AMPLITUDE, ONSET_SHAPE_SECONDS, LeadDecelPulse, closing_request, onset_descent, PULSE_SECONDS,
+  ATTACK_JERK, LEAD_DECEL_TRIGGER_HIGH, LEAD_DECEL_TRIGGER_HIGH_SPEED, LEAD_DECEL_TRIGGER_LOW, LEAD_DECEL_TRIGGER_LOW_SPEED,
+  ONSET_SHAPE_AMPLITUDE, ONSET_SHAPE_SECONDS, LeadDecelPulse, closing_request, lead_decel_trigger, onset_descent, PULSE_SECONDS,
 )
 
 TIMES = 10.0 * (np.arange(13) / 12.0) ** 2
 
 
 def inputs(**overrides):
-  lead = SimpleNamespace(status=True, radar=True, radarTrackId=48, dRel=15.0, vRel=-0.8, vLead=9.2, aLeadK=-0.4)
+  # 21.6 km/h: below LEAD_DECEL_TRIGGER_LOW_SPEED, so a -0.4 m/s^2 lead deceleration starts a pulse.
+  lead = SimpleNamespace(status=True, radar=True, radarTrackId=48, dRel=15.0, vRel=-0.8, vLead=5.2, aLeadK=-0.4)
   values = {
     'enabled': True,
     'lead': lead,
     'track_frames': 10,
     'dt': 0.05,
-    'ego_speed': 10.0,
+    'ego_speed': 6.0,
     'measured_accel': 0.4,
     'planned_accel': 0.4,
     'base_distance': 18.0,
@@ -127,7 +129,7 @@ def test_soft_pulse_leaves_physical_bounds_obstacles_and_following_time_intact()
   from openpilot.selfdrive.controls.tests.test_longitudinal_gap_recovery import load_mpc_update, run_update
 
   cls = load_mpc_update(Path(__file__).resolve().parents[1] / 'lib/longitudinal_mpc_lib/long_mpc.py')
-  args = {'distance': 12.0, 'speed': 10.0, 'lead_speed': 9.2, 'lead_accel': -0.4, 'ego_accel': 0.4}
+  args = {'distance': 12.0, 'speed': 6.0, 'lead_speed': 5.2, 'lead_accel': -0.4, 'ego_accel': 0.4}
   off = run_update(cls, **args)
   on = run_update(cls, **args, decel_enabled=True)
   np.testing.assert_array_equal(on.params[:, :8], off.params[:, :8])
@@ -146,7 +148,7 @@ def test_mpc_excludes_reset_lane_change_blended_and_untrusted_lead(overrides):
   from openpilot.selfdrive.controls.tests.test_longitudinal_gap_recovery import load_mpc_update, run_update
 
   cls = load_mpc_update(Path(__file__).resolve().parents[1] / 'lib/longitudinal_mpc_lib/long_mpc.py')
-  mpc = run_update(cls, distance=12.0, speed=10.0, lead_speed=9.2, lead_accel=-0.4, ego_accel=0.4, decel_enabled=True, **overrides)
+  mpc = run_update(cls, distance=12.0, speed=6.0, lead_speed=5.2, lead_accel=-0.4, ego_accel=0.4, decel_enabled=True, **overrides)
   np.testing.assert_array_equal(mpc.params[:, 8], mpc.params[:, 1])
   assert mpc.solver.weights[0, 'Zl'][4] == 0.0
 
@@ -227,3 +229,56 @@ def test_live_ceiling_matches_original_entry_after_shape_period():
   assert shaped[5] > linear[5]  # softer early
   assert linear[-1] > -1.8  # still descending, so the comparison is not a saturated floor
   assert shaped[-1] == pytest.approx(linear[-1], abs=1e-9)
+
+
+def test_lead_decel_trigger_rises_with_speed():
+  assert lead_decel_trigger(5.0) == pytest.approx(LEAD_DECEL_TRIGGER_LOW)
+  assert lead_decel_trigger(LEAD_DECEL_TRIGGER_LOW_SPEED) == pytest.approx(LEAD_DECEL_TRIGGER_LOW)
+  middle = lead_decel_trigger((LEAD_DECEL_TRIGGER_LOW_SPEED + LEAD_DECEL_TRIGGER_HIGH_SPEED) / 2)
+  assert LEAD_DECEL_TRIGGER_LOW < middle < LEAD_DECEL_TRIGGER_HIGH
+  assert lead_decel_trigger(LEAD_DECEL_TRIGGER_HIGH_SPEED) == pytest.approx(LEAD_DECEL_TRIGGER_HIGH)
+  assert lead_decel_trigger(25.0) == pytest.approx(LEAD_DECEL_TRIGGER_HIGH)
+
+
+def high_speed_inputs(a_lead):
+  # 72 km/h, 2 m inside the base distance and closing: a real gap need at speed.
+  args = inputs(ego_speed=20.0, base_distance=26.0, measured_accel=0.0, planned_accel=0.0, maximum_accel=1.0)
+  args['lead'].dRel, args['lead'].vRel, args['lead'].vLead, args['lead'].aLeadK = 24.0, -0.8, 19.2, a_lead
+  return args
+
+
+def test_small_lead_deceleration_at_speed_does_not_start_a_pulse():
+  state = LeadDecelPulse()
+  np.testing.assert_array_equal(state.acceleration_limits(**high_speed_inputs(-0.6)), np.full(13, 1.0))
+  assert state.phase == 'idle'
+
+
+def test_real_lead_braking_at_speed_still_starts_a_pulse():
+  state = LeadDecelPulse()
+  limits = state.acceleration_limits(**high_speed_inputs(-1.2))
+  assert state.phase == 'pulse'
+  assert np.min(limits[1:]) < 1.0
+
+
+def test_own_acceleration_does_not_create_predicted_shortfall():
+  # 72 km/h, 3 m farther than the base distance, accelerating toward cruise while
+  # the lead brakes lightly: the 0000012c case that triggered without a real gap need.
+  args = (24.6, -0.2, 20.0, 0.33, 19.8, -0.54, 21.4, 0.69, 2.4)
+  accelerating = closing_request(*args)
+  holding = closing_request(*args[:3], 0.0, *args[4:])
+  # Only the distance actually closed in 1 s (0.5 * a) remains; the ~3 m growth of
+  # the base distance from the ego's own speed-up is no longer counted.
+  assert accelerating[1] - holding[1] == pytest.approx(0.5 * 0.33)
+
+
+def test_extra_minimum_only_when_gap_is_actually_short():
+  ample, short = LeadDecelPulse(), LeadDecelPulse()
+  ample_args = inputs(base_distance=14.0)   # lead at 15 m: 1 m of spare gap
+  short_args = inputs(base_distance=17.0)   # lead at 15 m: 2 m inside the base distance
+  for args in (ample_args, short_args):
+    args['lead'].vRel = -0.15                 # barely closing, so the closing term is small
+  ample_limits = ample.acceleration_limits(**ample_args)
+  short_limits = short.acceleration_limits(**short_args)
+  assert short.phase == 'pulse'
+  if ample.phase == 'pulse':
+    assert np.min(ample_limits[1:]) > np.min(short_limits[1:])

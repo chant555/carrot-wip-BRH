@@ -16,6 +16,18 @@ ATTACK_JERK = 1.0
 # less braking than the original entry.
 ONSET_SHAPE_AMPLITUDE = 0.20
 ONSET_SHAPE_SECONDS = 1.6
+# C4 2026-11-09: above stop-and-go speeds the pulse reacted to every small lead
+# deceleration even with spare distance (0000012c: 4-7 brake/accel switches per
+# minute above 60 km/h vs about 1 without the pulse). Small lead decelerations
+# (median -0.6 m/s^2 there) are ignored at speed, while real braking still gets the
+# early response: the lead deceleration needed to start a pulse rises with speed.
+# The minimum extra deceleration is only added when the gap is actually short.
+LEAD_DECEL_TRIGGER_LOW = 0.1         # m/s^2 at or below LEAD_DECEL_TRIGGER_LOW_SPEED
+LEAD_DECEL_TRIGGER_HIGH = 1.0        # m/s^2 at or above LEAD_DECEL_TRIGGER_HIGH_SPEED
+LEAD_DECEL_TRIGGER_LOW_SPEED = 20.0 / 3.6   # m/s
+LEAD_DECEL_TRIGGER_HIGH_SPEED = 50.0 / 3.6  # m/s
+EXTRA_DECEL_MIN = 0.15
+EXTRA_MIN_GAP_SHORTFALL = 1.0       # m below the base distance for the full minimum
 RELEASE_JERK = 0.8
 CLEAR_RELEASE_JERK = 1.5
 EXTRA_DECEL_MAX = 0.6
@@ -41,6 +53,12 @@ def onset_descent(start, duration):
   return ATTACK_JERK * (cumulative(start + max(0.0, duration)) - cumulative(start))
 
 
+def lead_decel_trigger(ego_speed):
+  """Lead deceleration (positive m/s^2) needed to start a pulse at this speed."""
+  blend = smoothstep((ego_speed - LEAD_DECEL_TRIGGER_LOW_SPEED) / (LEAD_DECEL_TRIGGER_HIGH_SPEED - LEAD_DECEL_TRIGGER_LOW_SPEED))
+  return LEAD_DECEL_TRIGGER_LOW + (LEAD_DECEL_TRIGGER_HIGH - LEAD_DECEL_TRIGGER_LOW) * blend
+
+
 def closing_request(distance, relative_speed, ego_speed, ego_accel, lead_speed,
                     lead_accel, base_distance, t_follow, comfort_brake):
   values = (distance, relative_speed, ego_speed, ego_accel, lead_speed,
@@ -50,7 +68,10 @@ def closing_request(distance, relative_speed, ego_speed, ego_accel, lead_speed,
     return 0.0, 0.0
   closing = max(0.0, -relative_speed)
   shortfall = max(0.0, base_distance + closing - distance)
-  future_ego = max(0.0, ego_speed + ego_accel)
+  # The ego's own acceleration toward cruise speed must not create a predicted
+  # shortfall by itself: at 72 km/h, +0.33 m/s^2 grows the 1 s base distance by
+  # about 3 m. Only braking of the ego is carried into the future target.
+  future_ego = max(0.0, ego_speed + min(0.0, ego_accel))
   future_lead = max(0.0, lead_speed + lead_accel)
   future_base = (base_distance + (future_ego**2 - ego_speed**2) / (2.0 * comfort_brake)
                  + t_follow * (future_ego - ego_speed) - (future_lead**2 - lead_speed**2) / 5.0)
@@ -108,7 +129,7 @@ class LeadDecelPulse:
     self.rearm_time = self.rearm_time + dt if recovering else 0.0
     if self.phase == 'done' and self.rearm_time >= 0.5:
       self.phase = 'idle'
-    if (self.phase == 'idle' and ego_speed >= 3.0 and lead.aLeadK < -0.1
+    if (self.phase == 'idle' and ego_speed >= 3.0 and lead.aLeadK < -lead_decel_trigger(ego_speed)
         and closing > -0.1 and self.shortfall > 0.0 and self.strength > 0.15):
       self.phase = 'pulse'
       self.elapsed = 0.0
@@ -121,7 +142,10 @@ class LeadDecelPulse:
     if self.phase not in ('pulse', 'release'):
       return limits
 
-    extra = min(EXTRA_DECEL_MAX, max(0.15, max(0.0, closing) / 1.5 + 0.03 * max(0.0, self.shortfall)))
+    # Ask for more than the lead's own deceleration only as far as the gap is
+    # actually short now; with spare distance the lead's brief braking is absorbed.
+    extra_min = EXTRA_DECEL_MIN * smoothstep((base_distance - lead.dRel) / EXTRA_MIN_GAP_SHORTFALL)
+    extra = min(EXTRA_DECEL_MAX, max(extra_min, max(0.0, closing) / 1.5 + 0.03 * max(0.0, self.shortfall)))
     target = max(minimum_accel, lead.aLeadK - extra)
     clear = closing <= 0.1 or self.shortfall <= 0.0 or lead.aLeadK >= 0.05
     release_jerk = CLEAR_RELEASE_JERK if clear else RELEASE_JERK
