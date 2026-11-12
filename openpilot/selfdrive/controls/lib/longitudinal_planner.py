@@ -302,6 +302,11 @@ class LongitudinalPlanner:
       ),
       lead_track_frames=lead_track_frames,
       measured_a_ego=sm['carState'].aEgo,
+      lead_anticipation_enabled=(
+        not reset_state and not force_slow_decel and not self.output_should_stop
+        and not sm['carState'].gasPressed and not sm['carState'].brakePressed
+        and not carrot.lane_change_active
+      ),
       tesla_stop_distance=(
         max(0.0, self.tesla_traffic_decision.distance - STOP_BUFFER)
         if self.tesla_traffic_decision is not None and self.tesla_traffic_decision.active else None
