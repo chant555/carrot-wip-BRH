@@ -14,6 +14,7 @@ from openpilot.selfdrive.controls.radar_constants import LEAD_ACCEL_TAU
 from openpilot.selfdrive.carrot.traffic_stop import get_traffic_stop_distance_adjust, get_traffic_stop_obstacle_distance
 from openpilot.selfdrive.controls.lib.longitudinal_preview import LEAD_ACCEL_MIN_TRACK_FRAMES, LeadAccelResponseState, get_lead_accel_mpc_request
 from openpilot.selfdrive.controls.lib.longitudinal_cutout import cutout_obstacle_relief
+from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import LeadAnticipationState, anticipated_tau
 from openpilot.selfdrive.controls.lib.longitudinal_gap_recovery import LeadGapState, displayed_follow_distance
 from openpilot.selfdrive.controls.lib.longitudinal_braking_gap import LeadComfortState, braking_gap_reference, comfort_path_has_reserve
 from openpilot.selfdrive.carrot.radar_motion.lane_change_gap import LaneChangeGapPlan
@@ -296,6 +297,8 @@ class LongitudinalMpc:
     # timers
     self.lead_response_state = LeadAccelResponseState()
     self.lead_gap_states = (LeadGapState(), LeadGapState())
+    self.lead_anticipation_states = (LeadAnticipationState(), LeadAnticipationState())
+    self.lead_anticipation_needs = np.zeros(2)
     self.lead_comfort_states = (LeadComfortState(), LeadComfortState())
     self.lead_gap_margins = np.zeros((N+1, 2))
     self.solve_time = 0.0
@@ -378,13 +381,13 @@ class LongitudinalMpc:
     lead_xv = np.column_stack((x_lead_traj, v_lead_traj))
     return lead_xv
 
-  def process_lead(self, lead):
+  def process_lead(self, lead, tau_need=0.0):
     v_ego = self.x0[1]
     if lead is not None and lead.status:
       x_lead = lead.dRel
       v_lead = lead.vLead
       a_lead = lead.aLeadK
-      a_lead_tau = lead.aLeadTau
+      a_lead_tau = anticipated_tau(lead.aLeadTau, tau_need)
     else:
       # Fake a fast lead car, so mpc can keep running in the same mode
       x_lead = 50.0
@@ -417,19 +420,39 @@ class LongitudinalMpc:
              lead_gap_enabled=False,
              lead_track_frames=(0, 0),
              measured_a_ego=0.0,
-             cutout_relief_enabled=False):
+             cutout_relief_enabled=False,
+             lead_anticipation_enabled=False):
     v_ego = self.x0[1]
     a_ego = self.x0[2]
     self.status = radarstate.leadOne.status or radarstate.leadTwo.status
     t_follow = carrot.get_T_FOLLOW(personality, v_ego, a_ego)
     jerk_factor = carrot.jerk_factor
 
-    lead_xv_0, lead_v_0 = self.process_lead(radarstate.leadOne)
-    lead_xv_1, lead_v_1 = self.process_lead(radarstate.leadTwo)
-
     mode = self.mode
     comfort_brake = carrot.comfort_brake
     stop_distance = carrot.stop_distance
+
+    # How persistently a braking lead is assumed to keep braking depends on the
+    # spare gap: none adds nothing, so spare gap still absorbs the lead's braking.
+    for lead_index, lead in enumerate((radarstate.leadOne, radarstate.leadTwo)):
+      eligible = (
+        lead_anticipation_enabled and mode == 'acc' and not reset_state
+        and lead.status and lead.radar and lead.radarTrackId >= 0
+        and len(lead_track_frames) > lead_index and lead_track_frames[lead_index] >= LEAD_ACCEL_MIN_TRACK_FRAMES
+      )
+      state = self.lead_anticipation_states[lead_index]
+      if not eligible:
+        state.reset()
+        self.lead_anticipation_needs[lead_index] = 0.0
+        continue
+      spare = lead.dRel - desired_follow_distance(v_ego, max(0.0, lead.vLead), comfort_brake, stop_distance, t_follow)
+      self.lead_anticipation_needs[lead_index] = state.update(
+        valid=True, track_id=lead.radarTrackId, spare=spare, closing=-lead.vRel,
+        a_lead=lead.aLeadK, v_ego=v_ego, dt=self.dt,
+      )
+
+    lead_xv_0, lead_v_0 = self.process_lead(radarstate.leadOne, self.lead_anticipation_needs[0])
+    lead_xv_1, lead_v_1 = self.process_lead(radarstate.leadTwo, self.lead_anticipation_needs[1])
     self.base_desired_distances = np.array([
       desired_follow_distance(v_ego, lead_v_0, comfort_brake, stop_distance, t_follow),
       desired_follow_distance(v_ego, lead_v_1, comfort_brake, stop_distance, t_follow),

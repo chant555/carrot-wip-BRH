@@ -259,6 +259,11 @@ class LongitudinalPlanner:
       ),
       lead_track_frames=lead_track_frames,
       measured_a_ego=sm['carState'].aEgo,
+      lead_anticipation_enabled=(
+        not reset_state and not force_slow_decel and not self.output_should_stop
+        and not sm['carState'].gasPressed and not sm['carState'].brakePressed
+        and not carrot.lane_change_active
+      ),
     )
 
     self.v_desired_trajectory = np.interp(CONTROL_N_T_IDX, T_IDXS_MPC, self.mpc.v_solution)
