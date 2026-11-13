@@ -1,0 +1,3 @@
+-rw-rw-r-- 1 comma comma 5824708 Nov 13 14:28 /tmp/c4-drive128/raw128.jsonl.gz
+00000128--996b87d9ef segment 31: 1197 samples, 0 warnings
+0
