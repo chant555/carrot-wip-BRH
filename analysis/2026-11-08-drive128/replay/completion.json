@@ -1,0 +1,80 @@
+{
+  "runs": [
+    {
+      "done": "before_aggressive_fixed_lag0.05_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "before_aggressive_closed_lag0.05_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.05_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "before_standard_closed_lag0.05_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_standard_closed_lag0.05_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "before_aggressive_closed_lag0.00_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "before_aggressive_closed_lag0.15_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "before_aggressive_closed_lag0.05_tau0.15_integrated",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.00_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.15_tau0.15_observed",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.05_tau0.15_integrated",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.05_tau0.15_observed_preview_030",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_aggressive_closed_lag0.05_tau0.15_observed_brake_cost",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_standard_closed_lag0.05_tau0.15_observed_preview_030",
+      "n": 3583,
+      "solver_failures": 0
+    },
+    {
+      "done": "after_standard_closed_lag0.05_tau0.15_observed_brake_cost",
+      "n": 3583,
+      "solver_failures": 0
+    }
+  ],
+  "calls": 53745
+}

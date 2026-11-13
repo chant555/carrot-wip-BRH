@@ -1,0 +1,62 @@
+recorded
+full min_distance_m=5.198 max_closing_mps=2.680 min_accel_mps2=-2.581 min_timegap_s=0.830 under1s_time=4.700
+45_brake min_distance_m=5.733 max_closing_mps=1.570 min_accel_mps2=-1.886 min_timegap_s=0.830 under1s_time=4.700
+46_brake min_distance_m=7.427 max_closing_mps=2.340 min_accel_mps2=-2.581 min_timegap_s=1.235 under1s_time=0.000
+after_aggressive_closed_lag0.00_tau0.15_observed
+full min_distance_m=5.011 max_closing_mps=2.475 min_accel_mps2=-2.635 min_timegap_s=0.794 under1s_time=5.700
+45_brake min_distance_m=5.451 max_closing_mps=1.507 min_accel_mps2=-1.855 min_timegap_s=0.794 under1s_time=5.700
+46_brake min_distance_m=7.213 max_closing_mps=2.309 min_accel_mps2=-2.635 min_timegap_s=1.173 under1s_time=0.000
+after_aggressive_closed_lag0.05_tau0.15_integrated
+full min_distance_m=5.112 max_closing_mps=2.513 min_accel_mps2=-2.670 min_timegap_s=0.804 under1s_time=6.050
+45_brake min_distance_m=5.578 max_closing_mps=1.540 min_accel_mps2=-1.853 min_timegap_s=0.804 under1s_time=6.050
+46_brake min_distance_m=7.227 max_closing_mps=2.385 min_accel_mps2=-2.670 min_timegap_s=1.162 under1s_time=0.000
+after_aggressive_closed_lag0.05_tau0.15_observed
+full min_distance_m=4.915 max_closing_mps=2.574 min_accel_mps2=-2.682 min_timegap_s=0.769 under1s_time=5.950
+45_brake min_distance_m=5.275 max_closing_mps=1.531 min_accel_mps2=-1.872 min_timegap_s=0.769 under1s_time=5.950
+46_brake min_distance_m=7.064 max_closing_mps=2.419 min_accel_mps2=-2.682 min_timegap_s=1.161 under1s_time=0.000
+after_aggressive_closed_lag0.05_tau0.15_observed_brake_cost
+full min_distance_m=5.052 max_closing_mps=2.500 min_accel_mps2=-2.624 min_timegap_s=0.827 under1s_time=5.450
+45_brake min_distance_m=5.685 max_closing_mps=1.481 min_accel_mps2=-1.863 min_timegap_s=0.827 under1s_time=5.450
+46_brake min_distance_m=7.265 max_closing_mps=2.328 min_accel_mps2=-2.624 min_timegap_s=1.182 under1s_time=0.000
+after_aggressive_closed_lag0.05_tau0.15_observed_preview_030
+full min_distance_m=5.115 max_closing_mps=2.432 min_accel_mps2=-2.582 min_timegap_s=0.793 under1s_time=5.750
+45_brake min_distance_m=5.467 max_closing_mps=1.470 min_accel_mps2=-1.908 min_timegap_s=0.793 under1s_time=5.750
+46_brake min_distance_m=7.518 max_closing_mps=2.223 min_accel_mps2=-2.582 min_timegap_s=1.208 under1s_time=0.000
+after_aggressive_closed_lag0.15_tau0.15_observed
+full min_distance_m=4.698 max_closing_mps=2.784 min_accel_mps2=-2.797 min_timegap_s=0.723 under1s_time=6.550
+45_brake min_distance_m=4.931 max_closing_mps=1.558 min_accel_mps2=-1.895 min_timegap_s=0.723 under1s_time=6.550
+46_brake min_distance_m=6.727 max_closing_mps=2.636 min_accel_mps2=-2.797 min_timegap_s=1.124 under1s_time=0.000
+after_standard_closed_lag0.05_tau0.15_observed
+full min_distance_m=4.967 max_closing_mps=2.541 min_accel_mps2=-2.322 min_timegap_s=1.081 under1s_time=0.000
+45_brake min_distance_m=7.521 max_closing_mps=1.846 min_accel_mps2=-1.762 min_timegap_s=1.081 under1s_time=0.000
+46_brake min_distance_m=9.431 max_closing_mps=2.540 min_accel_mps2=-2.322 min_timegap_s=1.540 under1s_time=0.000
+after_standard_closed_lag0.05_tau0.15_observed_brake_cost
+full min_distance_m=5.081 max_closing_mps=2.476 min_accel_mps2=-2.278 min_timegap_s=1.129 under1s_time=0.000
+45_brake min_distance_m=7.855 max_closing_mps=1.795 min_accel_mps2=-1.743 min_timegap_s=1.129 under1s_time=0.000
+46_brake min_distance_m=9.595 max_closing_mps=2.460 min_accel_mps2=-2.278 min_timegap_s=1.560 under1s_time=0.000
+after_standard_closed_lag0.05_tau0.15_observed_preview_030
+full min_distance_m=5.136 max_closing_mps=2.417 min_accel_mps2=-2.214 min_timegap_s=1.103 under1s_time=0.000
+45_brake min_distance_m=7.751 max_closing_mps=1.781 min_accel_mps2=-1.798 min_timegap_s=1.103 under1s_time=0.000
+46_brake min_distance_m=10.034 max_closing_mps=2.348 min_accel_mps2=-2.214 min_timegap_s=1.587 under1s_time=0.000
+before_aggressive_closed_lag0.00_tau0.15_observed
+full min_distance_m=5.011 max_closing_mps=2.582 min_accel_mps2=-2.561 min_timegap_s=0.823 under1s_time=4.600
+45_brake min_distance_m=5.656 max_closing_mps=1.597 min_accel_mps2=-1.860 min_timegap_s=0.823 under1s_time=4.600
+46_brake min_distance_m=7.791 max_closing_mps=2.401 min_accel_mps2=-2.561 min_timegap_s=1.262 under1s_time=0.000
+before_aggressive_closed_lag0.05_tau0.15_integrated
+full min_distance_m=5.112 max_closing_mps=2.624 min_accel_mps2=-2.608 min_timegap_s=0.829 under1s_time=5.000
+45_brake min_distance_m=5.763 max_closing_mps=1.619 min_accel_mps2=-1.859 min_timegap_s=0.829 under1s_time=5.000
+46_brake min_distance_m=7.799 max_closing_mps=2.488 min_accel_mps2=-2.608 min_timegap_s=1.252 under1s_time=0.000
+before_aggressive_closed_lag0.05_tau0.15_observed
+full min_distance_m=4.914 max_closing_mps=2.685 min_accel_mps2=-2.619 min_timegap_s=0.797 under1s_time=5.000
+45_brake min_distance_m=5.472 max_closing_mps=1.623 min_accel_mps2=-1.881 min_timegap_s=0.797 under1s_time=5.000
+46_brake min_distance_m=7.652 max_closing_mps=2.521 min_accel_mps2=-2.619 min_timegap_s=1.251 under1s_time=0.000
+baseline_error
+{'d': {'rmse': 1.1617097993924117, 'max_abs': 2.784696983891763}, 'v': {'rmse': 0.16664012331320774, 'max_abs': 0.5074987027614486}, 'a': {'rmse': 0.08611621766292711, 'max_abs': 0.359671045695643}}
+before_aggressive_closed_lag0.15_tau0.15_observed
+full min_distance_m=4.698 max_closing_mps=2.870 min_accel_mps2=-2.717 min_timegap_s=0.749 under1s_time=5.600
+45_brake min_distance_m=5.113 max_closing_mps=1.657 min_accel_mps2=-1.909 min_timegap_s=0.749 under1s_time=5.600
+46_brake min_distance_m=7.344 max_closing_mps=2.756 min_accel_mps2=-2.717 min_timegap_s=1.224 under1s_time=0.000
+before_standard_closed_lag0.05_tau0.15_observed
+full min_distance_m=4.967 max_closing_mps=2.607 min_accel_mps2=-2.136 min_timegap_s=1.157 under1s_time=0.000
+45_brake min_distance_m=8.445 max_closing_mps=2.183 min_accel_mps2=-1.759 min_timegap_s=1.210 under1s_time=0.000
+46_brake min_distance_m=10.437 max_closing_mps=2.607 min_accel_mps2=-2.136 min_timegap_s=1.714 under1s_time=0.000

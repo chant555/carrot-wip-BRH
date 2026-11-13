@@ -1,0 +1,5 @@
+{"done": "before_aggressive_fixed_lag0.05_tau0.15_observed", "n": 3583, "solver_failures": 0}
+{"validation": "target", "rmse": 0.03536522643289118, "mean": 0.0025550073178369505, "max_abs": 0.1688583264658272}
+{"validation": "tf", "rmse": 0.0027644026451491403, "mean": 4.942277279010449e-05, "max_abs": 0.083690956170697}
+{"validation": "desired", "rmse": 0.1748321075599016, "mean": 0.0015649148111683416, "max_abs": 0.955402337183493}
+{"validation": "base", "rmse": 0.03175106958767234, "mean": 0.0006562550816323883, "max_abs": 0.16885828355048305}

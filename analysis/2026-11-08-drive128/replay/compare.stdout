@@ -1,0 +1,4 @@
+{"done": "before_aggressive_closed_lag0.05_tau0.15_observed", "n": 3583, "solver_failures": 0}
+{"done": "after_aggressive_closed_lag0.05_tau0.15_observed", "n": 3583, "solver_failures": 0}
+{"done": "before_standard_closed_lag0.05_tau0.15_observed", "n": 3583, "solver_failures": 0}
+{"done": "after_standard_closed_lag0.05_tau0.15_observed", "n": 3583, "solver_failures": 0}

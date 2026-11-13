@@ -1,0 +1,281 @@
+[
+ {
+  "event": "W153600",
+  "route": "128",
+  "time": "15:36:10",
+  "v_kph_min": -0.0022130741039291025,
+  "v_kph_max": 16.823501586914062,
+  "usable": false,
+  "path_discrepancy": 0.267437428337459
+ },
+ {
+  "event": "W153630",
+  "route": "128",
+  "time": "15:36:40",
+  "v_kph_min": 11.256348896026612,
+  "v_kph_max": 36.70815467834473,
+  "usable": true,
+  "path_discrepancy": 1.108452773094001
+ },
+ {
+  "event": "W153700",
+  "route": "128",
+  "time": "15:37:10",
+  "v_kph_min": 8.334261989593506,
+  "v_kph_max": 20.430714797973632,
+  "usable": true,
+  "path_discrepancy": 0.20369274020193018
+ },
+ {
+  "event": "W153730",
+  "route": "128",
+  "time": "15:37:40",
+  "v_kph_min": 3.7989542484283447,
+  "v_kph_max": 17.28017749786377,
+  "usable": true,
+  "path_discrepancy": 0.2135668933391912
+ },
+ {
+  "event": "W153800",
+  "route": "128",
+  "time": "15:38:10",
+  "v_kph_min": 7.7358135223388675,
+  "v_kph_max": 22.292377281188966,
+  "usable": true,
+  "path_discrepancy": 0.31397876739490016
+ },
+ {
+  "event": "W153830",
+  "route": "128",
+  "time": "15:38:40",
+  "v_kph_min": 17.495820236206054,
+  "v_kph_max": 34.65751190185547,
+  "usable": true,
+  "path_discrepancy": 0.3930355548860689
+ },
+ {
+  "event": "W153900",
+  "route": "128",
+  "time": "15:39:10",
+  "v_kph_min": 6.688664102554322,
+  "v_kph_max": 38.6606071472168,
+  "usable": true,
+  "path_discrepancy": 0.551070475578399
+ },
+ {
+  "event": "W153930",
+  "route": "128",
+  "time": "15:39:40",
+  "v_kph_min": 7.0519918441772464,
+  "v_kph_max": 19.039028549194338,
+  "usable": false,
+  "path_discrepancy": 11.848008006811128
+ },
+ {
+  "event": "W154000",
+  "route": "128",
+  "time": "15:40:10",
+  "v_kph_min": 4.359513187408448,
+  "v_kph_max": 15.108413887023927,
+  "usable": true,
+  "path_discrepancy": 0.3131211459637768
+ },
+ {
+  "event": "W154030",
+  "route": "128",
+  "time": "15:40:40",
+  "v_kph_min": 6.675258636474609,
+  "v_kph_max": 21.72100410461426,
+  "usable": true,
+  "path_discrepancy": 0.29821381568908123
+ },
+ {
+  "event": "W154100",
+  "route": "128",
+  "time": "15:41:10",
+  "v_kph_min": 15.857532119750976,
+  "v_kph_max": 22.50557041168213,
+  "usable": true,
+  "path_discrepancy": 0.10917727947235534
+ },
+ {
+  "event": "W154130",
+  "route": "128",
+  "time": "15:41:40",
+  "v_kph_min": 15.521613121032715,
+  "v_kph_max": 24.172113990783693,
+  "usable": true,
+  "path_discrepancy": 0.17942674160002525
+ },
+ {
+  "event": "W154200",
+  "route": "128",
+  "time": "15:42:10",
+  "v_kph_min": 19.32488765716553,
+  "v_kph_max": 38.575250244140626,
+  "usable": false,
+  "path_discrepancy": 30.849132859706828
+ },
+ {
+  "event": "W154230",
+  "route": "128",
+  "time": "15:42:40",
+  "v_kph_min": 4.286321067810059,
+  "v_kph_max": 34.47948875427246,
+  "usable": true,
+  "path_discrepancy": 0.6207683324813047
+ },
+ {
+  "event": "W154300",
+  "route": "128",
+  "time": "15:43:10",
+  "v_kph_min": 6.088213634490967,
+  "v_kph_max": 34.8489315032959,
+  "usable": true,
+  "path_discrepancy": 0.6073977053168278
+ },
+ {
+  "event": "W154330",
+  "route": "128",
+  "time": "15:43:40",
+  "v_kph_min": 4.9849090576171875,
+  "v_kph_max": 28.453798484802245,
+  "usable": true,
+  "path_discrepancy": 0.7728126585483324
+ },
+ {
+  "event": "W154400",
+  "route": "128",
+  "time": "15:44:10",
+  "v_kph_min": 15.915690994262695,
+  "v_kph_max": 29.591510009765624,
+  "usable": true,
+  "path_discrepancy": 0.5219181895255929
+ },
+ {
+  "event": "W154430",
+  "route": "128",
+  "time": "15:44:40",
+  "v_kph_min": 4.971001482009888,
+  "v_kph_max": 30.379806518554688,
+  "usable": true,
+  "path_discrepancy": 0.7324457108976503
+ },
+ {
+  "event": "W154500",
+  "route": "128",
+  "time": "15:45:10",
+  "v_kph_min": 15.781017494201661,
+  "v_kph_max": 34.91273803710938,
+  "usable": true,
+  "path_discrepancy": 0.4430538892746938
+ },
+ {
+  "event": "W154530",
+  "route": "128",
+  "time": "15:45:40",
+  "v_kph_min": 15.47208366394043,
+  "v_kph_max": 42.68832206726074,
+  "usable": true,
+  "path_discrepancy": 0.8692960262297902
+ },
+ {
+  "event": "W154600",
+  "route": "128",
+  "time": "15:46:10",
+  "v_kph_min": 8.791606521606445,
+  "v_kph_max": 31.780000305175783,
+  "usable": true,
+  "path_discrepancy": 0.606551671028086
+ },
+ {
+  "event": "W154630",
+  "route": "128",
+  "time": "15:46:40",
+  "v_kph_min": 6.906898927688599,
+  "v_kph_max": 24.53675537109375,
+  "usable": true,
+  "path_discrepancy": 0.2959554314613513
+ },
+ {
+  "event": "W154700",
+  "route": "128",
+  "time": "15:47:10",
+  "v_kph_min": 10.335458564758301,
+  "v_kph_max": 33.980414199829106,
+  "usable": true,
+  "path_discrepancy": 0.36686674356477056
+ },
+ {
+  "event": "W154730",
+  "route": "128",
+  "time": "15:47:40",
+  "v_kph_min": 11.688157081604004,
+  "v_kph_max": 56.21968116760254,
+  "usable": true,
+  "path_discrepancy": 1.530420756339879
+ },
+ {
+  "event": "W154800",
+  "route": "128",
+  "time": "15:48:10",
+  "v_kph_min": 15.287252426147461,
+  "v_kph_max": 32.18820762634277,
+  "usable": true,
+  "path_discrepancy": 0.27779543399805107
+ },
+ {
+  "event": "W154830",
+  "route": "128",
+  "time": "15:48:40",
+  "v_kph_min": 26.07227668762207,
+  "v_kph_max": 37.31335372924805,
+  "usable": true,
+  "path_discrepancy": 0.6226257324219233
+ },
+ {
+  "event": "W154900",
+  "route": "128",
+  "time": "15:49:10",
+  "v_kph_min": 12.306946563720704,
+  "v_kph_max": 26.929787063598635,
+  "usable": true,
+  "path_discrepancy": 0.29162664413466644
+ },
+ {
+  "event": "W154930",
+  "route": "128",
+  "time": "15:49:40",
+  "v_kph_min": 18.419475173950197,
+  "v_kph_max": 26.803112983703613,
+  "usable": true,
+  "path_discrepancy": 0.16360235214253294
+ },
+ {
+  "event": "W155000",
+  "route": "128",
+  "time": "15:50:10",
+  "v_kph_min": 24.9466947555542,
+  "v_kph_max": 62.484274291992186,
+  "usable": true,
+  "path_discrepancy": 1.6217594027517634
+ },
+ {
+  "event": "W155030",
+  "route": "128",
+  "time": "15:50:40",
+  "v_kph_min": 49.48097305297852,
+  "v_kph_max": 65.34900054931641,
+  "usable": true,
+  "path_discrepancy": 0.4997993946075212
+ },
+ {
+  "event": "W155100",
+  "route": "128",
+  "time": "15:51:10",
+  "v_kph_min": 56.82989959716797,
+  "v_kph_max": 85.29021606445313,
+  "usable": false,
+  "path_discrepancy": 70.7362114906316
+ }
+]

@@ -1,0 +1,20 @@
+# 00000128 15:39-15:50, 3791b956, aggressive, myDrivingMode=3, 20Hz 13196 samples
+lead present 0.9992421946044255
+tFollow p5=0.48 p25=0.52 p50=0.53 p75=0.56 p95=0.60
+actual time gap dRel/vEgo (v>3) p5=1.12 p25=1.38 p50=1.58 p75=1.92 p95=3.04
+gap error dRel-desiredDistance (m) p5=-4.66 p25=-1.91 p50=-0.32 p75=1.30 p95=3.31
+desiredDistance (m) p5=6.38 p25=8.31 p50=10.30 p75=12.60 p95=18.83
+vRel (m/s) p5=-1.43 p25=-0.59 p50=-0.10 p75=0.50 p95=1.22
+v 0-10 km/h n=1268 dRel med=7.9 desired med=6.7 tgap med=4.06s
+v 10-20 km/h n=4694 dRel med=8.6 desired med=8.6 tgap med=1.92s
+v 20-30 km/h n=4643 dRel med=10.5 desired med=11.1 tgap med=1.53s
+v 30-60 km/h n=2581 dRel med=13.4 desired med=15.4 tgap med=1.36s
+lag aTarget->aEgo (corr, samples@20Hz) (0.9920284659463474, 6)
+lag aTarget->aEgo (0.992, '6 samples = 0.30s') | aTarget->accelCmd (0.9912, '3 samples = 0.15s') | accelCmd->sccReq (0.9997, '0 samples = 0.00s') | sccReq->aEgo (0.9876, '3 samples = 0.15s')
+aEgo - aTarget p5=-0.13 p25=-0.04 p50=0.01 p75=0.06 p95=0.21
+sccReq - accelCmd p5=-0.02 p25=-0.01 p50=0.00 p75=0.01 p95=0.02
+jerk limits JL p5=1.00 p25=1.00 p50=1.00 p75=1.00 p95=1.80 | JU p5=1.00 p25=1.00 p50=1.00 p75=1.00 p95=1.00
+sccMode {'1.0': 13188} StopReq {'0.0': 13188}
+source {'lead0': 6042, 'cruise': 7146} fastLeadReason {'active': 13081, 'selectionStale': 97, 'inactive': 10}
+xState {'0': 13188} trafficState {'2': 12449, '0': 739} allowThrottle {'1': 13188}
+leadRadar {'1': 13179, '0': 7, '': 2}

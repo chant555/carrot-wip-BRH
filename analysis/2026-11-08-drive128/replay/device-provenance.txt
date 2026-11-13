@@ -1,0 +1,66 @@
+21cff36ff4c279ccc13c307538760c7b07f8fdcbc1490886e5c659913e0b197d  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/acados_ocp_solver_pyx.so
+c3b25e257ed8befa95c5d56493289881c34c790f7f75deae7acfc6d6bdd60335  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/libacados.so
+4e051eeaa1c0fc0370599ab591bdadc734bc38b831798a229762dfefb5a02fde  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/libacados_ocp_solver_long.so
+bfa126e6d2f881be97792a1b3611c1aa786a68a7233c36f86c0091be08cf95da  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/libblasfeo.so
+bc1f5825c52b53327f109821082af47c6053b49cc38381b0bd4845963a3d5075  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_mpc_lib/c_generated_code/libhpipm.so
+229897fa8bf5b1fdb46dbed314faa488ce8aae607d6b0bc03fa4ba0d71c4bc2f  /data/openpilot/openpilot/selfdrive/controls/lib/longitudinal_preview.py
+931a2ef6ee293164cae84fa8d878302bd30eae8da2d8b5f95c7d69936b5b4e28  /data/openpilot/openpilot/selfdrive/carrot/carrot_functions.py
+fa8a161b23fb0c7b37bc5c54b6e7fce8fc787b77a6fb31ad7afdac47ef1b0850  /data/openpilot/openpilot/selfdrive/carrot/t_follow.py
+1 M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_180_generated.dbc
+ M opendbc_repo/opendbc/dbc/hyundai_canfd_corner_radar_235_generated.dbc
+ M openpilot/selfdrive/assets/fonts/Pretendard-Medium.fnt
+ M openpilot/selfdrive/assets/fonts/Pretendard-Medium.png
+ M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.fnt
+ M openpilot/selfdrive/assets/fonts/Pretendard-SemiBold.png
+?? opendbc_repo/opendbc/can/_can_native.cpp
+?? opendbc_repo/opendbc/dbc/generator/hyundai/hyundai_canfd_radar.dbc
+?? openpilot/cereal/gen/
+?? openpilot/cereal/messaging/bridge
+?? openpilot/cereal/services.h
+?? openpilot/pydeps/
+?? openpilot/selfdrive/assets/fonts/Inter-Black.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Black.png
+?? openpilot/selfdrive/assets/fonts/Inter-Bold.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Bold.png
+?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-ExtraBold.png
+?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-ExtraLight.png
+?? openpilot/selfdrive/assets/fonts/Inter-Light.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Light.png
+?? openpilot/selfdrive/assets/fonts/Inter-Medium.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Medium.png
+?? openpilot/selfdrive/assets/fonts/Inter-Regular.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Regular.png
+?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-SemiBold.png
+?? openpilot/selfdrive/assets/fonts/Inter-Thin.fnt
+?? openpilot/selfdrive/assets/fonts/Inter-Thin.png
+?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.fnt
+?? openpilot/selfdrive/assets/fonts/JetBrainsMono-Medium.png
+?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.fnt
+?? openpilot/selfdrive/assets/fonts/KaiGenGothicKR-Bold.png
+?? openpilot/selfdrive/assets/fonts/unifont.fnt
+?? openpilot/selfdrive/assets/fonts/unifont.png
+?? openpilot/selfdrive/carrot/radar_motion/_motion_native.cpp
+?? openpilot/selfdrive/modeld/models/.build_stamp
+?? openpilot/selfdrive/modeld/models/dm_warp_1344x760_tinygrad.pkl
+?? openpilot/selfdrive/modeld/models/dm_warp_1928x1208_tinygrad.pkl
+?? openpilot/selfdrive/modeld/models/dmonitoring_model_metadata.pkl
+?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunk01of01
+?? openpilot/selfdrive/modeld/models/dmonitoring_model_tinygrad.pkl.chunkmanifest
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of03
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk01of05
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of03
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk02of05
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of03
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk03of05
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk04of05
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunk05of05
+?? openpilot/selfdrive/modeld/models/driving_tinygrad.pkl.chunkmanifest
+?? openpilot/selfdrive/modeld/models/tg_input_devices.json
+?? openpilot/selfdrive/navigation/_rasterizer.cpp
+?? openpilot/system/camerad/camerad
+?? openpilot/system/ui/lib/_draw_native.cpp
+?? pydeps/
+acbf858df780236e70e42ecc2aa084378ce394be

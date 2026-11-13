@@ -1,0 +1,203 @@
+{
+  "fit_mse_training": 0.005113395644805891,
+  "lag": 0.05,
+  "tau": 0.15000000000000002,
+  "test_accel_rmse": 0.083866200083508,
+  "samples": 3583,
+  "start": 0.8500000000000001,
+  "end": 179.95000000000016,
+  "lead_path_discrepancy_max_45_47": 1.0264769613754652,
+  "segment_metadata": [
+    {
+      "seg": 24,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--24/rlog.zst",
+      "size": 15982297,
+      "sha256": "e99a44ca505bdcf83f462e6b5d72267ceb91a83324ec00a314a0866ad47e7836",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null,
+        "TFollowDecelBoost": "0",
+        "MyDrivingMode": "3",
+        "DrivingMode": null,
+        "AChangeCostStarting": "5",
+        "CruiseCoastingPercent": "0",
+        "TrafficStopDistanceAdjust": "-100",
+        "LongitudinalPersonality": "0",
+        "CruiseMaxVals0": "150",
+        "CruiseMaxVals1": "170",
+        "CruiseMaxVals2": "130",
+        "CruiseMaxVals3": "90",
+        "CruiseMaxVals4": "70",
+        "CruiseMaxVals5": "60",
+        "CruiseMaxVals6": "60"
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1200
+    },
+    {
+      "seg": 25,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--25/rlog.zst",
+      "size": 16155115,
+      "sha256": "28e55896665362626160fe0f1eaab18a3d3059dd6c41a279d549665ac218b855",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null,
+        "TFollowDecelBoost": "0",
+        "MyDrivingMode": "3",
+        "DrivingMode": null,
+        "AChangeCostStarting": "5",
+        "CruiseCoastingPercent": "0",
+        "TrafficStopDistanceAdjust": "-100",
+        "LongitudinalPersonality": "0",
+        "CruiseMaxVals0": "150",
+        "CruiseMaxVals1": "170",
+        "CruiseMaxVals2": "130",
+        "CruiseMaxVals3": "90",
+        "CruiseMaxVals4": "70",
+        "CruiseMaxVals5": "60",
+        "CruiseMaxVals6": "60"
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1199
+    },
+    {
+      "seg": 26,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--26/rlog.zst",
+      "size": 16204980,
+      "sha256": "00bdd66bfc211c8ed3ae63e9c0ffc0405736db70b4b9e6e184c5492998f5f548",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null,
+        "TFollowDecelBoost": "0",
+        "MyDrivingMode": "3",
+        "DrivingMode": null,
+        "AChangeCostStarting": "5",
+        "CruiseCoastingPercent": "0",
+        "TrafficStopDistanceAdjust": "-100",
+        "LongitudinalPersonality": "0",
+        "CruiseMaxVals0": "150",
+        "CruiseMaxVals1": "170",
+        "CruiseMaxVals2": "130",
+        "CruiseMaxVals3": "90",
+        "CruiseMaxVals4": "70",
+        "CruiseMaxVals5": "60",
+        "CruiseMaxVals6": "60"
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1200
+    }
+  ],
+  "fit_top10": [
+    [
+      0.005113395644805891,
+      0.05,
+      0.15000000000000002,
+      0.083866200083508
+    ],
+    [
+      0.005116660645299973,
+      0.1,
+      0.1,
+      0.08398435166010074
+    ],
+    [
+      0.005122166578133518,
+      0.15000000000000002,
+      0.05,
+      0.08405444846816124
+    ],
+    [
+      0.005122945809591441,
+      0.0,
+      0.2,
+      0.08382286124162132
+    ],
+    [
+      0.005177324966400711,
+      0.2,
+      0.0,
+      0.08285418087499184
+    ],
+    [
+      0.005183704205849496,
+      0.0,
+      0.25,
+      0.0811674213132134
+    ],
+    [
+      0.0052034524358880695,
+      0.05,
+      0.2,
+      0.08137355719311297
+    ],
+    [
+      0.005205170378601695,
+      0.15000000000000002,
+      0.0,
+      0.08745172984091593
+    ],
+    [
+      0.0052287098362954875,
+      0.1,
+      0.15000000000000002,
+      0.08165087889660537
+    ],
+    [
+      0.005250784967884496,
+      0.15000000000000002,
+      0.1,
+      0.08195711515619666
+    ]
+  ]
+}
