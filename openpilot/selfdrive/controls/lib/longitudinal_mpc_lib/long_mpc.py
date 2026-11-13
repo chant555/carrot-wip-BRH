@@ -14,7 +14,9 @@ from openpilot.selfdrive.controls.radar_constants import LEAD_ACCEL_TAU
 from openpilot.selfdrive.carrot.traffic_stop import get_traffic_stop_distance_adjust, get_traffic_stop_obstacle_distance
 from openpilot.selfdrive.controls.lib.longitudinal_preview import LEAD_ACCEL_MIN_TRACK_FRAMES, LeadAccelResponseState, get_lead_accel_mpc_request
 from openpilot.selfdrive.controls.lib.longitudinal_cutout import cutout_obstacle_relief
-from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import LeadAnticipationState, anticipated_tau
+from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import (
+  LeadAnticipationState, anticipated_tau, anticipation_cost_factors, anticipation_danger_factor,
+)
 from openpilot.selfdrive.controls.lib.longitudinal_gap_recovery import LeadGapState, displayed_follow_distance
 from openpilot.selfdrive.controls.lib.longitudinal_braking_gap import LeadComfortState, braking_gap_reference, comfort_path_has_reserve
 from openpilot.selfdrive.carrot.radar_motion.lane_change_gap import LaneChangeGapPlan
@@ -519,7 +521,7 @@ class LongitudinalMpc:
       x[:], v[:], a[:], j[:] = 0.0, 0.0, 0.0, 0.0
 
       #safe_distance = lead_0_obstacle[0] - get_safe_obstacle_distance(v_ego, comfort_brake, stop_distance)
-      self.lead_danger_factor = LEAD_DANGER_FACTOR
+      self.lead_danger_factor = anticipation_danger_factor(LEAD_DANGER_FACTOR, float(np.max(self.lead_anticipation_needs)))
       self.params[:,5] = self.lead_danger_factor
 
     elif mode == 'blended':
@@ -571,13 +573,15 @@ class LongitudinalMpc:
     response_request = self.lead_response_state.update(response_request, self.dt, response_lead.radarTrackId)
     self.lead_accel_response_active = response_request.active
     self.lead_accel_response_level = response_request.level if response_request.active else 0
+    # A short gap with a braking lead may act on the persistent lead prediction now.
+    anticipation_a_change, anticipation_jerk = anticipation_cost_factors(self.lead_anticipation_needs[response_lead_index])
     self.set_weights(
       prev_accel_constraint,
       personality=personality,
       jerk_factor=jerk_factor,
       a_change_cost_starting=a_change_cost_starting,
-      a_change_cost_factor=response_request.a_change_cost_factor,
-      jerk_cost_factor=response_request.jerk_cost_factor,
+      a_change_cost_factor=min(response_request.a_change_cost_factor, anticipation_a_change),
+      jerk_cost_factor=min(response_request.jerk_cost_factor, anticipation_jerk),
     )
 
     # Extra TF is a comfort preference, not a change to physical lead obstacles,

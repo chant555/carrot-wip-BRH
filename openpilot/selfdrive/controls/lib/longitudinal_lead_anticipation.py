@@ -8,9 +8,12 @@ plan react late and close in (0000012x drives). When there is spare gap, the
 fading assumption is what lets the plan absorb the lead's braking instead of
 copying it, which is the comfortable behaviour the driver preferred.
 
-This module only lowers tau, continuously, by how little spare gap there is.
-It adds no constraint, no separate acceleration request and no latch, so the
-single MPC trajectory still owns speed, acceleration and jerk.
+This module lowers tau, continuously, by how little spare gap there is, and
+by the same need lowers the MPC's acceleration-change and jerk costs so the plan
+acts on that prediction now instead of spreading it over the horizon, and widens
+the MPC's existing soft danger zone toward the full desired distance. It adds no
+constraint, no separate acceleration request and no latch, so the single MPC
+trajectory still owns speed, acceleration and jerk.
 """
 
 import math
@@ -19,13 +22,21 @@ from openpilot.selfdrive.controls.radar_constants import LEAD_ACCEL_TAU
 
 LEAD_DECEL_DEADBAND = 0.10   # m/s^2: lead decelerations below this are noise
 LEAD_DECEL_FULL = 0.60       # m/s^2 of lead deceleration for full persistence
-SPARE_REFERENCE_M = 2.0      # spare gap (after one second of closing) where persistence stops
+SPARE_REFERENCE_M = 3.0      # spare gap (after one second of closing) where persistence stops
 CLOSING_LOOKAHEAD_S = 1.0    # seconds of current closing counted against the spare gap
-MIN_TAU = 0.30               # most persistent lead deceleration: ~55 % left after 2 s
+MIN_TAU = 0.05               # most persistent lead deceleration: ~90 % left after 2 s
 MIN_SPEED = 2.0              # m/s: below this the stopping logic owns the plan
 FULL_SPEED = 5.0             # m/s
+HIGH_SPEED_START = 50.0 / 3.6  # m/s: above this the need is weakened
+HIGH_SPEED_END = 60.0 / 3.6    # m/s
+HIGH_SPEED_NEED_SCALE = 0.5    # need scale at and above HIGH_SPEED_END
 NEED_ATTACK_S = 0.20         # filter time constants of the anticipation need
 NEED_RELEASE_S = 0.80
+A_CHANGE_COST_FACTOR_MIN = 0.05  # acceleration-change cost factor at full need
+JERK_COST_FACTOR_MIN = 0.15      # jerk cost factor at full need
+# Danger-zone widening is kept available but off: with it the ego braked harder
+# than the lead again (simulation candidates d1/d3, 2026-11-13).
+DANGER_FACTOR_FULL = 0.8         # danger-zone fraction of the desired distance at full need
 
 
 def smoothstep(value):
@@ -42,7 +53,8 @@ def anticipation_need(*, spare, closing, a_lead, v_ego):
   gap_need = smoothstep((SPARE_REFERENCE_M - effective_spare) / SPARE_REFERENCE_M)
   braking = smoothstep((-a_lead - LEAD_DECEL_DEADBAND) / (LEAD_DECEL_FULL - LEAD_DECEL_DEADBAND))
   speed = smoothstep((v_ego - MIN_SPEED) / (FULL_SPEED - MIN_SPEED))
-  return gap_need * braking * speed
+  high_speed = 1.0 - (1.0 - HIGH_SPEED_NEED_SCALE) * smoothstep((v_ego - HIGH_SPEED_START) / (HIGH_SPEED_END - HIGH_SPEED_START))
+  return gap_need * braking * speed * high_speed
 
 
 def anticipated_tau(lead_tau, need):
@@ -50,6 +62,18 @@ def anticipated_tau(lead_tau, need):
   base = lead_tau if math.isfinite(lead_tau) and lead_tau > 0.0 else LEAD_ACCEL_TAU
   need = min(1.0, max(0.0, need)) if math.isfinite(need) else 0.0
   return base + (min(base, MIN_TAU) - base) * need
+
+
+def anticipation_cost_factors(need):
+  """MPC (acceleration-change, jerk) cost factors; 1.0 leaves the costs unchanged."""
+  need = min(1.0, max(0.0, need)) if math.isfinite(need) else 0.0
+  return (1.0 - need * (1.0 - A_CHANGE_COST_FACTOR_MIN), 1.0 - need * (1.0 - JERK_COST_FACTOR_MIN))
+
+
+def anticipation_danger_factor(base_factor, need):
+  """Blend the MPC danger-zone factor toward DANGER_FACTOR_FULL; never below the base."""
+  need = min(1.0, max(0.0, need)) if math.isfinite(need) else 0.0
+  return base_factor + (max(base_factor, DANGER_FACTOR_FULL) - base_factor) * need
 
 
 class LeadAnticipationState:

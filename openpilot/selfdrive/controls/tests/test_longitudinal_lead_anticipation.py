@@ -33,8 +33,8 @@ def test_need_grows_continuously_as_spare_gap_shrinks():
 
 
 def test_closing_counts_against_the_spare_gap():
-  assert need(spare=2.0, closing=0.0) == 0.0
-  assert need(spare=2.0, closing=1.5) > 0.5
+  assert need(spare=SPARE_REFERENCE_M, closing=0.0) == 0.0
+  assert need(spare=SPARE_REFERENCE_M, closing=0.75 * SPARE_REFERENCE_M) > 0.5
 
 
 @pytest.mark.parametrize('a_lead', [0.3, 0.0, -0.05, -0.1])
@@ -52,7 +52,7 @@ def test_nonfinite_inputs_need_no_anticipation(field):
 
 
 def test_tau_is_never_made_less_persistent_than_the_lead_reports():
-  assert anticipated_tau(0.2, 1.0) == pytest.approx(0.2)
+  assert anticipated_tau(MIN_TAU / 2, 1.0) == pytest.approx(MIN_TAU / 2)
   assert anticipated_tau(math.nan, 0.0) == LEAD_ACCEL_TAU
 
 
@@ -76,3 +76,31 @@ def test_release_is_slower_than_attack():
   released = state.update(**{**args, 'a_lead': 0.5})
   attack = LeadAnticipationState().update(**args)
   assert 1.0 - released < attack
+
+
+def test_cost_factors_follow_the_need():
+  from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import (
+    A_CHANGE_COST_FACTOR_MIN, JERK_COST_FACTOR_MIN, anticipation_cost_factors,
+  )
+  assert anticipation_cost_factors(0.0) == (1.0, 1.0)
+  assert anticipation_cost_factors(1.0) == pytest.approx((A_CHANGE_COST_FACTOR_MIN, JERK_COST_FACTOR_MIN))
+  half = anticipation_cost_factors(0.5)
+  assert A_CHANGE_COST_FACTOR_MIN < half[0] < 1.0 and JERK_COST_FACTOR_MIN < half[1] < 1.0
+  assert anticipation_cost_factors(math.nan) == (1.0, 1.0)
+
+
+def test_danger_factor_widens_only_with_need():
+  from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import DANGER_FACTOR_FULL, anticipation_danger_factor
+  assert anticipation_danger_factor(0.8, 0.0) == 0.8
+  assert anticipation_danger_factor(0.8, 1.0) == pytest.approx(max(0.8, DANGER_FACTOR_FULL))
+  assert anticipation_danger_factor(1.2, 1.0) == 1.2  # never narrower than the base
+  assert anticipation_danger_factor(0.8, math.nan) == 0.8
+
+
+def test_need_is_weakened_above_highway_threshold():
+  from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import HIGH_SPEED_END, HIGH_SPEED_NEED_SCALE, HIGH_SPEED_START
+  assert need(spare=-1.0, v_ego=HIGH_SPEED_START) == pytest.approx(1.0)
+  assert need(spare=-1.0, v_ego=HIGH_SPEED_END) == pytest.approx(HIGH_SPEED_NEED_SCALE)
+  assert need(spare=-1.0, v_ego=30.0) == pytest.approx(HIGH_SPEED_NEED_SCALE)
+  middle = need(spare=-1.0, v_ego=(HIGH_SPEED_START + HIGH_SPEED_END) / 2)
+  assert HIGH_SPEED_NEED_SCALE < middle < 1.0
