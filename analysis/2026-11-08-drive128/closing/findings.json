@@ -1,0 +1,1253 @@
+{
+  "short_time_gap_episodes": [
+    {
+      "start": "15:43:18.78",
+      "end": "15:43:23.38",
+      "duration_s": 4.652900481000188,
+      "min_timegap_s": 0.9266462906362878,
+      "at": "15:43:21.03",
+      "gap_m": 6.67,
+      "ego_kph": 25.9128,
+      "lead_kph": 24.228,
+      "closing_mps": 0.48,
+      "target_gap_m": 11.53,
+      "a_target": -0.483,
+      "a_ego": -0.505
+    },
+    {
+      "start": "15:45:49.62",
+      "end": "15:45:54.26",
+      "duration_s": 4.699096870999938,
+      "min_timegap_s": 0.8303516347933374,
+      "at": "15:45:52.86",
+      "gap_m": 6.73,
+      "ego_kph": 29.178,
+      "lead_kph": 24.012,
+      "closing_mps": 1.54,
+      "target_gap_m": 15.83,
+      "a_target": -1.845,
+      "a_ego": -1.613
+    },
+    {
+      "start": "15:49:07.29",
+      "end": "15:49:11.20",
+      "duration_s": 3.9501616939999167,
+      "min_timegap_s": 0.9220762657824257,
+      "at": "15:49:09.05",
+      "gap_m": 7.23,
+      "ego_kph": 28.227600000000002,
+      "lead_kph": 26.532,
+      "closing_mps": 0.51,
+      "target_gap_m": 12.24,
+      "a_target": -0.509,
+      "a_ego": -0.585
+    },
+    {
+      "start": "15:49:11.30",
+      "end": "15:49:11.30",
+      "duration_s": 0.047811615999989954,
+      "min_timegap_s": 0.9998577727208079,
+      "at": "15:49:11.30",
+      "gap_m": 7.03,
+      "ego_kph": 25.3116,
+      "lead_kph": 23.832,
+      "closing_mps": 0.44,
+      "target_gap_m": 11.43,
+      "a_target": -0.711,
+      "a_ego": -0.545
+    }
+  ],
+  "total_short_time_gap_s": 13.349970662000032,
+  "eligible_time_s": 587.3275338240003,
+  "distance_under7m_and_speed_over20kph_seconds": 11.26297485799978,
+  "raw_segments": [
+    {
+      "seg": 23,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--23/rlog.zst",
+      "size": 15977160,
+      "sha256": "ad23815e6bbe835bafb7deafca6bb978d96d6b1c58faf9e5f92dc97395aae4d8",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1200
+    },
+    {
+      "seg": 25,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--25/rlog.zst",
+      "size": 16155115,
+      "sha256": "28e55896665362626160fe0f1eaab18a3d3059dd6c41a279d549665ac218b855",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1199
+    },
+    {
+      "seg": 26,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--26/rlog.zst",
+      "size": 16204980,
+      "sha256": "00bdd66bfc211c8ed3ae63e9c0ffc0405736db70b4b9e6e184c5492998f5f548",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1200
+    },
+    {
+      "seg": 29,
+      "path": "/data/media/0/realdata/00000128--996b87d9ef--29/rlog.zst",
+      "size": 16074978,
+      "sha256": "978d5ced40c710418d53902bc76983f386dc1c3eb76c93c8d8f73fecf5fcb108",
+      "commit": "3791b9562a0a1e4d1d9d24ca39b316425fc91720",
+      "params": {
+        "TFollowGap1": "46",
+        "TFollowGap2": "65",
+        "TFollowGap3": "85",
+        "TFollowGap4": "110",
+        "StopDistanceCarrot": "580",
+        "ComfortBrake": null,
+        "LeadAccelResponse": "3",
+        "LeadAccelResponseTF1": "4",
+        "LeadAccelResponseTF2": "-1",
+        "LeadAccelResponseTF3": "-1",
+        "LeadAccelResponseTF4": "-1",
+        "LongActuatorDelay": "20",
+        "LeadDecelResponse": null,
+        "LeadDecelResponseTF1": null,
+        "SpeedTFFactor": "17",
+        "DynamicTFollow": null,
+        "UseBigModel": null
+      },
+      "warnings": [],
+      "kind": "segment",
+      "samples": 1200
+    }
+  ],
+  "cases": [
+    {
+      "start": "15:43:12",
+      "end": "15:43:26",
+      "samples": 300,
+      "lead_ids": {
+        "48": 300
+      },
+      "lead_radar_all": true,
+      "lead2_present": 0,
+      "max_age_s": {
+        "car": 0.011133211000014853,
+        "control": 0.00749330500002543,
+        "leads": 0.0762648420000005,
+        "scc": 0.021772319000092466
+      },
+      "forward_warning_count": 0,
+      "brake_disabled_count": 0,
+      "stop_requests": 0,
+      "blinkers": 0,
+      "pedals": 0,
+      "minimum_distance": {
+        "wall": "2026-11-07T15:43:23.388210+09:00",
+        "ego_kph": 22.471687889099123,
+        "lead_kph": 22.801456260681153,
+        "gap_m": 6.195606231689453,
+        "vrel": 0.07999999821186066,
+        "target_gap_m": 9.34803581237793,
+        "aEgo": -0.31470003724098206,
+        "aTarget": -0.27894243597984314
+      },
+      "minimum_time_gap": {
+        "wall": "2026-11-07T15:43:21.031929+09:00",
+        "ego_kph": 25.914581680297854,
+        "lead_kph": 24.230617904663088,
+        "gap_m": 6.672116756439209,
+        "vrel": -0.47999998927116394,
+        "target_gap_m": 11.529009819030762,
+        "aEgo": -0.5049331188201904,
+        "aTarget": -0.48276862502098083
+      },
+      "strongest_deceleration": {
+        "wall": "2026-11-07T15:43:19.445713+09:00",
+        "ego_kph": 28.819033813476562,
+        "lead_kph": 25.844483757019045,
+        "gap_m": 7.736454963684082,
+        "vrel": -0.8500000238418579,
+        "target_gap_m": 13.432069778442383,
+        "aEgo": -0.6159296631813049,
+        "aTarget": -0.5499580502510071
+      }
+    },
+    {
+      "start": "15:45:42",
+      "end": "15:45:59",
+      "samples": 360,
+      "lead_ids": {
+        "48": 360
+      },
+      "lead_radar_all": true,
+      "lead2_present": 0,
+      "max_age_s": {
+        "car": 0.010643016999893007,
+        "control": 0.007508185000006051,
+        "leads": 0.0636891829999513,
+        "scc": 0.021109301999786112
+      },
+      "forward_warning_count": 0,
+      "brake_disabled_count": 0,
+      "stop_requests": 0,
+      "blinkers": 0,
+      "pedals": 0,
+      "minimum_distance": {
+        "wall": "2026-11-07T15:45:54.323355+09:00",
+        "ego_kph": 20.50283660888672,
+        "lead_kph": 21.65397720336914,
+        "gap_m": 5.733255863189697,
+        "vrel": 0.23000000417232513,
+        "target_gap_m": 8.859209060668945,
+        "aEgo": -1.3431142568588257,
+        "aTarget": -1.2022762298583984
+      },
+      "minimum_time_gap": {
+        "wall": "2026-11-07T15:45:52.914080+09:00",
+        "ego_kph": 28.844141006469727,
+        "lead_kph": 23.99235019683838,
+        "gap_m": 6.648953914642334,
+        "vrel": -1.440000057220459,
+        "target_gap_m": 15.77957534790039,
+        "aEgo": -1.7067396640777588,
+        "aTarget": -1.8824518918991089
+      },
+      "strongest_deceleration": {
+        "wall": "2026-11-07T15:45:53.124698+09:00",
+        "ego_kph": 27.410025215148927,
+        "lead_kph": 23.284931945800782,
+        "gap_m": 6.387482643127441,
+        "vrel": -1.2999999523162842,
+        "target_gap_m": 14.858816146850586,
+        "aEgo": -1.885919451713562,
+        "aTarget": -1.919694423675537
+      }
+    },
+    {
+      "start": "15:46:05",
+      "end": "15:46:16",
+      "samples": 240,
+      "lead_ids": {
+        "48": 240
+      },
+      "lead_radar_all": true,
+      "lead2_present": 0,
+      "max_age_s": {
+        "car": 0.011402431999840701,
+        "control": 0.007911480000075244,
+        "leads": 0.0689708630000041,
+        "scc": 0.022423257000127705
+      },
+      "forward_warning_count": 0,
+      "brake_disabled_count": 0,
+      "stop_requests": 0,
+      "blinkers": 0,
+      "pedals": 0,
+      "minimum_distance": {
+        "wall": "2026-11-07T15:46:13.220746+09:00",
+        "ego_kph": 13.828703212738038,
+        "lead_kph": 15.142260360717774,
+        "gap_m": 7.426889896392822,
+        "vrel": 0.28999999165534973,
+        "target_gap_m": 7.308287620544434,
+        "aEgo": -1.5631903409957886,
+        "aTarget": -1.4758096933364868
+      },
+      "minimum_time_gap": {
+        "wall": "2026-11-07T15:46:11.470365+09:00",
+        "ego_kph": 27.471186447143555,
+        "lead_kph": 19.48206939697266,
+        "gap_m": 9.422103881835938,
+        "vrel": -2.259999990463257,
+        "target_gap_m": 17.106508255004883,
+        "aEgo": -1.9336678981781006,
+        "aTarget": -2.575744867324829
+      },
+      "strongest_deceleration": {
+        "wall": "2026-11-07T15:46:12.025848+09:00",
+        "ego_kph": 22.662738418579103,
+        "lead_kph": 16.9476676940918,
+        "gap_m": 8.403655052185059,
+        "vrel": -1.7999999523162842,
+        "target_gap_m": 13.72227668762207,
+        "aEgo": -2.5813934803009033,
+        "aTarget": -2.5166409015655518
+      }
+    },
+    {
+      "start": "15:49:02",
+      "end": "15:49:17",
+      "samples": 319,
+      "lead_ids": {
+        "48": 319
+      },
+      "lead_radar_all": true,
+      "lead2_present": 0,
+      "max_age_s": {
+        "car": 0.013198888000033548,
+        "control": 0.010189799000045241,
+        "leads": 0.05302579099998184,
+        "scc": 0.016755030000012994
+      },
+      "forward_warning_count": 0,
+      "brake_disabled_count": 0,
+      "stop_requests": 0,
+      "blinkers": 0,
+      "pedals": 0,
+      "minimum_distance": {
+        "wall": "2026-11-07T15:49:13.300047+09:00",
+        "ego_kph": 17.7044677734375,
+        "lead_kph": 18.303833770751954,
+        "gap_m": 6.241570949554443,
+        "vrel": 0.12999999523162842,
+        "target_gap_m": 8.488908767700195,
+        "aEgo": -0.9809104204177856,
+        "aTarget": -1.0047111511230469
+      },
+      "minimum_time_gap": {
+        "wall": "2026-11-07T15:49:09.050912+09:00",
+        "ego_kph": 28.227100753784182,
+        "lead_kph": 26.52406883239746,
+        "gap_m": 7.233151435852051,
+        "vrel": -0.5099999904632568,
+        "target_gap_m": 12.23734188079834,
+        "aEgo": -0.5850426554679871,
+        "aTarget": -0.5087952613830566
+      },
+      "strongest_deceleration": {
+        "wall": "2026-11-07T15:49:12.249421+09:00",
+        "ego_kph": 21.76564464569092,
+        "lead_kph": 20.240453910827636,
+        "gap_m": 6.5060625076293945,
+        "vrel": -0.5,
+        "target_gap_m": 10.99648666381836,
+        "aEgo": -1.262764811515808,
+        "aTarget": -1.2470855712890625
+      }
+    }
+  ],
+  "snapshots": [
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1597.673487706,
+      "wall": "2026-11-07T15:45:44.024432+09:00",
+      "age": {
+        "car": 0.004837805000079243,
+        "control": 0.0007257409999965603,
+        "scc": 0.008139028999949005,
+        "leads": 0.04036323300010736
+      },
+      "plan": {
+        "aTarget": 0.09698354452848434,
+        "aTargetBase": 0.1991778016090393,
+        "leadPreviewSeconds": 0.42329081892967224,
+        "leadPreviewAccel": -0.20457878708839417,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5979927778244019,
+        "desiredDistance": 18.459041595458984,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "cruise",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006686401000024489
+      },
+      "car": {
+        "vEgo": 11.732625961303711,
+        "aEgo": 0.190715491771698,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -1.600000023841858,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": 0.2593662738800049
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": 0.2599999999999998,
+        "aReqValue": 0.2599999999999998,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.1
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 16.963823318481445,
+          "vRel": -0.4099999964237213,
+          "vLead": 11.307517051696777,
+          "aLeadK": -0.09624815732240677,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1599.666592815,
+      "wall": "2026-11-07T15:45:46.017533+09:00",
+      "age": {
+        "car": 0.0069280049999633775,
+        "control": 0.0025304340001639503,
+        "scc": 0.00467406600000686,
+        "leads": 0.04111773600016022
+      },
+      "plan": {
+        "aTarget": -0.24941208958625793,
+        "aTargetBase": -0.22012993693351746,
+        "leadPreviewSeconds": 0.16359294950962067,
+        "leadPreviewAccel": -0.16359294950962067,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5974100232124329,
+        "desiredDistance": 19.675966262817383,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006448187000160033
+      },
+      "car": {
+        "vEgo": 11.785943031311035,
+        "aEgo": -0.06409452855587006,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.6000000238418579,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -0.1648034304380417
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -0.16000000000000014,
+        "aReqValue": -0.16000000000000014,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 15.28571605682373,
+          "vRel": -1.159999966621399,
+          "vLead": 10.629258155822754,
+          "aLeadK": -0.3952399492263794,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1601.673886933,
+      "wall": "2026-11-07T15:45:48.024827+09:00",
+      "age": {
+        "car": 0.004726928999843949,
+        "control": 3.541399996720429e-05,
+        "scc": 0.007933055999956196,
+        "leads": 0.04129664799984312
+      },
+      "plan": {
+        "aTarget": -0.46146148443222046,
+        "aTargetBase": -0.46146148443222046,
+        "leadPreviewSeconds": 0.0,
+        "leadPreviewAccel": 0.0,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5970392823219299,
+        "desiredDistance": 19.32898712158203,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006444855999916399
+      },
+      "car": {
+        "vEgo": 11.203896522521973,
+        "aEgo": -0.41930821537971497,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -1.100000023841858,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -0.4352709949016571
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -0.4399999999999995,
+        "aReqValue": -0.4399999999999995,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 12.52828311920166,
+          "vRel": -1.3799999952316284,
+          "vLead": 9.854473114013672,
+          "aLeadK": -0.3484818637371063,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1603.675437404,
+      "wall": "2026-11-07T15:45:50.026377+09:00",
+      "age": {
+        "car": 0.003999782999926538,
+        "control": 0.0001893129999643861,
+        "scc": 0.007892019999871991,
+        "leads": 0.05050585100002536
+      },
+      "plan": {
+        "aTarget": -0.5612350106239319,
+        "aTargetBase": -0.5612350106239319,
+        "leadPreviewSeconds": 0.0,
+        "leadPreviewAccel": 0.05274885147809982,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5970392823219299,
+        "desiredDistance": 17.085416793823242,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006319917999917379
+      },
+      "car": {
+        "vEgo": 10.229265213012695,
+        "aEgo": -0.5140775442123413,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.10000000149011612,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -0.5645298957824707
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -0.5800000000000001,
+        "aReqValue": -0.5800000000000001,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 9.938933372497559,
+          "vRel": -1.1799999475479126,
+          "vLead": 9.084315299987793,
+          "aLeadK": -0.3664987087249756,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1605.666760181,
+      "wall": "2026-11-07T15:45:52.017700+09:00",
+      "age": {
+        "car": 0.007767134000005171,
+        "control": 0.003987701999903948,
+        "scc": 0.005509911999979522,
+        "leads": 0.04238786599989908
+      },
+      "plan": {
+        "aTarget": -0.7455961108207703,
+        "aTargetBase": -0.7065485119819641,
+        "leadPreviewSeconds": 0.3099028468132019,
+        "leadPreviewAccel": -0.31690964102745056,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5970392823219299,
+        "desiredDistance": 15.5023775100708,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.0071280019999449
+      },
+      "car": {
+        "vEgo": 9.089524269104004,
+        "aEgo": -0.5742524266242981,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.6000000238418579,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -0.6947982311248779
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -0.7100000000000009,
+        "aReqValue": -0.7100000000000009,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.3
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 7.883005619049072,
+          "vRel": -1.0099999904632568,
+          "vLead": 8.124406814575195,
+          "aLeadK": -0.7972612977027893,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1606.673479417,
+      "wall": "2026-11-07T15:45:53.024419+09:00",
+      "age": {
+        "car": 0.004428616000041075,
+        "control": 0.0005514289998700406,
+        "scc": 0.008370175999971252,
+        "leads": 0.04230256699997881
+      },
+      "plan": {
+        "aTarget": -1.917895793914795,
+        "aTargetBase": -1.8378957509994507,
+        "leadPreviewSeconds": 0.19086259603500366,
+        "leadPreviewAccel": 0.508735179901123,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5970392823219299,
+        "desiredDistance": 15.269928932189941,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006596989999934522
+      },
+      "car": {
+        "vEgo": 7.8075175285339355,
+        "aEgo": -1.8097906112670898,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.5,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -1.6577926874160767
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -1.700000000000001,
+        "aReqValue": -1.7100000000000009,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 3.7
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 6.528609275817871,
+          "vRel": -1.4500000476837158,
+          "vLead": 6.48890495300293,
+          "aLeadK": -1.3979061841964722,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 25,
+      "mono": 1607.673871255,
+      "wall": "2026-11-07T15:45:54.024811+09:00",
+      "age": {
+        "car": 0.0053758579999794165,
+        "control": 0.0005132020000928605,
+        "scc": 0.008453036999981123,
+        "leads": 0.04614820200004033
+      },
+      "plan": {
+        "aTarget": -1.4160269498825073,
+        "aTargetBase": -1.4160269498825073,
+        "leadPreviewSeconds": 0.0,
+        "leadPreviewAccel": 0.9899197816848755,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5970392823219299,
+        "desiredDistance": 10.048742294311523,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006515484999908949
+      },
+      "car": {
+        "vEgo": 6.116393566131592,
+        "aEgo": -1.489050030708313,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.4000000059604645,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -1.3076201677322388
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -1.3399999999999999,
+        "aReqValue": -1.3399999999999999,
+        "JerkUpperLimit": 1.2000000000000002,
+        "JerkLowerLimit": 1.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 5.753840923309326,
+          "vRel": -0.15000000596046448,
+          "vLead": 6.052521228790283,
+          "aLeadK": -0.375056654214859,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 26,
+      "mono": 1621.674436919,
+      "wall": "2026-11-07T15:46:08.025419+09:00",
+      "age": {
+        "control": 0.007062816000143357,
+        "car": 0.004109425000024203,
+        "scc": 0.00878356199996233,
+        "leads": 0.048379395999972985
+      },
+      "plan": {
+        "aTarget": 0.47554701566696167,
+        "aTargetBase": 0.7883991599082947,
+        "leadPreviewSeconds": 0.6547221541404724,
+        "leadPreviewAccel": -0.6485264897346497,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5646947622299194,
+        "desiredDistance": 15.703018188476562,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "cruise",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006609037000089302
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": 0.5893559455871582
+      },
+      "car": {
+        "vEgo": 8.928519248962402,
+        "aEgo": 0.510966956615448,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.800000011920929,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": 0.5899999999999999,
+        "aReqValue": 0.5899999999999999,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 2.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 13.649436950683594,
+          "vRel": 0.019999999552965164,
+          "vLead": 8.92049789428711,
+          "aLeadK": -0.09766104817390442,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 26,
+      "mono": 1622.674822166,
+      "wall": "2026-11-07T15:46:09.025804+09:00",
+      "age": {
+        "control": 0.00016993899998851703,
+        "car": 0.005199473999937254,
+        "scc": 0.008487328000001071,
+        "leads": 0.059118699000009656
+      },
+      "plan": {
+        "aTarget": 0.07949812710285187,
+        "aTargetBase": 0.2467251420021057,
+        "leadPreviewSeconds": 0.41535356640815735,
+        "leadPreviewAccel": -0.41535356640815735,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5704604387283325,
+        "desiredDistance": 16.70758819580078,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.00696073900007832
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": 0.479958713054657
+      },
+      "car": {
+        "vEgo": 9.1548490524292,
+        "aEgo": 0.22770626842975616,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.8999999761581421,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": 0.4900000000000002,
+        "aReqValue": 0.4900000000000002,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.9000000000000001
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 13.412263870239258,
+          "vRel": -0.44999998807907104,
+          "vLead": 8.684556007385254,
+          "aLeadK": -0.21717539429664612,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 26,
+      "mono": 1623.669827071,
+      "wall": "2026-11-07T15:46:10.020809+09:00",
+      "age": {
+        "control": 0.005181195000204752,
+        "car": 0.009094382000057522,
+        "scc": 0.0068442880001384765,
+        "leads": 0.051048182000158704
+      },
+      "plan": {
+        "aTarget": -0.439317524433136,
+        "aTargetBase": -0.3593175411224365,
+        "leadPreviewSeconds": 1.1997098922729492,
+        "leadPreviewAccel": -1.1997098922729492,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5705904364585876,
+        "desiredDistance": 18.34650993347168,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006473682000205372
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -0.20803430676460266
+      },
+      "car": {
+        "vEgo": 9.382521629333496,
+        "aEgo": 0.08254937827587128,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.6000000238418579,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -0.21000000000000085,
+        "aReqValue": -0.21000000000000085,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 3.6
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 12.597366333007812,
+          "vRel": -1.4299999475479126,
+          "vLead": 7.9550957679748535,
+          "aLeadK": -1.0860731601715088,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 26,
+      "mono": 1624.675524256,
+      "wall": "2026-11-07T15:46:11.026506+09:00",
+      "age": {
+        "control": 0.0001998860000185232,
+        "car": 0.004351811000105954,
+        "scc": 0.0076124800000343384,
+        "leads": 0.0004414889999679872
+      },
+      "plan": {
+        "aTarget": -2.018630266189575,
+        "aTargetBase": -1.9386303424835205,
+        "leadPreviewSeconds": 0.6703690886497498,
+        "leadPreviewAccel": 0.0,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5704618096351624,
+        "desiredDistance": 18.829999923706055,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.006532170000127735
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -1.6605572700500488
+      },
+      "car": {
+        "vEgo": 8.432206153869629,
+        "aEgo": -1.560714840888977,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -0.8999999761581421,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -1.6899999999999995,
+        "aReqValue": -1.6899999999999995,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 5.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 10.466506958007812,
+          "vRel": -2.319999933242798,
+          "vLead": 6.144457817077637,
+          "aLeadK": -1.6722805500030518,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    },
+    {
+      "kind": "sample",
+      "seg": 26,
+      "mono": 1625.674865729,
+      "wall": "2026-11-07T15:46:12.025848+09:00",
+      "age": {
+        "control": 0.0069628250000732805,
+        "car": 0.0037280930000633816,
+        "scc": 0.008538370999986,
+        "leads": 0.04055680300007225
+      },
+      "plan": {
+        "aTarget": -2.5166409015655518,
+        "aTargetBase": -2.5166409015655518,
+        "leadPreviewSeconds": 0.07036907225847244,
+        "leadPreviewAccel": 1.1257846355438232,
+        "aChangeCost": 200.0,
+        "tFollow": 0.5704618096351624,
+        "desiredDistance": 13.72227668762207,
+        "fcw": false,
+        "allowBrake": true,
+        "shouldStop": false,
+        "source": "lead0",
+        "fastLeadReason": "active",
+        "fastLeadTrackId": 48,
+        "liveTracksAge": 0.007009438000068258
+      },
+      "control": {
+        "enabled": true,
+        "longActive": true,
+        "accel": -2.314873695373535
+      },
+      "car": {
+        "vEgo": 6.295205116271973,
+        "aEgo": -2.5813934803009033,
+        "gasPressed": false,
+        "brakePressed": false,
+        "standstill": false,
+        "canValid": true,
+        "steeringAngleDeg": -1.399999976158142,
+        "leftBlinker": false,
+        "rightBlinker": false
+      },
+      "scc": {
+        "ACCMode": 1.0,
+        "StopReq": 0.0,
+        "aReqRaw": -2.34,
+        "aReqValue": -2.37,
+        "JerkUpperLimit": 1.0,
+        "JerkLowerLimit": 1.0
+      },
+      "leads": [
+        {
+          "status": true,
+          "radarTrackId": 48,
+          "dRel": 8.403655052185059,
+          "vRel": -1.7999999523162842,
+          "vLead": 4.707685470581055,
+          "aLeadK": -1.3688362836837769,
+          "radar": true
+        },
+        {
+          "status": false,
+          "radarTrackId": -1,
+          "dRel": 0.0,
+          "vRel": 0.0,
+          "vLead": 0.0,
+          "aLeadK": 0.0,
+          "radar": false
+        }
+      ]
+    }
+  ]
+}
