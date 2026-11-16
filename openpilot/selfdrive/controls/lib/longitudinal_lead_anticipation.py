@@ -27,9 +27,12 @@ CLOSING_LOOKAHEAD_S = 1.0    # seconds of current closing counted against the sp
 MIN_TAU = 0.05               # most persistent lead deceleration: ~90 % left after 2 s
 MIN_SPEED = 2.0              # m/s: below this the stopping logic owns the plan
 FULL_SPEED = 5.0             # m/s
-HIGH_SPEED_START = 50.0 / 3.6  # m/s: above this the need is weakened
-HIGH_SPEED_END = 60.0 / 3.6    # m/s
-HIGH_SPEED_NEED_SCALE = 0.5    # need scale at and above HIGH_SPEED_END
+# Above 40 km/h even a halved need made the plan brake earlier and more often
+# than BRH with a short-but-adequate gap (drive 132 and its replays,
+# 2026-11-16), so the need fades out by 50 km/h and BRH owns higher speeds.
+HIGH_SPEED_START = 40.0 / 3.6  # m/s: above this the need is weakened
+HIGH_SPEED_END = 50.0 / 3.6    # m/s
+HIGH_SPEED_NEED_SCALE = 0.0    # need scale at and above HIGH_SPEED_END
 NEED_ATTACK_S = 0.20         # filter time constants of the anticipation need
 NEED_RELEASE_S = 0.80
 A_CHANGE_COST_FACTOR_MIN = 0.05  # acceleration-change cost factor at full need
