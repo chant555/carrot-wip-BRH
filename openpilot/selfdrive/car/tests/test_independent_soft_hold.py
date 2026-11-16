@@ -355,8 +355,8 @@ def test_independent_hold_schema_roundtrip_does_not_alias_auto_indicator(ready, 
     assert decoded.autoTurnSignalDirection == direction
     assert decoded.tbtRightRearBlocked
     assert decoded.laneLineInfoMonoTime == 123456789
-  # Upstream owns @112 (laneLineInfoMonoTime) since 7e88bb72; the user field moved to @113.
-  assert car.CarState.schema.fields['independentSoftHoldReady'].proto.ordinal.explicit == 113
+  # Upstream owns @112 (laneLineInfoMonoTime) since 7e88bb72 and @113..@119 since 2026-11-16; the user field moved to @120.
+  assert car.CarState.schema.fields['independentSoftHoldReady'].proto.ordinal.explicit == 120
   assert car.CarState.schema.fields['laneLineInfoMonoTime'].proto.ordinal.explicit == 112
   assert car.CarState.schema.fields['autoTurnSignalDirection'].proto.ordinal.explicit == 105
 
