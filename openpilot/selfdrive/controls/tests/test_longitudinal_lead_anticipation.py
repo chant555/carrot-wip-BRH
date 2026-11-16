@@ -104,3 +104,16 @@ def test_need_is_weakened_above_highway_threshold():
   assert need(spare=-1.0, v_ego=30.0) == pytest.approx(HIGH_SPEED_NEED_SCALE)
   middle = need(spare=-1.0, v_ego=(HIGH_SPEED_START + HIGH_SPEED_END) / 2)
   assert HIGH_SPEED_NEED_SCALE < middle < 1.0
+
+
+def test_highway_speeds_are_left_to_the_unchanged_plan():
+  # Low speeds keep the full anticipation; from 50 km/h the plan is BRH's.
+  assert need(spare=-1.0, v_ego=39.0 / 3.6) == pytest.approx(1.0)
+  for kph in (50.0, 60.0, 80.0, 110.0):
+    assert need(spare=-1.0, v_ego=kph / 3.6) == 0.0
+  state = LeadAnticipationState()
+  args = {'valid': True, 'track_id': 7, 'spare': -1.0, 'closing': 0.5, 'a_lead': -1.0, 'v_ego': 70.0 / 3.6, 'dt': 0.05}
+  for _ in range(40):
+    state.update(**args)
+  assert state.need == 0.0
+  assert anticipated_tau(LEAD_ACCEL_TAU, state.need) == LEAD_ACCEL_TAU
