@@ -20,6 +20,9 @@ def setup_hold():
   h._cruise_available = True
   h._cruise_ready = False
   h._paddle_decel_active = False
+  h.stock_adopt_kph = 0.  # upstream restart hand-over (cruise.py __init__ default)
+  h._paddle_resume_kph = 0
+  h._paddle_resume_cnt = 0
   h.carrot_cruise_active = False
   h.enabled_last = False
   h._gas_pressed_count = -1
