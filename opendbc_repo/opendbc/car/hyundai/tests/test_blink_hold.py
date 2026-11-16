@@ -96,7 +96,7 @@ def external_hold_messages():
 
 
 def test_external_hold_changes_only_existing_1ea_fields():
-  _, message = external_hold_messages()
+  state, message = external_hold_messages()
   baseline=message(0)
   for value,left,right in ((1,0,0),(2,1,0),(3,0,1)):
     actual=message(value)
