@@ -1,6 +1,6 @@
 ﻿"use strict";
 const EN = {
-  title: "External driving model", internal: "Internal model: CD210 (fixed)",
+  title: "External driving model", internal: "Internal model: {model}", internal_unknown: "Internal model",
   help: "One choice for eGPU and Jetson. Choosing saves the next-boot selection. Reboot comma and Jetson while parked with ignition off and internet available. First use downloads files; Jetson also prepares its engine.",
   change: "Change model", close: "Close", pending_apply: "Apply after restart",
   current: "This boot", next: "Next boot", saved: "Saved. Reboot comma and Jetson to apply.",
@@ -33,6 +33,7 @@ export function renderLibrary(library, force = false) {
   const effective = library.models.find(m => m.id === library.effective);
   const selected = library.models.find(m => m.id === library.selected);
   const effectiveName = effective?.name || library.effective_name || library.effective;
+  const internal = library.internal ? t("internal").replace("{model}", library.internal) : t("internal_unknown");
   if (!root.querySelector("button")) {
     const summary = text("div", "");
     summary.className = "model-library__summary";
@@ -49,7 +50,7 @@ export function renderLibrary(library, force = false) {
   }
   root.querySelector("strong").textContent = selected?.name || library.selected;
   const card = document.getElementById("egpuModelCard");
-  const state = card && !card.hidden ? document.getElementById("egpuModelState").textContent : t("internal");
+  const state = card && !card.hidden ? document.getElementById("egpuModelState").textContent : internal;
   const amount = card && !card.hidden ? document.getElementById("egpuModelAmount").textContent : "";
   root.querySelector("p").textContent = library.reboot_required
     ? `${t("pending_apply")} · ${t("current")} ${effectiveName} · ${state}`
@@ -59,10 +60,10 @@ export function renderLibrary(library, force = false) {
   document.getElementById("modelLibraryTitle").textContent = t("title");
   document.getElementById("btnCloseModelLibrary").textContent = t("close");
   const signature = JSON.stringify([library.models, library.selected, library.effective,
-    library.effective_name, library.effective_noo, library.reboot_required, t("title")]);
+    library.effective_name, library.effective_noo, library.reboot_required, t("title"), internal]);
   if (!force && editor.dataset.signature === signature) return;
   editor.dataset.signature = signature;
-  editor.replaceChildren(text("p", t("internal")), text("p", t("help")));
+  editor.replaceChildren(text("p", internal), text("p", t("help")));
   editor.append(text("p", `${t("current")} ${effectiveName} · ${t((effective?.noo ?? library.effective_noo) ? "noo" : "no_noo")}`));
   const label = text("label", t("next"));
   const select = document.createElement("select");
