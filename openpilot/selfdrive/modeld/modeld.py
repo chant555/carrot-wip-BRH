@@ -31,6 +31,7 @@ from openpilot.common.file_chunker import open_file_chunked
 from openpilot.selfdrive.modeld.camera_sync import FrameMeta
 from openpilot.selfdrive.modeld.camera_gap import CameraGapTrace
 from openpilot.selfdrive.modeld.constants import ModelConstants, Plan
+from openpilot.selfdrive.modeld.internal_model import INTERNAL_MODEL_USES_CHEDDAR
 from openpilot.selfdrive.navigation.map_client import MapInput
 from openpilot.selfdrive.modeld.signal_shadow import ShadowClient
 from openpilot.selfdrive.modeld.helpers import (get_tg_input_devices, load_oob, modeld_pkl_path,
@@ -134,6 +135,12 @@ def get_action_from_model(model_output: dict[str, np.ndarray], prev_action: log.
 
 class ModelState:
   prev_desire: np.ndarray  # for tracking the rising edge of the pulse
+
+  def __new__(cls, cam_w, cam_h, usbgpu, pkl_path=None, *, enable_shadow=True):
+    if not usbgpu and INTERNAL_MODEL_USES_CHEDDAR:
+      from openpilot.selfdrive.modeld.cheddar_model import CheddarModelState
+      return CheddarModelState(cam_w, cam_h, pkl_path or modeld_pkl_path(False))
+    return super().__new__(cls)
 
   def __init__(self, cam_w: int, cam_h: int, usbgpu: bool, pkl_path=None, *, enable_shadow=True):
     input_devices = get_tg_input_devices(PROCESS_NAME, usbgpu)
