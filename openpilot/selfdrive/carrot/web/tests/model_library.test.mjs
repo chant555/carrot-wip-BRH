@@ -25,6 +25,16 @@ const data = { effective: 'n16', selected: 'flip-flop', reboot_required: true, m
   { id: 'n16', name: 'N16 Nav', noo: true, hidden: false, protected: true, egpu_bytes: 100, jetson_bytes: null },
   { id: 'flip-flop', name: 'Flip Flop', noo: false, hidden: false, protected: true, egpu_bytes: 200, jetson_bytes: 300 },
 ] };
+test('the dialog shows the internal model reported by the current branch', t => {
+  const old = globalThis.document;
+  t.after(() => { globalThis.document = old; });
+  const { root, editor } = setupDocument();
+  for (const internal of ['BRH', 'CD210', 'Cheddar']) {
+    renderLibrary({ ...data, internal });
+    assert.equal(editor.children[0].textContent, `Internal model: ${internal}`);
+    assert.match(root.querySelector('p').textContent, new RegExp(`Internal model: ${internal}$`));
+  }
+});
 test('model choice distinguishes current/pending/NOO and preserves in-flight choice across polls', t => {
   const old = globalThis.document;
   t.after(() => { globalThis.document = old; });

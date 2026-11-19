@@ -27,8 +27,13 @@ def test_select_vision_streams(available, use_wide_camera, main, use_extra):
 
 
 def test_usbgpu_artifact_uses_checked_in_model_name():
-  assert modeld_pkl_path(False).name == "driving_tinygrad.pkl"
   assert modeld_pkl_path(True, "a" * 64).name == "big_driving_aaaaaaaaaaaaaaaa_tinygrad.pkl"
+
+
+@pytest.mark.parametrize(('cheddar', 'filename'), [(False, 'driving_tinygrad.pkl'), (True, 'cheddar_driving_tinygrad.pkl')])
+def test_internal_model_artifact_separates_runtime_formats(monkeypatch, cheddar, filename):
+  monkeypatch.setattr(helpers, 'INTERNAL_MODEL_USES_CHEDDAR', cheddar)
+  assert modeld_pkl_path(False).name == filename
 
 
 def test_usbgpu_pcie_readiness_error_is_recognized_through_wrappers():
