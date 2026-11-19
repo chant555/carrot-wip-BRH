@@ -293,9 +293,11 @@ function invalidate_modeld_build_if_needed {
   local stamp_path="$DIR/openpilot/selfdrive/modeld/models/.build_stamp"
   local big_stamp_path="$DIR/openpilot/selfdrive/modeld/models/.big_model_build_stamp"
   local tg_devices_path="$DIR/openpilot/selfdrive/modeld/models/tg_input_devices.json"
-  local driving_pkl_path="$DIR/openpilot/selfdrive/modeld/models/driving_tinygrad.pkl"
+  local driving_pkl_path
   local old_stamp
   local old_big_stamp
+
+  driving_pkl_path="$(python3 -c 'from openpilot.selfdrive.modeld.helpers import modeld_pkl_path; print(modeld_pkl_path(False))' 2>/dev/null || true)"
 
   MODEL_BUILD_STAMP_VALUE="$(git rev-parse HEAD:openpilot/selfdrive/modeld HEAD:tinygrad_repo HEAD:openpilot/common/file_chunker.py 2>/dev/null | tr '\n' ':')"
   if [ -z "$MODEL_BUILD_STAMP_VALUE" ]; then
@@ -303,7 +305,7 @@ function invalidate_modeld_build_if_needed {
   fi
 
   old_stamp="$(cat "$stamp_path" 2>/dev/null || true)"
-  if [ "$MODEL_BUILD_STAMP_VALUE" != "$old_stamp" ] || [ ! -f "$tg_devices_path" ] || { [ ! -f "$driving_pkl_path" ] && [ ! -f "$driving_pkl_path.chunkmanifest" ]; }; then
+  if [ "$MODEL_BUILD_STAMP_VALUE" != "$old_stamp" ] || [ ! -f "$tg_devices_path" ] || [ -z "$driving_pkl_path" ] || { [ ! -f "$driving_pkl_path" ] && [ ! -f "$driving_pkl_path.chunkmanifest" ]; }; then
     echo "Model/tinygrad inputs changed or artifacts are missing; revalidating with SCons."
     # Keep generated artifacts. SCons tracks the compiler, tinygrad and model
     # dependencies and will rebuild only stale targets. Deleting everything
