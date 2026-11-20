@@ -144,3 +144,31 @@ def test_external_hold_cannot_bypass_four_flashes_or_deadline(side, external):
   state.out.blinkerLever = 2
   assert message(external)[field] == 1
   assert message(1)[field] == 0  # Upstream explicit release still wins.
+
+
+@pytest.mark.parametrize('side', [1, 2])
+def test_driver_one_touch_keeps_bounded_hold_after_cruise_cancel(side):
+  # Cruise cancel pauses automatic/model holds (upstream ec79cae3), but a verified physical one-touch keeps its
+  # four-lighting hold so the flash count does not depend on whether cruise was cancelled.
+  from openpilot.cereal import log
+  state, message = external_hold_messages()
+  counter = 'leftBlinkerStalkCount' if side == 1 else 'rightBlinkerStalkCount'
+  field = 'LEFT_BLINK_HOLD' if side == 1 else 'RIGHT_BLINK_HOLD'
+  md = log.ModelDataV2.new_message()
+  md.meta.desire = 'laneChangeLeft' if side == 1 else 'laneChangeRight'
+  state.modelV2 = md
+  state.out.cruiseCancelState = True
+  message(0)  # physical-counter baseline
+  assert message(0)[field] == 0  # a lane change without a driver press stays paused
+  setattr(state.out, counter, 1)
+  state.out.blinkerLever = 1
+  state.out.blinkerLamp = side
+  assert message(0)[field] == 1
+  state.out.blinkerLever = 0
+  for flash in range(2, 5):
+    state.out.blinkerLamp = 0
+    message(0)
+    state.out.blinkerLamp = side
+    assert message(0)[field] == int(flash < 4)
+  for _ in range(10):
+    assert message(0)[field] == 0
