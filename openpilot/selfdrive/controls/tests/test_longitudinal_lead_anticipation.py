@@ -37,7 +37,7 @@ def test_closing_counts_against_the_spare_gap():
   assert need(spare=SPARE_REFERENCE_M, closing=0.75 * SPARE_REFERENCE_M) > 0.5
 
 
-@pytest.mark.parametrize('a_lead', [0.3, 0.0, -0.05, -0.1])
+@pytest.mark.parametrize('a_lead', [0.3, 0.0, -0.03, -0.05])
 def test_non_braking_lead_needs_no_anticipation(a_lead):
   assert need(spare=-2.0, a_lead=a_lead) == 0.0
 
@@ -117,3 +117,12 @@ def test_highway_speeds_are_left_to_the_unchanged_plan():
     state.update(**args)
   assert state.need == 0.0
   assert anticipated_tau(LEAD_ACCEL_TAU, state.need) == LEAD_ACCEL_TAU
+
+
+def test_mild_lead_braking_reaches_full_persistence_early():
+  # A lead easing off at 0.3 m/s^2 with no spare gap already gets the full prediction; 0.2 m/s^2 gets most of it.
+  from openpilot.selfdrive.controls.lib.longitudinal_lead_anticipation import LEAD_DECEL_DEADBAND, LEAD_DECEL_FULL
+  assert (LEAD_DECEL_DEADBAND, LEAD_DECEL_FULL) == (0.05, 0.30)
+  assert need(spare=-1.0, closing=0.0, a_lead=-0.3, v_ego=20.0 / 3.6) == pytest.approx(1.0)
+  assert 0.5 < need(spare=-1.0, closing=0.0, a_lead=-0.2, v_ego=20.0 / 3.6) < 1.0
+  assert need(spare=4.0, closing=0.0, a_lead=-0.3, v_ego=20.0 / 3.6) == 0.0
