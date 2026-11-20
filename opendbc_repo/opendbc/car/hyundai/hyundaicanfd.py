@@ -1544,7 +1544,11 @@ def create_ccnc_messages(CP, packer, CAN, frame, CC, CS, hud_control,
         values = copy.copy(CS.adrv_0x1ea)
         rx_counter = values.pop("COUNTER", None)
         # blinker hold: the confirmed lane change until the body is across (see _blink_hold_side)
-        hold_desire = 0 if getattr(CS.out, "cruiseCancelState", False) else desire
+        # Cruise cancel pauses automatic and model holds (upstream ec79cae3), but the driver's own one-touch
+        # lane change keeps its bounded hold (4 lightings / 3.2 s), so the flash count does not depend on cruise state.
+        cruise_cancelled = getattr(CS.out, "cruiseCancelState", False)
+        driver_one_touch = CS.one_touch_blinker_limit.pressing({3: 1, 4: 2}.get(desire, 0))
+        hold_desire = 0 if cruise_cancelled and not driver_one_touch else desire
         hold = _blink_hold_side(md, hold_desire, create_ccnc_messages.__dict__.setdefault("_blink_hold", {}),
                                 CS.one_touch_blinker_limit)
         external_hold = getattr(hud_control, "physicalBlinkerHold", 0)
