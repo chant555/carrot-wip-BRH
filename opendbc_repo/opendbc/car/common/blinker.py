@@ -50,3 +50,7 @@ class OneTouchBlinkerLimit:
 
   def allows(self, side):
     return not (self.expired and side == self.side)
+
+  def pressing(self, side):
+    """A physical one-touch press on this side whose bounded budget is still running."""
+    return bool(side) and side == self.side and not self.expired

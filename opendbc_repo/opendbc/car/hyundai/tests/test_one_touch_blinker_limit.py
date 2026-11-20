@@ -61,3 +61,17 @@ def test_legacy_car_without_physical_feedback_is_unchanged():
   for _ in range(200):
     limit.update(NS(leftBlinker=True, rightBlinker=False), 0.05)
   assert limit.allows(1) and limit.allows(2)
+
+
+def test_pressing_reports_only_a_running_physical_one_touch():
+  limit = OneTouchBlinkerLimit()
+  car = NS(leftBlinkerStalkCount=0, rightBlinkerStalkCount=0, blinkerLamp=0, blinkerLever=0, leftBlinker=False, rightBlinker=False)
+  limit.update(car, 0.01)
+  assert not limit.pressing(1) and not limit.pressing(0)
+  car.leftBlinkerStalkCount, car.blinkerLever, car.blinkerLamp = 1, 1, 1
+  limit.update(car, 0.01)
+  assert limit.pressing(1) and not limit.pressing(2) and not limit.pressing(0)
+  car.blinkerLever = 0
+  for _ in range(int(ONE_TOUCH_MAX_S / 0.01) + 2):
+    limit.update(car, 0.01)
+  assert not limit.pressing(1)  # the deadline ended the budget
