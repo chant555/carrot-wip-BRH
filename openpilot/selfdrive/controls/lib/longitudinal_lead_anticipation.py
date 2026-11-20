@@ -20,8 +20,11 @@ import math
 
 from openpilot.selfdrive.controls.radar_constants import LEAD_ACCEL_TAU
 
-LEAD_DECEL_DEADBAND = 0.10   # m/s^2: lead decelerations below this are noise
-LEAD_DECEL_FULL = 0.60       # m/s^2 of lead deceleration for full persistence
+# A lead easing off at 0.2-0.4 m/s^2 in slow traffic often stops abruptly a few seconds later (drives 135/136,
+# 2026-11-20). Reaching full persistence by 0.3 m/s^2 lets the plan leave ~0.7 m more gap before such a stop;
+# the spare-gap gate still keeps it off when there is room.
+LEAD_DECEL_DEADBAND = 0.05   # m/s^2: lead decelerations below this are noise
+LEAD_DECEL_FULL = 0.30       # m/s^2 of lead deceleration for full persistence
 SPARE_REFERENCE_M = 3.0      # spare gap (after one second of closing) where persistence stops
 CLOSING_LOOKAHEAD_S = 1.0    # seconds of current closing counted against the spare gap
 MIN_TAU = 0.05               # most persistent lead deceleration: ~90 % left after 2 s
