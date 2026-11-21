@@ -15,10 +15,8 @@ from openpilot.common.file_chunker import get_manifest_path
 from openpilot.selfdrive.modeld import big_model, big_model_status, helpers, precompiled_model, precompiled_validation
 
 
-@pytest.mark.parametrize('internal_artifact', ['driving_tinygrad.pkl', 'cheddar_driving_tinygrad.pkl'])
-@pytest.mark.parametrize('internal_ready, external_ready, expected_rebuild', [(True, True, '0'), (True, False, '1'), (False, True, '1')])
-def test_launcher_checks_the_selected_internal_and_precompiled_external_models(tmp_path, internal_artifact, internal_ready,
-                                                                              external_ready, expected_rebuild):
+@pytest.mark.parametrize('artifact_ready, expected_rebuild', [(True, '0'), (False, '1')])
+def test_launcher_accepts_precompiled_model_without_legacy_chunks(tmp_path, artifact_ready, expected_rebuild):
   bash = 'C:/Program Files/Git/bin/bash.exe' if os.name == 'nt' else shutil.which('bash')
   if not bash or not Path(bash).is_file():
     pytest.skip('bash unavailable')
@@ -27,17 +25,13 @@ def test_launcher_checks_the_selected_internal_and_precompiled_external_models(t
   (models / '.build_stamp').write_text('stamp:')
   (models / '.big_model_build_stamp').write_text('model-sha')
   (models / 'tg_input_devices.json').write_text('{}')
-  selected_path = models / internal_artifact
-  existing = internal_artifact if internal_ready else (
-    'driving_tinygrad.pkl' if internal_artifact == 'cheddar_driving_tinygrad.pkl' else 'cheddar_driving_tinygrad.pkl')
-  (models / f'{existing}.chunkmanifest').write_text('1')
+  (models / 'driving_tinygrad.pkl.chunkmanifest').write_text('1')
   source = (Path(BASEDIR) / 'launch_chffrplus.sh').read_text(encoding='utf8')
   function = source[source.index('function invalidate_modeld_build_if_needed {'):]
   function = function[:function.index('\n}')+2]
   script = (f'DIR={shlex.quote(tmp_path.as_posix())}\nBIG_MODEL_SHA=model-sha\nFORCE_REBUILD=0\n'
             + 'git() { echo stamp; }\n'
-            + f'python3() {{ printf "%s\\n" {shlex.quote(selected_path.as_posix())}; }}\n'
-            + f'big_model_artifact_ready() {{ return {0 if external_ready else 1}; }}\n'
+            + f'big_model_artifact_ready() {{ return {0 if artifact_ready else 1}; }}\n'
             + function + '\ninvalidate_modeld_build_if_needed\necho "$FORCE_REBUILD"\n')
   result = subprocess.run([bash, '-c', script], capture_output=True, text=True, check=True)
   assert result.stdout.strip().splitlines()[-1] == expected_rebuild

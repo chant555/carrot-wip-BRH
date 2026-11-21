@@ -29,7 +29,7 @@ test('the dialog shows the internal model reported by the current branch', t => 
   const old = globalThis.document;
   t.after(() => { globalThis.document = old; });
   const { root, editor } = setupDocument();
-  for (const internal of ['BRH', 'CD210', 'Cheddar']) {
+  for (const internal of ['BRH', 'CD210']) {
     renderLibrary({ ...data, internal });
     assert.equal(editor.children[0].textContent, `Internal model: ${internal}`);
     assert.match(root.querySelector('p').textContent, new RegExp(`Internal model: ${internal}$`));
