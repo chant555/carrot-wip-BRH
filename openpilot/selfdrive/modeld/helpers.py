@@ -12,7 +12,6 @@ from typing import TypeVar
 
 from openpilot.common.file_chunker import get_manifest_path
 from openpilot.selfdrive.modeld.big_model import selected_manifest
-from openpilot.selfdrive.modeld.internal_model import INTERNAL_MODEL_USES_CHEDDAR
 
 MODELS_DIR = Path(__file__).resolve().parent / 'models'
 TG_INPUT_DEVICES_PATH = MODELS_DIR / 'tg_input_devices.json'
@@ -65,8 +64,6 @@ def get_tg_input_devices(process_name: str, usbgpu: bool):
 
 def modeld_pkl_path(usbgpu: bool, model_sha256: str | None = None):
   if not usbgpu:
-    if INTERNAL_MODEL_USES_CHEDDAR:
-      return MODELS_DIR / 'cheddar_driving_tinygrad.pkl'
     return MODELS_DIR / 'driving_tinygrad.pkl'
   if model_sha256 is None:
     model = selected_manifest()

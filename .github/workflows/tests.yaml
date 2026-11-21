@@ -119,15 +119,8 @@ jobs:
       - run: ./tools/op.sh setup
       - name: Build openpilot
         run: scons
-      - name: Verify the branch internal model artifact
-        run: |
-          model_path=$(python -c 'from openpilot.selfdrive.modeld.helpers import modeld_pkl_path; print(modeld_pkl_path(False))')
-          test -s "$model_path.chunkmanifest"
-          if python -c 'from openpilot.selfdrive.modeld.internal_model import INTERNAL_MODEL_USES_CHEDDAR; raise SystemExit(not INTERNAL_MODEL_USES_CHEDDAR)'; then
-            python tools/modeld/check_cheddar_model.py "$model_path"
-          else
-            SEND_RAW_PRED=1 python tools/modeld/check_internal_model.py "$model_path"
-          fi
+      - name: Execute the SCons-built internal model and camera warps
+        run: SEND_RAW_PRED=1 python tools/modeld/check_internal_model.py openpilot/selfdrive/modeld/models/driving_tinygrad.pkl
       - name: Check native offline cloud boundaries and C3 modem routing
         env:
           NATIVE_DEVICE_TESTS: '1'
