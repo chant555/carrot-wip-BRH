@@ -1,12 +1,16 @@
-"""Run the installed CD210 artifact through modeld's actual standby/fallback path."""
+"""Run the branch's installed internal artifact through modeld's actual standby/fallback path."""
 import argparse
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 
+from openpilot.selfdrive.modeld.internal_model import INTERNAL_MODEL_NAME
 from openpilot.selfdrive.modeld.internal_model_warmup import warm_internal_model
 from openpilot.selfdrive.modeld.modeld import ModelState, SEND_RAW_PRED
+
+# C4 local: raw_pred length of each branch's built-in model.
+RAW_PRED_SIZES = {'CD210': 2576, 'BRH': 2580}
 
 
 def check(path, width, height):
@@ -18,7 +22,7 @@ def check(path, width, height):
             'action_t': np.array([.3, .3], np.float32)}
   warm_internal_model(model, frames)
   first = model.run(frames, transforms, inputs, False)['raw_pred']
-  assert first.shape == (2576,) and np.isfinite(first).all()
+  assert first.shape == (RAW_PRED_SIZES[INTERNAL_MODEL_NAME],) and np.isfinite(first).all()
   inputs['desire_pulse'][1] = 1
   frames['img'].data[:] = 64
   assert model.run(frames, transforms, inputs, True) is None
@@ -28,7 +32,7 @@ def check(path, width, height):
   inputs['desire_pulse'][:] = 0
   frames['img'].data[:] = 128
   np.testing.assert_array_equal(model.run(frames, transforms, inputs, False)['raw_pred'], first)
-  print(f'CD210 {width}x{height}: warmup, changed input, catch-up and reset PASS', flush=True)
+  print(f'{INTERNAL_MODEL_NAME} {width}x{height}: warmup, changed input, catch-up and reset PASS', flush=True)
 
 
 if __name__ == '__main__':
